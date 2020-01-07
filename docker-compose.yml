@@ -1,0 +1,51 @@
+version: '3.3'
+
+services:
+    graphite:
+        image: hopsoft/graphite-statsd
+        volumes:
+            - type: "bind"
+              source: ./statsd.config.js
+              target: /opt/statsd/config.js
+            - type: "bind"
+              source: ./graphite.storage-schemas.conf
+              target: /opt/graphite/conf/storage-schemas.conf
+        ports:
+            - "8090:80"
+            - "81:81"
+            - "8125:8125/udp"
+            - "8126:8126"
+
+    grafana:
+        image: grafana/grafana:6.3.3
+        ports:
+            - "80:3000"
+        volumes:
+            - "grafana_config:/var/lib/grafana"
+
+    cadvisor:
+        image: google/cadvisor:v0.33.0
+        links:
+            - graphite
+        command: -storage_driver="statsd" -storage_driver_host="graphite:8125" -storage_driver_db="cadvisor" -storage_driver_buffer_duration="1s"
+        ports:
+            - "8080:8080"
+        volumes:
+            - "/:/rootfs:ro"
+            - "/var/run:/var/run:rw"
+            - "/sys:/sys:ro"
+            - "/var/lib/docker/:/var/lib/docker:ro"
+        
+    go:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        volumes:
+            - .:/app/go
+        ports:
+            - "4000:8080"
+        command: go run
+
+volumes:
+    grafana_config:
+        driver: local
