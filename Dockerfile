@@ -9,18 +9,16 @@ ENV GO_VERSION=1.13.5
 ENV GOPATH=/go
 ENV GOROOT=/usr/local/go
 ENV PATH=$GOPATH/bin:$GOROOT/bin:$PATH
-ENV APPLICATION_PACKAGE="src/api"
 
 ENV IGNORE_GO_GET="false"
 
-WORKDIR /go/src/app
-COPY src/api/ .
+WORKDIR /go/src/github.com/arpb2/C-3PO/src/api
+COPY src/api .
 
 RUN echo "Running go build" && \
-  go build && \
-  echo "Running go test" && \
-  go test
+  go build ./...
 
-RUN echo "Running app:"
+RUN echo "Running go test" && \
+  go test ./...
 
-CMD [ "go", "run" ]
+CMD [ "go", "run", "main.go" ]
