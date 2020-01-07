@@ -43,8 +43,8 @@ services:
         volumes:
             - .:/app/go
         ports:
-            - "4000:8080"
-        command: go run
+            - "5555:8080"
+        command: go run main.go
 
 volumes:
     grafana_config:
