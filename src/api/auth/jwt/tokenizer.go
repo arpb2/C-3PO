@@ -1,16 +1,13 @@
 package jwt
 
 import (
+	"errors"
 	"fmt"
 	"github.com/arpb2/C-3PO/src/api/auth"
 	"github.com/dgrijalva/jwt-go"
 	"net/http"
 	"os"
 )
-
-var DefaultTokenHandler = TokenHandler{
-	secret: FetchJwtSecret(),
-}
 
 func FetchJwtSecret() []byte {
 	osValue := os.Getenv("JWT_SECRET")
@@ -27,7 +24,7 @@ type token struct{
 }
 
 type TokenHandler struct{
-	secret []byte
+	Secret []byte
 }
 
 func (t TokenHandler) Create(authToken auth.Token) (*string, *auth.TokenError) {
@@ -37,7 +34,7 @@ func (t TokenHandler) Create(authToken auth.Token) (*string, *auth.TokenError) {
 	}
 
 	tkn := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := tkn.SignedString(t.secret)
+	tokenString, err := tkn.SignedString(t.Secret)
 
 	if err != nil {
 		return nil, &auth.TokenError{
@@ -52,25 +49,25 @@ func (t TokenHandler) Retrieve(authToken string) (*auth.Token, *auth.TokenError)
 	claims := &token{}
 
 	tkn, err := jwt.ParseWithClaims(authToken, claims, func(token *jwt.Token) (interface{}, error) {
-		return t.secret, nil
+		return t.Secret, nil
 	})
 
 	if err != nil {
 		if err == jwt.ErrSignatureInvalid {
 			return nil, &auth.TokenError{
-				Error:  err,
+				Error:  errors.New("invalid signature"),
 				Status: http.StatusUnauthorized,
 			}
 		}
 		return nil, &auth.TokenError{
-			Error: err,
+			Error: errors.New("malformed token"),
 			Status: http.StatusBadRequest,
 		}
 	}
 
 	if !tkn.Valid {
 		return nil, &auth.TokenError{
-			Error:  err,
+			Error:  errors.New("invalid token"),
 			Status: http.StatusUnauthorized,
 		}
 	}

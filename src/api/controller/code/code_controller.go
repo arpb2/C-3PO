@@ -9,18 +9,27 @@ import (
 var GetController = controller.Controller{
 	Method: "GET",
 	Path:   "/users/:user_id/codes/:code_id",
+	Middleware: []gin.HandlerFunc{
+		HandleAuthentication,
+	},
 	Body:   codeGet,
 }
 
 var PostController = controller.Controller{
 	Method: "POST",
 	Path:   "/users/:user_id/codes",
+	Middleware: []gin.HandlerFunc{
+		HandleAuthentication,
+	},
 	Body:   codePost,
 }
 
 var PutController = controller.Controller{
 	Method: "PUT",
 	Path:   "/users/:user_id/codes/:code_id",
+	Middleware: []gin.HandlerFunc{
+		HandleAuthentication,
+	},
 	Body:   codePut,
 }
 

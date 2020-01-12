@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"github.com/arpb2/C-3PO/src/api/auth/jwt"
 	"github.com/arpb2/C-3PO/src/api/controller"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -22,6 +23,10 @@ func CreateBasicServerEngine() ServerEngine {
 	}
 }
 
+var DefaultTokenHandler = jwt.TokenHandler{
+	Secret: jwt.FetchJwtSecret(),
+}
+
 type defaultServerEngine struct {
 	engine *gin.Engine
 	port   string
@@ -36,10 +41,17 @@ func (server defaultServerEngine) Run() error {
 }
 
 func (server defaultServerEngine) Register(controller controller.Controller) {
+	var handlers []gin.HandlerFunc
+	handlers = append(handlers, gin.Logger(), gin.Recovery())
+	if controller.Middleware != nil {
+		handlers = append(handlers, controller.Middleware...)
+	}
+	handlers = append(handlers, controller.Body)
+
 	server.engine.Handle(
 		controller.Method,
 		controller.Path,
-		controller.Body,
+		handlers...,
 	)
 }
 
