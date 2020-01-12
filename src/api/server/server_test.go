@@ -34,14 +34,6 @@ func (server FailingServerEngineMock) Run() error {
 }
 func (server FailingServerEngineMock) Register(controller controller.Controller) {}
 
-func TestHealthGet(test *testing.T) {
-	w := performRequest(server.CreateEngine(), "GET", "/ping", "")
-
-	assert.Equal(test, 200, w.Code)
-	assert.Equal(test, "pong", w.Body.String())
-	server.Engine = server.CreateEngine()
-}
-
 func TestStartApplicationSuccess(t *testing.T) {
 	server.Engine = ServerEngineMock{}
 	err := server.StartApplication()
@@ -57,4 +49,29 @@ func TestStartApplicationFailureIsHandled(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Equal(t, "woops this fails", err.Error())
 	server.Engine = server.CreateEngine()
+}
+
+func TestHealthGet(test *testing.T) {
+	w := performRequest(server.CreateEngine(), "GET", "/ping", "")
+
+	assert.Equal(test, 200, w.Code)
+	assert.Equal(test, "pong", w.Body.String())
+}
+
+func TestCodeGetRegistered(test *testing.T) {
+	w := performRequest(server.CreateEngine(), "GET", "/users/1/codes/1", "")
+
+	assert.NotEqual(test, 404, w.Code)
+}
+
+func TestCodePostRegistered(test *testing.T) {
+	w := performRequest(server.CreateEngine(), "POST", "/users/1/codes", "")
+
+	assert.NotEqual(test, 404, w.Code)
+}
+
+func TestCodePutRegistered(test *testing.T) {
+	w := performRequest(server.CreateEngine(), "PUT", "/users/1/codes/1", "")
+
+	assert.NotEqual(test, 404, w.Code)
 }
