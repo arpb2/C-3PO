@@ -1,4 +1,4 @@
-package test_integration
+package integration_test
 
 import (
 	"bytes"
@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"strings"
 	"testing"
+	"time"
 )
 
 type SharedInMemoryCodeService struct{}
@@ -43,6 +44,7 @@ func Test_Get(t *testing.T) {
 	req.Header.Set("Authorization", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEwMDB9.GVS-KC5nOCHybzzFIIH864u4KcGu-ZSd-96krqTUGWo")
 
 	// Perform request
+	time.Sleep(1 * time.Second) // http doesn't have an ignite hook, so we halt for a second
 	resp, err := http.DefaultClient.Do(req)
 
 	// High level Assertions
@@ -77,6 +79,7 @@ func Test_Post(t *testing.T) {
 	req.Header.Set("Authorization", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEwMDB9.GVS-KC5nOCHybzzFIIH864u4KcGu-ZSd-96krqTUGWo")
 
 	// Perform request
+	time.Sleep(1 * time.Second) // http doesn't have an ignite hook, so we halt for a second
 	resp, err := http.DefaultClient.Do(req)
 
 	// High level Assertions
@@ -111,6 +114,7 @@ func Test_Put(t *testing.T) {
 	req.Header.Set("Authorization", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEwMDB9.GVS-KC5nOCHybzzFIIH864u4KcGu-ZSd-96krqTUGWo")
 
 	// Perform request
+	time.Sleep(1 * time.Second) // http doesn't have an ignite hook, so we halt for a second
 	resp, err := http.DefaultClient.Do(req)
 
 	// High level Assertions

@@ -91,7 +91,6 @@ func (server defaultServerEngine) Shutdown() error {
 
 func (server defaultServerEngine) Register(controller controller.Controller) {
 	var handlers []gin.HandlerFunc
-	handlers = append(handlers, gin.Logger(), gin.Recovery())
 	if controller.Middleware != nil {
 		handlers = append(handlers, controller.Middleware...)
 	}
