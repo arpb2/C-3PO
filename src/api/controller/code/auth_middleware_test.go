@@ -53,7 +53,7 @@ func TestHandlingOfAuthentication_BadHeader(t *testing.T) {
 	})
 
 	headers := map[string][]string{}
-	headers["Authentication"] = []string{"bad token"}
+	headers["Authorization"] = []string{"bad token"}
 	recorder := performRequest(e, "GET", "/test", "", headers)
 
 	assert.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -75,7 +75,7 @@ func TestHandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
 
 	headers := map[string][]string{}
 	// Token for user 1000
-	headers["Authentication"] = []string{"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEwMDB9.GVS-KC5nOCHybzzFIIH864u4KcGu-ZSd-96krqTUGWo"}
+	headers["Authorization"] = []string{"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEwMDB9.GVS-KC5nOCHybzzFIIH864u4KcGu-ZSd-96krqTUGWo"}
 	recorder := performRequest(e, "GET", "/test/1", "", headers)
 
 	assert.Equal(t, http.StatusUnauthorized, recorder.Code)
@@ -97,7 +97,7 @@ func TestHandlingOfAuthentication_Authorized(t *testing.T) {
 
 	headers := map[string][]string{}
 	// Token for user 1000
-	headers["Authentication"] = []string{"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEwMDB9.GVS-KC5nOCHybzzFIIH864u4KcGu-ZSd-96krqTUGWo"}
+	headers["Authorization"] = []string{"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEwMDB9.GVS-KC5nOCHybzzFIIH864u4KcGu-ZSd-96krqTUGWo"}
 	recorder := performRequest(e, "GET", "/test/1000", "", headers)
 
 	assert.Equal(t, http.StatusOK, recorder.Code)

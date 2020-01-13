@@ -25,6 +25,9 @@ func (server ServerEngineMock) Run() error {
 	return nil
 }
 func (server ServerEngineMock) Register(controller controller.Controller) {}
+func (server ServerEngineMock) Shutdown() error {
+	return nil
+}
 
 type FailingServerEngineMock struct{}
 
@@ -33,6 +36,9 @@ func (server FailingServerEngineMock) Run() error {
 	return errors.New("woops this fails")
 }
 func (server FailingServerEngineMock) Register(controller controller.Controller) {}
+func (server FailingServerEngineMock) Shutdown() error {
+	return nil
+}
 
 func TestStartApplicationSuccess(t *testing.T) {
 	server.Engine = ServerEngineMock{}
