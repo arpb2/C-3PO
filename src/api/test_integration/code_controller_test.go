@@ -2,11 +2,13 @@ package integration_test
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/arpb2/C-3PO/src/api/controller/code"
 	"github.com/arpb2/C-3PO/src/api/golden"
 	"github.com/arpb2/C-3PO/src/api/server"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"net/url"
 	"strings"
@@ -32,6 +34,21 @@ func init() {
 	code.Service = &SharedInMemoryCodeService{}
 }
 
+func dial(t *testing.T) {
+	connStablished := false
+	for i := 0 ; i < 5 && !connStablished ; i++ {
+		fmt.Printf("Dialing localhost:8080. Retry: %d", i)
+		_, err := net.DialTimeout("tcp","localhost:8080", 500 * time.Millisecond)
+		if err == nil {
+			connStablished = true
+		} else {
+			fmt.Printf("Error: %s", err.Error())
+		}
+	}
+
+	assert.True(t, connStablished)
+}
+
 func Test_Get(t *testing.T) {
 	// Ignite server
 	defer server.Engine.Shutdown()
@@ -44,7 +61,7 @@ func Test_Get(t *testing.T) {
 	req.Header.Set("Authorization", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEwMDB9.GVS-KC5nOCHybzzFIIH864u4KcGu-ZSd-96krqTUGWo")
 
 	// Perform request
-	time.Sleep(1 * time.Second) // http doesn't have an ignite hook, so we halt for a second
+	dial(t)
 	resp, err := http.DefaultClient.Do(req)
 
 	// High level Assertions
@@ -79,7 +96,7 @@ func Test_Post(t *testing.T) {
 	req.Header.Set("Authorization", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEwMDB9.GVS-KC5nOCHybzzFIIH864u4KcGu-ZSd-96krqTUGWo")
 
 	// Perform request
-	time.Sleep(1 * time.Second) // http doesn't have an ignite hook, so we halt for a second
+	dial(t)
 	resp, err := http.DefaultClient.Do(req)
 
 	// High level Assertions
@@ -114,7 +131,7 @@ func Test_Put(t *testing.T) {
 	req.Header.Set("Authorization", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEwMDB9.GVS-KC5nOCHybzzFIIH864u4KcGu-ZSd-96krqTUGWo")
 
 	// Perform request
-	time.Sleep(1 * time.Second) // http doesn't have an ignite hook, so we halt for a second
+	dial(t)
 	resp, err := http.DefaultClient.Do(req)
 
 	// High level Assertions
