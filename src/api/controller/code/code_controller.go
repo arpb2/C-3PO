@@ -1,58 +1,48 @@
 package code
 
 import (
-	"github.com/arpb2/C-3PO/src/api/controller"
+	"github.com/arpb2/C-3PO/src/api/service"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
-var GetController = controller.Controller{
-	Method: "GET",
-	Path:   "/users/:user_id/codes/:code_id",
-	Middleware: []gin.HandlerFunc{
-		HandleAuthentication,
-	},
-	Body:   codeGet,
+var Service service.CodeService
+
+func FetchUserId(ctx *gin.Context) (string, bool) {
+	userId := ctx.Param("user_id")
+
+	if userId == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "'user_id' empty",
+		})
+		return userId, true
+	}
+
+	return userId, false
 }
 
-var PostController = controller.Controller{
-	Method: "POST",
-	Path:   "/users/:user_id/codes",
-	Middleware: []gin.HandlerFunc{
-		HandleAuthentication,
-	},
-	Body:   codePost,
+func FetchCodeId(ctx *gin.Context) (string, bool) {
+	codeId := ctx.Param("code_id")
+
+	if codeId == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "'code_id' empty",
+		})
+		return codeId, true
+	}
+
+	return codeId, false
 }
 
-var PutController = controller.Controller{
-	Method: "PUT",
-	Path:   "/users/:user_id/codes/:code_id",
-	Middleware: []gin.HandlerFunc{
-		HandleAuthentication,
-	},
-	Body:   codePut,
-}
+func FetchCode(ctx *gin.Context) (*string, bool) {
+	code, exists := ctx.GetPostForm("code")
 
-func codeGet(ctx *gin.Context) {
-	ctx.JSON(http.StatusOK, gin.H{
-		"code": "some long code",
-		"user_id": ctx.Param("user_id"),
-		"code_id": ctx.Param("code_id"),
-	})
-}
+	if !exists {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "'code' part not found",
+		})
+		return nil, true
+	}
 
-func codePost(ctx *gin.Context) {
-	ctx.JSON(http.StatusOK, gin.H{
-		"code": "some long code",
-		"user_id": ctx.Param("user_id"),
-		"code_id": ctx.Param("code_id"),
-	})
-}
-
-func codePut(ctx *gin.Context) {
-	ctx.JSON(http.StatusOK, gin.H{
-		"code": "some long code",
-		"user_id": ctx.Param("user_id"),
-		"code_id": ctx.Param("code_id"),
-	})
+	return &code, false
 }

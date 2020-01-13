@@ -26,7 +26,7 @@ func TestHandlingOfAuthentication_NoHeader(t *testing.T) {
 		Method:        "GET",
 		Path:          "/test",
 		Middleware:    []gin.HandlerFunc{
-			HandleAuthentication,
+			AuthenticationMiddleware,
 		},
 		Body:          func(ctx *gin.Context) {
 			panic("Shouldn't reach here!")
@@ -45,7 +45,7 @@ func TestHandlingOfAuthentication_BadHeader(t *testing.T) {
 		Method:        "GET",
 		Path:          "/test",
 		Middleware:    []gin.HandlerFunc{
-			HandleAuthentication,
+			AuthenticationMiddleware,
 		},
 		Body:          func(ctx *gin.Context) {
 			panic("Shouldn't reach here!")
@@ -66,7 +66,7 @@ func TestHandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
 		Method:        "GET",
 		Path:          "/test/:user_id",
 		Middleware:    []gin.HandlerFunc{
-			HandleAuthentication,
+			AuthenticationMiddleware,
 		},
 		Body:          func(ctx *gin.Context) {
 			panic("Shouldn't reach here!")
@@ -88,7 +88,7 @@ func TestHandlingOfAuthentication_Authorized(t *testing.T) {
 		Method:        "GET",
 		Path:          "/test/:user_id",
 		Middleware:    []gin.HandlerFunc{
-			HandleAuthentication,
+			AuthenticationMiddleware,
 		},
 		Body:          func(ctx *gin.Context) {
 			ctx.String(http.StatusOK, "Returned success")
