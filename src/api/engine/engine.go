@@ -16,16 +16,15 @@ import (
 )
 
 type ServerEngine interface {
-	ControllerHandler
-
-	ServeHTTP(writer http.ResponseWriter, request *http.Request)
+	ControllerRegistrable
+	http.Handler
 
 	Run() error
 
 	Shutdown() error
 }
 
-type ControllerHandler interface {
+type ControllerRegistrable interface {
 
 	Register(controller controller.Controller)
 

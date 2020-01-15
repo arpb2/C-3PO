@@ -18,7 +18,7 @@ func StartApplication() error {
 	return nil
 }
 
-type Binder func(engine.ControllerHandler)
+type Binder func(engine.ControllerRegistrable)
 var binders = []Binder{
 	health.Binder,
 	code.Binder,

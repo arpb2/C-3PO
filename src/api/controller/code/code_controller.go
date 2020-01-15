@@ -9,7 +9,7 @@ import (
 
 var Service service.CodeService
 
-func Binder(handler engine.ControllerHandler) {
+func Binder(handler engine.ControllerRegistrable) {
 	handler.Register(GetController)
 	handler.Register(PostController)
 	handler.Register(PutController)

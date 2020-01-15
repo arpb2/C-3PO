@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func Binder(handler engine.ControllerHandler) {
+func Binder(handler engine.ControllerRegistrable) {
 	handler.Register(GetController)
 }
 
