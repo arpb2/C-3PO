@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/arpb2/C-3PO/src/api/controller/code"
 	"github.com/arpb2/C-3PO/src/api/golden"
+	"github.com/arpb2/C-3PO/src/api/middleware/auth"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"net/http"
@@ -27,7 +28,7 @@ func TestCodePostControllerMiddleware_HasAuthenticationMiddleware(t *testing.T) 
 
 	for _, middleware := range code.PostController.Middleware {
 		// Golang doesn't allow func comparisons, so we have to test identity through pointers using reflection.
-		if reflect.ValueOf(code.AuthenticationMiddleware).Pointer() == reflect.ValueOf(middleware).Pointer() {
+		if reflect.ValueOf(auth.UserOrTeacherAuthenticationMiddleware).Pointer() == reflect.ValueOf(middleware).Pointer() {
 			found = true
 		}
 	}
