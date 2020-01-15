@@ -1,12 +1,19 @@
 package code
 
 import (
+	"github.com/arpb2/C-3PO/src/api/engine"
 	"github.com/arpb2/C-3PO/src/api/service"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 var Service service.CodeService
+
+func Binder(handler engine.ControllerHandler) {
+	handler.Register(GetController)
+	handler.Register(PostController)
+	handler.Register(PutController)
+}
 
 func FetchUserId(ctx *gin.Context) (string, bool) {
 	userId := ctx.Param("user_id")

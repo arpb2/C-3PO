@@ -15,7 +15,7 @@ func handleAuthentication(ctx *gin.Context) {
 
 	if authToken == "" {
 		ctx.JSON(http.StatusUnauthorized, gin.H{
-			"error": "no 'Authentication' header provided",
+			"error": "no 'Authorization' header provided",
 		})
 		ctx.Abort()
 		return

@@ -16,13 +16,19 @@ import (
 )
 
 type ServerEngine interface {
-	ServeHTTP(writer http.ResponseWriter, request *http.Request)
+	ControllerHandler
 
-	Register(controller controller.Controller)
+	ServeHTTP(writer http.ResponseWriter, request *http.Request)
 
 	Run() error
 
 	Shutdown() error
+}
+
+type ControllerHandler interface {
+
+	Register(controller controller.Controller)
+
 }
 
 func CreateBasicServerEngine() ServerEngine {
