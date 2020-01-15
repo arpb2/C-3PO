@@ -32,16 +32,15 @@ func handleAuthentication(ctx *gin.Context, allowTeacher bool) {
 		return
 	}
 
-	userIdStr := strconv.FormatUint(uint64(token.UserId), 10)
 	requestedUserId := ctx.Param("user_id")
 
-	if userIdStr == requestedUserId {
+	if strconv.FormatUint(uint64(token.UserId), 10) == requestedUserId {
 		ctx.Next()
 		return
 	}
 
 	if allowTeacher {
-		students, serviceErr := TeacherService.GetStudents(userIdStr)
+		students, serviceErr := TeacherService.GetStudents(token.UserId)
 
 		if serviceErr != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{
@@ -53,7 +52,7 @@ func handleAuthentication(ctx *gin.Context, allowTeacher bool) {
 
 		if students != nil {
 			for _, student := range *students {
-				if strconv.FormatUint(uint64(student), 10) == requestedUserId {
+				if strconv.FormatUint(uint64(student.Id), 10) == requestedUserId {
 					ctx.Next()
 					return
 				}

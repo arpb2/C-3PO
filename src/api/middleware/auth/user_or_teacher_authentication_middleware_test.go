@@ -5,6 +5,7 @@ import (
 	"github.com/arpb2/C-3PO/src/api/controller"
 	"github.com/arpb2/C-3PO/src/api/engine"
 	"github.com/arpb2/C-3PO/src/api/middleware/auth"
+	"github.com/arpb2/C-3PO/src/api/model"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"net/http"
@@ -100,22 +101,29 @@ func Test_Multi_HandlingOfAuthentication_Authorized_SameUser(t *testing.T) {
 }
 
 type MockTeacherService struct{}
-func (s MockTeacherService) GetUser(userId string) (user *interface{}, err error) {
+
+func (m MockTeacherService) GetUser(userId uint) (user *model.User, err error) {
 	panic("implement me")
 }
-func (s MockTeacherService) CreateUser(data ...interface{}) (user *interface{}, err error) {
+
+func (m MockTeacherService) CreateUser(authenticatedUser model.AuthenticatedUser) (user *model.User, err error) {
 	panic("implement me")
 }
-func (s MockTeacherService) UpdateUser(user interface{}) error {
+
+func (m MockTeacherService) UpdateUser(authenticatedUser model.AuthenticatedUser) (user *model.User, err error) {
 	panic("implement me")
 }
-func (s MockTeacherService) DeleteUser(userId string) error {
+
+func (m MockTeacherService) DeleteUser(userId uint) error {
 	panic("implement me")
 }
-func (s MockTeacherService) GetStudents(userId string) (students *[]int, err error) {
-	if userId == "1001" {
-		students = &[]int{
-			1000,
+
+func (m MockTeacherService) GetStudents(userId uint) (students *[]model.User, err error) {
+	if userId == 1001 {
+		students = &[]model.User{
+			{
+				Id: 1000,
+			},
 		}
 	} else {
 		students = nil
@@ -174,19 +182,24 @@ func Test_Multi_HandlingOfAuthentication_Unauthorized_Student(t *testing.T) {
 }
 
 type FailingMockTeacherService struct{}
-func (s FailingMockTeacherService) GetUser(userId string) (user *interface{}, err error) {
+
+func (f FailingMockTeacherService) GetUser(userId uint) (user *model.User, err error) {
 	panic("implement me")
 }
-func (s FailingMockTeacherService) CreateUser(data ...interface{}) (user *interface{}, err error) {
+
+func (f FailingMockTeacherService) CreateUser(authenticatedUser model.AuthenticatedUser) (user *model.User, err error) {
 	panic("implement me")
 }
-func (s FailingMockTeacherService) UpdateUser(user interface{}) error {
+
+func (f FailingMockTeacherService) UpdateUser(authenticatedUser model.AuthenticatedUser) (user *model.User, err error) {
 	panic("implement me")
 }
-func (s FailingMockTeacherService) DeleteUser(userId string) error {
+
+func (f FailingMockTeacherService) DeleteUser(userId uint) error {
 	panic("implement me")
 }
-func (s FailingMockTeacherService) GetStudents(userId string) (students *[]int, err error) {
+
+func (f FailingMockTeacherService) GetStudents(userId uint) (students *[]model.User, err error) {
 	students = nil
 	err = errors.New("woops this fails")
 	return

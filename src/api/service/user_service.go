@@ -1,20 +1,22 @@
 package service
 
+import "github.com/arpb2/C-3PO/src/api/model"
+
 type UserService interface {
 
-	GetUser(userId string) (user *interface{}, err error)
+	GetUser(userId uint) (user *model.User, err error)
 
-	CreateUser(data ...interface{}) (user *interface{}, err error)
+	CreateUser(authenticatedUser model.AuthenticatedUser) (user *model.User, err error)
 
-	UpdateUser(user interface{}) error
+	UpdateUser(authenticatedUser model.AuthenticatedUser) (user *model.User, err error)
 
-	DeleteUser(userId string) error
+	DeleteUser(userId uint) error
 
 }
 
 type TeacherService interface {
 	UserService
 
-	GetStudents(userId string) (students *[]int, err error)
+	GetStudents(userId uint) (students *[]model.User, err error)
 
 }
