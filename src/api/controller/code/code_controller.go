@@ -1,6 +1,7 @@
 package code
 
 import (
+	"github.com/arpb2/C-3PO/src/api/controller"
 	"github.com/arpb2/C-3PO/src/api/engine"
 	"github.com/arpb2/C-3PO/src/api/service"
 	"github.com/gin-gonic/gin"
@@ -19,9 +20,7 @@ func FetchUserId(ctx *gin.Context) (string, bool) {
 	userId := ctx.Param("user_id")
 
 	if userId == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "'user_id' empty",
-		})
+		controller.Halt(ctx, http.StatusBadRequest, "'user_id' empty")
 		return userId, true
 	}
 
@@ -32,9 +31,7 @@ func FetchCodeId(ctx *gin.Context) (string, bool) {
 	codeId := ctx.Param("code_id")
 
 	if codeId == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "'code_id' empty",
-		})
+		controller.Halt(ctx, http.StatusBadRequest, "'code_id' empty")
 		return codeId, true
 	}
 
@@ -45,9 +42,7 @@ func FetchCode(ctx *gin.Context) (*string, bool) {
 	code, exists := ctx.GetPostForm("code")
 
 	if !exists {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "'code' part not found",
-		})
+		controller.Halt(ctx, http.StatusBadRequest, "'code' part not found")
 		return nil, true
 	}
 

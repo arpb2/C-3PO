@@ -30,9 +30,7 @@ func codePost(ctx *gin.Context) {
 	codeId, err := Service.CreateCode(userId, code)
 
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
+		controller.Halt(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
 

@@ -31,16 +31,12 @@ func codeGet(ctx *gin.Context) {
 	code, err := Service.GetCode(userId, codeId)
 
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
+		controller.Halt(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	if code == nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": fmt.Sprintf("no code associated to the user_id '%s' and code_id '%s'", userId, codeId),
-		})
+		controller.Halt(ctx, http.StatusBadRequest, fmt.Sprintf("no code associated to the user_id '%s' and code_id '%s'", userId, codeId))
 		return
 	}
 
