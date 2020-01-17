@@ -3,14 +3,19 @@ package auth
 import (
 	"fmt"
 	"github.com/arpb2/C-3PO/src/api/auth"
+	"github.com/arpb2/C-3PO/src/api/auth/jwt"
 	"github.com/arpb2/C-3PO/src/api/controller"
-	"github.com/arpb2/C-3PO/src/api/engine"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
 )
 
+var TokenHandler auth.TokenHandler = jwt.TokenHandler{
+	Secret: jwt.FetchJwtSecret(),
+}
+
 type AuthenticationStrategy func(token *auth.Token, userId string) (authorized bool, err error)
+
 func handleAuthentication(ctx *gin.Context, strategies ...AuthenticationStrategy) {
 	authToken := ctx.GetHeader("Authorization")
 
@@ -19,7 +24,7 @@ func handleAuthentication(ctx *gin.Context, strategies ...AuthenticationStrategy
 		return
 	}
 
-	token, err := engine.DefaultTokenHandler.Retrieve(authToken)
+	token, err := TokenHandler.Retrieve(authToken)
 
 	if err != nil {
 		controller.Halt(ctx, err.Status, err.Error.Error())

@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/arpb2/C-3PO/src/api/auth/jwt"
 	"github.com/arpb2/C-3PO/src/api/controller"
 	"github.com/gin-gonic/gin"
 	"log"
@@ -35,10 +34,6 @@ func CreateBasicServerEngine() ServerEngine {
 		engine: gin.Default(),
 		port:   GetPort(),
 	}
-}
-
-var DefaultTokenHandler = jwt.TokenHandler{
-	Secret: jwt.FetchJwtSecret(),
 }
 
 type defaultServerEngine struct {
