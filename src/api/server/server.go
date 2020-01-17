@@ -8,10 +8,10 @@ import (
 	"github.com/arpb2/C-3PO/src/api/engine"
 )
 
-var Engine = CreateEngine()
+func StartApplication(engine engine.ServerEngine) error {
+	RegisterRoutes(engine)
 
-func StartApplication() error {
-	if err := Engine.Run(); err != nil {
+	if err := engine.Run(); err != nil {
 		_ = fmt.Errorf("error running server %s", err.Error())
 		return err
 	}
@@ -25,12 +25,8 @@ var binders = []Binder{
 	user.Binder,
 }
 
-func CreateEngine() engine.ServerEngine {
-	serverEngine := engine.CreateBasicServerEngine()
-
+func RegisterRoutes(engine engine.ServerEngine) {
 	for _, binder := range binders {
-		binder(serverEngine)
+		binder(engine)
 	}
-
-	return serverEngine
 }

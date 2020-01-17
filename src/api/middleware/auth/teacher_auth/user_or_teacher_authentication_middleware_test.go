@@ -1,28 +1,38 @@
-package auth_test
+package teacher_auth_test
 
 import (
 	"errors"
+	"github.com/arpb2/C-3PO/src/api/auth/jwt"
 	"github.com/arpb2/C-3PO/src/api/controller"
-	"github.com/arpb2/C-3PO/src/api/engine"
-	"github.com/arpb2/C-3PO/src/api/middleware/auth"
+	"github.com/arpb2/C-3PO/src/api/engine/c3po"
+	"github.com/arpb2/C-3PO/src/api/middleware/auth/teacher_auth"
 	"github.com/arpb2/C-3PO/src/api/model"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"net/http"
+	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
-func init() {
-	auth.TeacherService = MockTeacherService{}
+var MultiTokenHandler = jwt.CreateTokenHandler()
+
+func performRequest(r http.Handler, method, path, body string, headers map[string][]string) *httptest.ResponseRecorder {
+	req, _ := http.NewRequest(method, path, strings.NewReader(body))
+	req.Header = headers
+
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+	return w
 }
 
 func Test_Multi_HandlingOfAuthentication_NoHeader(t *testing.T) {
-	e := engine.CreateBasicServerEngine()
+	e := c3po.New()
 	e.Register(controller.Controller{
 		Method:        "GET",
 		Path:          "/test",
 		Middleware:    []gin.HandlerFunc{
-			auth.UserOrTeacherAuthenticationMiddleware,
+			teacher_auth.CreateMiddleware(MultiTokenHandler, MockTeacherService{}),
 		},
 		Body:          func(ctx *gin.Context) {
 			panic("Shouldn't reach here!")
@@ -36,12 +46,12 @@ func Test_Multi_HandlingOfAuthentication_NoHeader(t *testing.T) {
 }
 
 func Test_Multi_HandlingOfAuthentication_BadHeader(t *testing.T) {
-	e := engine.CreateBasicServerEngine()
+	e := c3po.New()
 	e.Register(controller.Controller{
 		Method:        "GET",
 		Path:          "/test",
 		Middleware:    []gin.HandlerFunc{
-			auth.UserOrTeacherAuthenticationMiddleware,
+			teacher_auth.CreateMiddleware(MultiTokenHandler, MockTeacherService{}),
 		},
 		Body:          func(ctx *gin.Context) {
 			panic("Shouldn't reach here!")
@@ -57,12 +67,12 @@ func Test_Multi_HandlingOfAuthentication_BadHeader(t *testing.T) {
 }
 
 func Test_Multi_HandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
-	e := engine.CreateBasicServerEngine()
+	e := c3po.New()
 	e.Register(controller.Controller{
 		Method:        "GET",
 		Path:          "/test/:user_id",
 		Middleware:    []gin.HandlerFunc{
-			auth.UserOrTeacherAuthenticationMiddleware,
+			teacher_auth.CreateMiddleware(MultiTokenHandler, MockTeacherService{}),
 		},
 		Body:          func(ctx *gin.Context) {
 			panic("Shouldn't reach here!")
@@ -79,12 +89,12 @@ func Test_Multi_HandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
 }
 
 func Test_Multi_HandlingOfAuthentication_Authorized_SameUser(t *testing.T) {
-	e := engine.CreateBasicServerEngine()
+	e := c3po.New()
 	e.Register(controller.Controller{
 		Method:        "GET",
 		Path:          "/test/:user_id",
 		Middleware:    []gin.HandlerFunc{
-			auth.UserOrTeacherAuthenticationMiddleware,
+			teacher_auth.CreateMiddleware(MultiTokenHandler, MockTeacherService{}),
 		},
 		Body:          func(ctx *gin.Context) {
 			ctx.String(http.StatusOK, "Returned success")
@@ -133,19 +143,17 @@ func (m MockTeacherService) GetStudents(userId uint) (students *[]model.User, er
 }
 
 func Test_Multi_HandlingOfAuthentication_Authorized_Student(t *testing.T) {
-	e := engine.CreateBasicServerEngine()
+	e := c3po.New()
 	e.Register(controller.Controller{
 		Method:        "GET",
 		Path:          "/test/:user_id",
 		Middleware:    []gin.HandlerFunc{
-			auth.UserOrTeacherAuthenticationMiddleware,
+			teacher_auth.CreateMiddleware(MultiTokenHandler, MockTeacherService{}),
 		},
 		Body:          func(ctx *gin.Context) {
 			ctx.String(http.StatusOK, "Returned success")
 		},
 	})
-
-	auth.TeacherService = MockTeacherService{}
 
 	headers := map[string][]string{}
 	// Token for user 1001
@@ -158,19 +166,17 @@ func Test_Multi_HandlingOfAuthentication_Authorized_Student(t *testing.T) {
 
 
 func Test_Multi_HandlingOfAuthentication_Unauthorized_Student(t *testing.T) {
-	e := engine.CreateBasicServerEngine()
+	e := c3po.New()
 	e.Register(controller.Controller{
 		Method:        "GET",
 		Path:          "/test/:user_id",
 		Middleware:    []gin.HandlerFunc{
-			auth.UserOrTeacherAuthenticationMiddleware,
+			teacher_auth.CreateMiddleware(MultiTokenHandler, MockTeacherService{}),
 		},
 		Body:          func(ctx *gin.Context) {
 			ctx.String(http.StatusOK, "Returned success")
 		},
 	})
-
-	auth.TeacherService = MockTeacherService{}
 
 	headers := map[string][]string{}
 	// Token for user 1002
@@ -206,19 +212,17 @@ func (f FailingMockTeacherService) GetStudents(userId uint) (students *[]model.U
 }
 
 func Test_Multi_HandlingOfAuthentication_Service_Error(t *testing.T) {
-	e := engine.CreateBasicServerEngine()
+	e := c3po.New()
 	e.Register(controller.Controller{
 		Method:        "GET",
 		Path:          "/test/:user_id",
 		Middleware:    []gin.HandlerFunc{
-			auth.UserOrTeacherAuthenticationMiddleware,
+			teacher_auth.CreateMiddleware(MultiTokenHandler, FailingMockTeacherService{}),
 		},
 		Body:          func(ctx *gin.Context) {
 			ctx.String(http.StatusOK, "Returned success")
 		},
 	})
-
-	auth.TeacherService = FailingMockTeacherService{}
 
 	headers := map[string][]string{}
 	// Token for user 1001

@@ -3,9 +3,10 @@ package integration_test
 import (
 	"bytes"
 	"fmt"
-	"github.com/arpb2/C-3PO/src/api/controller/code"
+	"github.com/arpb2/C-3PO/src/api/engine/c3po"
 	"github.com/arpb2/C-3PO/src/api/golden"
 	"github.com/arpb2/C-3PO/src/api/server"
+	"github.com/arpb2/C-3PO/src/api/service/code_service"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"net"
@@ -15,24 +16,6 @@ import (
 	"testing"
 	"time"
 )
-
-type SharedInMemoryCodeService struct{}
-func (s *SharedInMemoryCodeService) GetCode(userId string, codeId string) (code *string, err error) {
-	c := "expected code"
-	return &c, nil
-}
-
-func (s *SharedInMemoryCodeService) CreateCode(userId string, code *string) (codeId string, err error) {
-	return "456", nil
-}
-
-func (s *SharedInMemoryCodeService) ReplaceCode(userId string, codeId string, code *string) error {
-	return nil
-}
-
-func init() {
-	code.Service = &SharedInMemoryCodeService{}
-}
 
 func dial(t *testing.T) {
 	connStablished := false
@@ -51,11 +34,19 @@ func dial(t *testing.T) {
 
 func Test_Get(t *testing.T) {
 	// Ignite server
-	defer server.Engine.Shutdown()
-	go server.StartApplication()
+	engine := c3po.New()
+
+	defer engine.Shutdown()
+	go server.StartApplication(engine)
+
+	// Add code to retrieve
+	code := "expected code"
+	codeId, err := code_service.GetService().CreateCode("1000", &code)
+
+	assert.Nil(t, err)
 
 	// Create request to perform
-	req, err := http.NewRequest("GET", "http://localhost:8080/users/1000/codes/1000", strings.NewReader(""))
+	req, err := http.NewRequest("GET", "http://localhost:8080/users/1000/codes/" + codeId, strings.NewReader(""))
 	assert.Nil(t, err)
 
 	req.Header.Set("Authorization", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEwMDB9.GVS-KC5nOCHybzzFIIH864u4KcGu-ZSd-96krqTUGWo")
@@ -83,8 +74,10 @@ func Test_Get(t *testing.T) {
 
 func Test_Post(t *testing.T) {
 	// Ignite server
-	defer server.Engine.Shutdown()
-	go server.StartApplication()
+	engine := c3po.New()
+
+	defer engine.Shutdown()
+	go server.StartApplication(engine)
 
 	// Create request to perform
 	data := url.Values{}
@@ -118,13 +111,21 @@ func Test_Post(t *testing.T) {
 
 func Test_Put(t *testing.T) {
 	// Ignite server
-	defer server.Engine.Shutdown()
-	go server.StartApplication()
+	engine := c3po.New()
+
+	defer engine.Shutdown()
+	go server.StartApplication(engine)
+
+	// Add code to replace
+	code := "test code"
+	codeId, err := code_service.GetService().CreateCode("1000", &code)
+
+	assert.Nil(t, err)
 
 	// Create request to perform
 	data := url.Values{}
 	data["code"] = []string{"some code i'm replacing"}
-	req, err := http.NewRequest("PUT", "http://localhost:8080/users/1000/codes/1000", strings.NewReader(data.Encode()))
+	req, err := http.NewRequest("PUT", "http://localhost:8080/users/1000/codes/" + codeId, strings.NewReader(data.Encode()))
 	assert.Nil(t, err)
 
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")

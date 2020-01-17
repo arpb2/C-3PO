@@ -3,17 +3,14 @@ package code
 import (
 	"github.com/arpb2/C-3PO/src/api/controller"
 	"github.com/arpb2/C-3PO/src/api/engine"
-	"github.com/arpb2/C-3PO/src/api/service"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
-var Service service.CodeService // TODO Set
-
 func Binder(handler engine.ControllerRegistrable) {
-	handler.Register(GetController)
-	handler.Register(PostController)
-	handler.Register(PutController)
+	handler.Register(CreateGetController())
+	handler.Register(CreatePostController())
+	handler.Register(CreatePutController())
 }
 
 func FetchUserId(ctx *gin.Context) (string, bool) {

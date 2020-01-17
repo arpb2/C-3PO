@@ -9,6 +9,12 @@ import (
 	"os"
 )
 
+func CreateTokenHandler() auth.TokenHandler {
+	return &TokenHandler{
+		Secret: FetchJwtSecret(),
+	}
+}
+
 func FetchJwtSecret() []byte {
 	osValue := os.Getenv("JWT_SECRET")
 	if osValue == "" {

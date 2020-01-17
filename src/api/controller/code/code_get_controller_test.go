@@ -5,34 +5,19 @@ import (
 	"errors"
 	"github.com/arpb2/C-3PO/src/api/controller/code"
 	"github.com/arpb2/C-3PO/src/api/golden"
-	"github.com/arpb2/C-3PO/src/api/middleware/auth"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
-	"reflect"
 	"testing"
 )
 
 func TestCodeGetControllerMethodIsGET(t *testing.T) {
-	assert.Equal(t, "GET", code.GetController.Method)
+	assert.Equal(t, "GET", code.CreateGetController().Method)
 }
 
 func TestCodeGetControllerPathIsAsExpected(t *testing.T) {
-	assert.Equal(t, "/users/:user_id/codes/:code_id", code.GetController.Path)
-}
-
-func TestCodeGetControllerMiddleware_HasAuthenticationMiddleware(t *testing.T) {
-	found := false
-
-	for _, middleware := range code.GetController.Middleware {
-		// Golang doesn't allow func comparisons, so we have to test identity through pointers using reflection.
-		if reflect.ValueOf(auth.UserOrTeacherAuthenticationMiddleware).Pointer() == reflect.ValueOf(middleware).Pointer() {
-			found = true
-		}
-	}
-
-	assert.True(t, found)
+	assert.Equal(t, "/users/:user_id/codes/:code_id", code.CreateGetController().Path)
 }
 
 func TestCodeGetControllerBody_400OnEmptyUserId(t *testing.T) {
@@ -45,7 +30,7 @@ func TestCodeGetControllerBody_400OnEmptyUserId(t *testing.T) {
 			Value: "",
 	})
 
-	code.GetController.Body(c)
+	code.CreateGetController().Body(c)
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "bad_request.empty.user_id.golden.json")
 
@@ -66,7 +51,7 @@ func TestCodeGetControllerBody_400OnEmptyCodeId(t *testing.T) {
 			Value: "",
 	})
 
-	code.GetController.Body(c)
+	code.CreateGetController().Body(c)
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "bad_request.empty.code_id.golden.json")
 
@@ -77,14 +62,11 @@ func TestCodeGetControllerBody_400OnEmptyCodeId(t *testing.T) {
 func TestCodeGetControllerBody_500OnServiceReadError(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
-	defer func() {
-		code.Service = nil
-	}()
-	code.Service = &SharedInMemoryCodeService{
+	body := code.CreateGetBody(&SharedInMemoryCodeService{
 		codeId: "1000",
 		code:   nil,
-		err:    errors.New("Unexpected error"),
-	}
+		err:    errors.New("unexpected error"),
+	})
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	c.Params = append(c.Params, gin.Param{
@@ -95,7 +77,8 @@ func TestCodeGetControllerBody_500OnServiceReadError(t *testing.T) {
 		Value: "1000",
 	})
 
-	code.GetController.Body(c)
+	body(c)
+
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "internal_server_error.error_read.service.golden.json")
 
@@ -106,14 +89,11 @@ func TestCodeGetControllerBody_500OnServiceReadError(t *testing.T) {
 func TestCodeGetControllerBody_400OnNoCodeStoredInService(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
-	defer func() {
-		code.Service = nil
-	}()
-	code.Service = &SharedInMemoryCodeService{
+	body := code.CreateGetBody(&SharedInMemoryCodeService{
 		codeId: "1000",
 		code:   nil,
 		err:    nil,
-	}
+	})
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	c.Params = append(c.Params, gin.Param{
@@ -124,7 +104,8 @@ func TestCodeGetControllerBody_400OnNoCodeStoredInService(t *testing.T) {
 		Value: "1000",
 	})
 
-	code.GetController.Body(c)
+	body(c)
+
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "bad_request.missing_code.read.service.golden.json")
 
@@ -135,9 +116,6 @@ func TestCodeGetControllerBody_400OnNoCodeStoredInService(t *testing.T) {
 func TestCodeGetControllerBody_200OnCodeStoredOnService(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
-	defer func() {
-		code.Service = nil
-	}()
 	expectedCode := `
 package main
 
@@ -149,11 +127,11 @@ func main() {
 	fmt.Print("Hello world!")
 }
 			`
-	code.Service = &SharedInMemoryCodeService{
+	body := code.CreateGetBody(&SharedInMemoryCodeService{
 		codeId: "1000",
 		code:   &expectedCode,
 		err:    nil,
-	}
+	})
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	c.Params = append(c.Params, gin.Param{
@@ -164,7 +142,8 @@ func main() {
 		Value: "1000",
 	})
 
-	code.GetController.Body(c)
+	body(c)
+
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "ok.get_code.golden.json")
 
@@ -175,15 +154,12 @@ func main() {
 func TestCodeGetControllerBody_200OnEmptyCodeStoredOnService(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
-	defer func() {
-		code.Service = nil
-	}()
 	expectedCode := ""
-	code.Service = &SharedInMemoryCodeService{
+	body := code.CreateGetBody(&SharedInMemoryCodeService{
 		codeId: "1000",
 		code:   &expectedCode,
 		err:    nil,
-	}
+	})
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	c.Params = append(c.Params, gin.Param{
@@ -194,7 +170,8 @@ func TestCodeGetControllerBody_200OnEmptyCodeStoredOnService(t *testing.T) {
 		Value: "1000",
 	})
 
-	code.GetController.Body(c)
+	body(c)
+
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "ok.get_empty_code.golden.json")
 

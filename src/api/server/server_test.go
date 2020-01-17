@@ -3,6 +3,7 @@ package server_test
 import (
 	"errors"
 	"github.com/arpb2/C-3PO/src/api/controller"
+	"github.com/arpb2/C-3PO/src/api/engine/c3po"
 	"github.com/arpb2/C-3PO/src/api/server"
 	"github.com/stretchr/testify/assert"
 	"net/http"
@@ -41,67 +42,87 @@ func (server FailingServerEngineMock) Shutdown() error {
 }
 
 func TestStartApplicationSuccess(t *testing.T) {
-	server.Engine = ServerEngineMock{}
-	err := server.StartApplication()
+	err := server.StartApplication(&ServerEngineMock{})
 
 	assert.Nil(t, err)
-	server.Engine = server.CreateEngine()
 }
 
 func TestStartApplicationFailureIsHandled(t *testing.T) {
-	server.Engine = FailingServerEngineMock{}
-	err := server.StartApplication()
+	err := server.StartApplication(&FailingServerEngineMock{})
 
 	assert.NotNil(t, err)
 	assert.Equal(t, "woops this fails", err.Error())
-	server.Engine = server.CreateEngine()
 }
 
 func TestHealthGet(test *testing.T) {
-	w := performRequest(server.CreateEngine(), "GET", "/ping", "")
+	engine := c3po.New()
+	server.RegisterRoutes(engine)
+
+	w := performRequest(engine, "GET", "/ping", "")
 
 	assert.Equal(test, 200, w.Code)
 	assert.Equal(test, "pong", w.Body.String())
 }
 
 func TestCodeGetRegistered(test *testing.T) {
-	w := performRequest(server.CreateEngine(), "GET", "/users/1/codes/1", "")
+	engine := c3po.New()
+	server.RegisterRoutes(engine)
+
+	w := performRequest(engine, "GET", "/users/1/codes/1", "")
 
 	assert.NotEqual(test, 404, w.Code)
 }
 
 func TestCodePostRegistered(test *testing.T) {
-	w := performRequest(server.CreateEngine(), "POST", "/users/1/codes", "")
+	engine := c3po.New()
+	server.RegisterRoutes(engine)
+
+	w := performRequest(engine, "POST", "/users/1/codes", "")
 
 	assert.NotEqual(test, 404, w.Code)
 }
 
 func TestCodePutRegistered(test *testing.T) {
-	w := performRequest(server.CreateEngine(), "PUT", "/users/1/codes/1", "")
+	engine := c3po.New()
+	server.RegisterRoutes(engine)
+
+	w := performRequest(engine, "PUT", "/users/1/codes/1", "")
 
 	assert.NotEqual(test, 404, w.Code)
 }
 
 func TestUserGetRegistered(test *testing.T) {
-	w := performRequest(server.CreateEngine(), "GET", "/users/1", "")
+	engine := c3po.New()
+	server.RegisterRoutes(engine)
+
+	w := performRequest(engine, "GET", "/users/1", "")
 
 	assert.NotEqual(test, 404, w.Code)
 }
 
 func TestUserPostRegistered(test *testing.T) {
-	w := performRequest(server.CreateEngine(), "POST", "/users", "")
+	engine := c3po.New()
+	server.RegisterRoutes(engine)
+
+	w := performRequest(engine, "POST", "/users", "")
 
 	assert.NotEqual(test, 404, w.Code)
 }
 
 func TestUserPutRegistered(test *testing.T) {
-	w := performRequest(server.CreateEngine(), "PUT", "/users/1", "")
+	engine := c3po.New()
+	server.RegisterRoutes(engine)
+
+	w := performRequest(engine, "PUT", "/users/1", "")
 
 	assert.NotEqual(test, 404, w.Code)
 }
 
 func TestUserDeleteRegistered(test *testing.T) {
-	w := performRequest(server.CreateEngine(), "DELETE", "/users/1", "")
+	engine := c3po.New()
+	server.RegisterRoutes(engine)
+
+	w := performRequest(engine, "DELETE", "/users/1", "")
 
 	assert.NotEqual(test, 404, w.Code)
 }
