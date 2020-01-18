@@ -7,5 +7,7 @@ type Controller struct {
 
 	Path string
 
+	Middleware []gin.HandlerFunc
+
 	Body gin.HandlerFunc
 }

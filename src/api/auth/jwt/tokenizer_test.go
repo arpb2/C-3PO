@@ -10,6 +10,10 @@ import (
 
 var defaultSha = "52bfd2de0a2e69dff4517518590ac32a46bd76606ec22a258f99584a6e70aca2"
 
+var DefaultTokenHandler = TokenHandler{
+	Secret: FetchJwtSecret(),
+}
+
 func TestSecret_DefaultValue(t *testing.T) {
 	err := os.Unsetenv("JWT_SECRET")
 
