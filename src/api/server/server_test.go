@@ -81,3 +81,27 @@ func TestCodePutRegistered(test *testing.T) {
 
 	assert.NotEqual(test, 404, w.Code)
 }
+
+func TestUserGetRegistered(test *testing.T) {
+	w := performRequest(server.CreateEngine(), "GET", "/users/1", "")
+
+	assert.NotEqual(test, 404, w.Code)
+}
+
+func TestUserPostRegistered(test *testing.T) {
+	w := performRequest(server.CreateEngine(), "POST", "/users", "")
+
+	assert.NotEqual(test, 404, w.Code)
+}
+
+func TestUserPutRegistered(test *testing.T) {
+	w := performRequest(server.CreateEngine(), "PUT", "/users/1", "")
+
+	assert.NotEqual(test, 404, w.Code)
+}
+
+func TestUserDeleteRegistered(test *testing.T) {
+	w := performRequest(server.CreateEngine(), "DELETE", "/users/1", "")
+
+	assert.NotEqual(test, 404, w.Code)
+}
