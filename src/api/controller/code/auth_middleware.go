@@ -11,7 +11,7 @@ import (
 var AuthenticationMiddleware gin.HandlerFunc = handleAuthentication
 
 func handleAuthentication(ctx *gin.Context) {
-	authToken := ctx.GetHeader("Authentication")
+	authToken := ctx.GetHeader("Authorization")
 
 	if authToken == "" {
 		ctx.JSON(http.StatusUnauthorized, gin.H{
