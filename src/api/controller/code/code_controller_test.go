@@ -15,17 +15,17 @@ type SharedInMemoryCodeService struct {
 	code   *string
 	err    error
 }
-func (s *SharedInMemoryCodeService) Read(userId string, codeId string) (code *string, err error) {
+func (s *SharedInMemoryCodeService) GetCode(userId string, codeId string) (code *string, err error) {
 	s.codeId = codeId
 	return s.code, s.err
 }
 
-func (s *SharedInMemoryCodeService) Write(userId string, code *string) (codeId string, err error) {
+func (s *SharedInMemoryCodeService) CreateCode(userId string, code *string) (codeId string, err error) {
 	s.code = code
 	return s.codeId, s.err
 }
 
-func (s *SharedInMemoryCodeService) Replace(userId string, codeId string, code *string) error {
+func (s *SharedInMemoryCodeService) ReplaceCode(userId string, codeId string, code *string) error {
 	s.code = code
 	s.codeId = codeId
 	return s.err

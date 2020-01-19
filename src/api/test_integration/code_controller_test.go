@@ -17,16 +17,16 @@ import (
 )
 
 type SharedInMemoryCodeService struct{}
-func (s *SharedInMemoryCodeService) Read(userId string, codeId string) (code *string, err error) {
+func (s *SharedInMemoryCodeService) GetCode(userId string, codeId string) (code *string, err error) {
 	c := "expected code"
 	return &c, nil
 }
 
-func (s *SharedInMemoryCodeService) Write(userId string, code *string) (codeId string, err error) {
+func (s *SharedInMemoryCodeService) CreateCode(userId string, code *string) (codeId string, err error) {
 	return "456", nil
 }
 
-func (s *SharedInMemoryCodeService) Replace(userId string, codeId string, code *string) error {
+func (s *SharedInMemoryCodeService) ReplaceCode(userId string, codeId string, code *string) error {
 	return nil
 }
 

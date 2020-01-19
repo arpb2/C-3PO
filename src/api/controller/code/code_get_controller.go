@@ -3,6 +3,7 @@ package code
 import (
 	"fmt"
 	"github.com/arpb2/C-3PO/src/api/controller"
+	"github.com/arpb2/C-3PO/src/api/middleware/auth"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -11,7 +12,7 @@ var GetController = controller.Controller{
 	Method: "GET",
 	Path:   "/users/:user_id/codes/:code_id",
 	Middleware: []gin.HandlerFunc{
-		AuthenticationMiddleware,
+		auth.UserOrTeacherAuthenticationMiddleware,
 	},
 	Body:   codeGet,
 }
@@ -27,7 +28,7 @@ func codeGet(ctx *gin.Context) {
 		return
 	}
 
-	code, err := Service.Read(userId, codeId)
+	code, err := Service.GetCode(userId, codeId)
 
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{

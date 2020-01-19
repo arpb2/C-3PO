@@ -2,6 +2,7 @@ package code
 
 import (
 	"github.com/arpb2/C-3PO/src/api/controller"
+	"github.com/arpb2/C-3PO/src/api/middleware/auth"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -10,7 +11,7 @@ var PutController = controller.Controller{
 	Method: "PUT",
 	Path:   "/users/:user_id/codes/:code_id",
 	Middleware: []gin.HandlerFunc{
-		AuthenticationMiddleware,
+		auth.UserOrTeacherAuthenticationMiddleware,
 	},
 	Body:   codePut,
 }
@@ -31,7 +32,7 @@ func codePut(ctx *gin.Context) {
 		return
 	}
 
-	err := Service.Replace(userId, codeId, code)
+	err := Service.ReplaceCode(userId, codeId, code)
 
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{

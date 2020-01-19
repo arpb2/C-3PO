@@ -1,32 +1,22 @@
-package code
+package auth_test
 
 import (
 	"github.com/arpb2/C-3PO/src/api/controller"
 	"github.com/arpb2/C-3PO/src/api/engine"
+	"github.com/arpb2/C-3PO/src/api/middleware/auth"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"net/http"
-	"net/http/httptest"
-	"strings"
 	"testing"
 )
 
-func performRequest(r http.Handler, method, path, body string, headers map[string][]string) *httptest.ResponseRecorder {
-	req, _ := http.NewRequest(method, path, strings.NewReader(body))
-	req.Header = headers
-
-	w := httptest.NewRecorder()
-	r.ServeHTTP(w, req)
-	return w
-}
-
-func TestHandlingOfAuthentication_NoHeader(t *testing.T) {
+func Test_Single_HandlingOfAuthentication_NoHeader(t *testing.T) {
 	e := engine.CreateBasicServerEngine()
 	e.Register(controller.Controller{
 		Method:        "GET",
 		Path:          "/test",
 		Middleware:    []gin.HandlerFunc{
-			AuthenticationMiddleware,
+			auth.SingleAuthenticationMiddleware,
 		},
 		Body:          func(ctx *gin.Context) {
 			panic("Shouldn't reach here!")
@@ -39,13 +29,13 @@ func TestHandlingOfAuthentication_NoHeader(t *testing.T) {
 	assert.Equal(t, "{\"error\":\"no 'Authorization' header provided\"}\n", recorder.Body.String())
 }
 
-func TestHandlingOfAuthentication_BadHeader(t *testing.T) {
+func Test_Single_HandlingOfAuthentication_BadHeader(t *testing.T) {
 	e := engine.CreateBasicServerEngine()
 	e.Register(controller.Controller{
 		Method:        "GET",
 		Path:          "/test",
 		Middleware:    []gin.HandlerFunc{
-			AuthenticationMiddleware,
+			auth.SingleAuthenticationMiddleware,
 		},
 		Body:          func(ctx *gin.Context) {
 			panic("Shouldn't reach here!")
@@ -60,13 +50,13 @@ func TestHandlingOfAuthentication_BadHeader(t *testing.T) {
 	assert.Equal(t, "{\"error\":\"malformed token\"}\n", recorder.Body.String())
 }
 
-func TestHandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
+func Test_Single_HandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
 	e := engine.CreateBasicServerEngine()
 	e.Register(controller.Controller{
 		Method:        "GET",
 		Path:          "/test/:user_id",
 		Middleware:    []gin.HandlerFunc{
-			AuthenticationMiddleware,
+			auth.SingleAuthenticationMiddleware,
 		},
 		Body:          func(ctx *gin.Context) {
 			panic("Shouldn't reach here!")
@@ -82,13 +72,13 @@ func TestHandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
 	assert.Equal(t, "{\"error\":\"unauthorized\"}\n", recorder.Body.String())
 }
 
-func TestHandlingOfAuthentication_Authorized(t *testing.T) {
+func Test_Single_HandlingOfAuthentication_Authorized_SameUser(t *testing.T) {
 	e := engine.CreateBasicServerEngine()
 	e.Register(controller.Controller{
 		Method:        "GET",
 		Path:          "/test/:user_id",
 		Middleware:    []gin.HandlerFunc{
-			AuthenticationMiddleware,
+			auth.SingleAuthenticationMiddleware,
 		},
 		Body:          func(ctx *gin.Context) {
 			ctx.String(http.StatusOK, "Returned success")
@@ -103,4 +93,3 @@ func TestHandlingOfAuthentication_Authorized(t *testing.T) {
 	assert.Equal(t, http.StatusOK, recorder.Code)
 	assert.Equal(t, "Returned success", recorder.Body.String())
 }
-

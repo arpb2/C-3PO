@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-var Service service.CodeService
+var Service service.CodeService // TODO Set
 
 func Binder(handler engine.ControllerRegistrable) {
 	handler.Register(GetController)
