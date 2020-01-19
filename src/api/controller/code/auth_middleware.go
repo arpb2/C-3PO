@@ -8,7 +8,9 @@ import (
 	"strconv"
 )
 
-func HandleAuthentication(ctx *gin.Context) {
+var AuthenticationMiddleware gin.HandlerFunc = handleAuthentication
+
+func handleAuthentication(ctx *gin.Context) {
 	authToken := ctx.GetHeader("Authentication")
 
 	if authToken == "" {
