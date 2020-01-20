@@ -35,9 +35,7 @@ func codePut(ctx *gin.Context) {
 	err := Service.ReplaceCode(userId, codeId, code)
 
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
+		controller.Halt(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
 

@@ -2,33 +2,27 @@ package auth
 
 import (
 	"fmt"
+	"github.com/arpb2/C-3PO/src/api/auth"
+	"github.com/arpb2/C-3PO/src/api/controller"
 	"github.com/arpb2/C-3PO/src/api/engine"
-	"github.com/arpb2/C-3PO/src/api/service"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
 )
 
-var TeacherService service.TeacherService // TODO Set.
-
-func handleAuthentication(ctx *gin.Context, allowTeacher bool) {
+type AuthenticationStrategy func(token *auth.Token, userId string) (authorized bool, err error)
+func handleAuthentication(ctx *gin.Context, strategies ...AuthenticationStrategy) {
 	authToken := ctx.GetHeader("Authorization")
 
 	if authToken == "" {
-		ctx.JSON(http.StatusUnauthorized, gin.H{
-			"error": "no 'Authorization' header provided",
-		})
-		ctx.Abort()
+		controller.Halt(ctx, http.StatusUnauthorized, "no 'Authorization' header provided")
 		return
 	}
 
 	token, err := engine.DefaultTokenHandler.Retrieve(authToken)
 
 	if err != nil {
-		ctx.JSON(err.Status, gin.H{
-			"error": err.Error.Error(),
-		})
-		ctx.Abort()
+		controller.Halt(ctx, err.Status, err.Error.Error())
 		return
 	}
 
@@ -39,24 +33,20 @@ func handleAuthentication(ctx *gin.Context, allowTeacher bool) {
 		return
 	}
 
-	if allowTeacher {
-		students, serviceErr := TeacherService.GetStudents(token.UserId)
+	for _, strategy := range strategies {
+		authenticated, err := strategy(token, requestedUserId)
 
-		if serviceErr != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{
-				"error": "internal error",
-			})
-			ctx.Abort()
+		// If any of our strategies has an error we will instantly fail the authentication process.
+		// TODO: In a future consider silently dismissing this, logging it somewhere but giving the user a 401.
+		if err != nil {
+			controller.Halt(ctx, http.StatusInternalServerError, "internal error")
 			return
 		}
 
-		if students != nil {
-			for _, student := range *students {
-				if strconv.FormatUint(uint64(student.Id), 10) == requestedUserId {
-					ctx.Next()
-					return
-				}
-			}
+		// If at least one of the strategies considers us authenticated, then we can continue.
+		if authenticated {
+			ctx.Next()
+			return
 		}
 	}
 
@@ -67,8 +57,5 @@ func handleAuthentication(ctx *gin.Context, allowTeacher bool) {
 		}
 	}(requestedUserId, ctx.Request.URL.String())
 
-	ctx.JSON(http.StatusUnauthorized, gin.H{
-		"error": "unauthorized",
-	})
-	ctx.Abort()
+	controller.Halt(ctx, http.StatusUnauthorized, "unauthorized")
 }
