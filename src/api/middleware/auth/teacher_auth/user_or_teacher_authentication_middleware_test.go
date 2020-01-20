@@ -9,6 +9,7 @@ import (
 	"github.com/arpb2/C-3PO/src/api/model"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -16,6 +17,38 @@ import (
 )
 
 var MultiTokenHandler = jwt.CreateTokenHandler()
+
+type MockTeacherService struct{
+	mock.Mock
+}
+
+func (m MockTeacherService) GetUser(userId uint) (user *model.User, err error) {
+	panic("implement me")
+}
+
+func (m MockTeacherService) CreateUser(authenticatedUser model.AuthenticatedUser) (user *model.User, err error) {
+	panic("implement me")
+}
+
+func (m MockTeacherService) UpdateUser(authenticatedUser model.AuthenticatedUser) (user *model.User, err error) {
+	panic("implement me")
+}
+
+func (m MockTeacherService) DeleteUser(userId uint) error {
+	panic("implement me")
+}
+
+func (m MockTeacherService) GetStudents(userId uint) (students *[]model.User, err error) {
+	args := m.Called(userId)
+
+	firstArg := args.Get(0)
+	if firstArg != nil {
+		students = firstArg.(*[]model.User)
+	}
+
+	err = args.Error(1)
+	return
+}
 
 func performRequest(r http.Handler, method, path, body string, headers map[string][]string) *httptest.ResponseRecorder {
 	req, _ := http.NewRequest(method, path, strings.NewReader(body))
@@ -67,12 +100,15 @@ func Test_Multi_HandlingOfAuthentication_BadHeader(t *testing.T) {
 }
 
 func Test_Multi_HandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
+	service := new(MockTeacherService)
+	service.On("GetStudents", uint(1000)).Return(nil, nil).Once()
+
 	e := c3po.New()
 	e.Register(controller.Controller{
 		Method:        "GET",
 		Path:          "/test/:user_id",
 		Middleware:    []gin.HandlerFunc{
-			teacher_auth.CreateMiddleware(MultiTokenHandler, MockTeacherService{}),
+			teacher_auth.CreateMiddleware(MultiTokenHandler, service),
 		},
 		Body:          func(ctx *gin.Context) {
 			panic("Shouldn't reach here!")
@@ -86,6 +122,8 @@ func Test_Multi_HandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
 
 	assert.Equal(t, http.StatusUnauthorized, recorder.Code)
 	assert.Equal(t, "{\"error\":\"unauthorized\"}\n", recorder.Body.String())
+	service.AssertExpectations(t)
+
 }
 
 func Test_Multi_HandlingOfAuthentication_Authorized_SameUser(t *testing.T) {
@@ -110,45 +148,23 @@ func Test_Multi_HandlingOfAuthentication_Authorized_SameUser(t *testing.T) {
 	assert.Equal(t, "Returned success", recorder.Body.String())
 }
 
-type MockTeacherService struct{}
-
-func (m MockTeacherService) GetUser(userId uint) (user *model.User, err error) {
-	panic("implement me")
-}
-
-func (m MockTeacherService) CreateUser(authenticatedUser model.AuthenticatedUser) (user *model.User, err error) {
-	panic("implement me")
-}
-
-func (m MockTeacherService) UpdateUser(authenticatedUser model.AuthenticatedUser) (user *model.User, err error) {
-	panic("implement me")
-}
-
-func (m MockTeacherService) DeleteUser(userId uint) error {
-	panic("implement me")
-}
-
-func (m MockTeacherService) GetStudents(userId uint) (students *[]model.User, err error) {
-	if userId == 1001 {
-		students = &[]model.User{
-			{
-				Id: 1000,
-			},
-		}
-	} else {
-		students = nil
-	}
-	err = nil
-	return
-}
-
 func Test_Multi_HandlingOfAuthentication_Authorized_Student(t *testing.T) {
+	service := new(MockTeacherService)
+	service.On("GetStudents", uint(1001)).Return(&[]model.User{
+		{
+			Id:      999,
+		},
+		{
+			Id:      1000,
+		},
+	}, nil).Once()
+
 	e := c3po.New()
 	e.Register(controller.Controller{
 		Method:        "GET",
 		Path:          "/test/:user_id",
 		Middleware:    []gin.HandlerFunc{
-			teacher_auth.CreateMiddleware(MultiTokenHandler, MockTeacherService{}),
+			teacher_auth.CreateMiddleware(MultiTokenHandler, service),
 		},
 		Body:          func(ctx *gin.Context) {
 			ctx.String(http.StatusOK, "Returned success")
@@ -162,16 +178,30 @@ func Test_Multi_HandlingOfAuthentication_Authorized_Student(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, recorder.Code)
 	assert.Equal(t, "Returned success", recorder.Body.String())
+	service.AssertExpectations(t)
 }
 
 
 func Test_Multi_HandlingOfAuthentication_Unauthorized_Student(t *testing.T) {
+	service := new(MockTeacherService)
+	service.On("GetStudents", uint(1002)).Return(&[]model.User{
+		{
+			Id: 1,
+		},
+		{
+			Id: 2,
+		},
+		{
+			Id: 3,
+		},
+	}, nil).Once()
+
 	e := c3po.New()
 	e.Register(controller.Controller{
 		Method:        "GET",
 		Path:          "/test/:user_id",
 		Middleware:    []gin.HandlerFunc{
-			teacher_auth.CreateMiddleware(MultiTokenHandler, MockTeacherService{}),
+			teacher_auth.CreateMiddleware(MultiTokenHandler, service),
 		},
 		Body:          func(ctx *gin.Context) {
 			ctx.String(http.StatusOK, "Returned success")
@@ -185,39 +215,19 @@ func Test_Multi_HandlingOfAuthentication_Unauthorized_Student(t *testing.T) {
 
 	assert.Equal(t, http.StatusUnauthorized, recorder.Code)
 	assert.Equal(t, "{\"error\":\"unauthorized\"}\n", recorder.Body.String())
-}
-
-type FailingMockTeacherService struct{}
-
-func (f FailingMockTeacherService) GetUser(userId uint) (user *model.User, err error) {
-	panic("implement me")
-}
-
-func (f FailingMockTeacherService) CreateUser(authenticatedUser model.AuthenticatedUser) (user *model.User, err error) {
-	panic("implement me")
-}
-
-func (f FailingMockTeacherService) UpdateUser(authenticatedUser model.AuthenticatedUser) (user *model.User, err error) {
-	panic("implement me")
-}
-
-func (f FailingMockTeacherService) DeleteUser(userId uint) error {
-	panic("implement me")
-}
-
-func (f FailingMockTeacherService) GetStudents(userId uint) (students *[]model.User, err error) {
-	students = nil
-	err = errors.New("woops this fails")
-	return
+	service.AssertExpectations(t)
 }
 
 func Test_Multi_HandlingOfAuthentication_Service_Error(t *testing.T) {
+	service := new(MockTeacherService)
+	service.On("GetStudents", uint(1001)).Return(nil, errors.New("whoops this fails")).Once()
+
 	e := c3po.New()
 	e.Register(controller.Controller{
 		Method:        "GET",
 		Path:          "/test/:user_id",
 		Middleware:    []gin.HandlerFunc{
-			teacher_auth.CreateMiddleware(MultiTokenHandler, FailingMockTeacherService{}),
+			teacher_auth.CreateMiddleware(MultiTokenHandler, service),
 		},
 		Body:          func(ctx *gin.Context) {
 			ctx.String(http.StatusOK, "Returned success")
@@ -231,4 +241,5 @@ func Test_Multi_HandlingOfAuthentication_Service_Error(t *testing.T) {
 
 	assert.Equal(t, http.StatusInternalServerError, recorder.Code)
 	assert.Equal(t, "{\"error\":\"internal error\"}\n", recorder.Body.String())
+	service.AssertExpectations(t)
 }
