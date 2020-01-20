@@ -51,6 +51,39 @@ func TestCodeGetControllerBody_400OnEmptyUserId(t *testing.T) {
 	reader.AssertExpectations(t)
 }
 
+func TestCodeGetControllerBody_400OnMalformedUserId(t *testing.T) {
+	reader := new(http_wrapper.TestReader)
+	reader.On("Param", "user_id").Return("not a number").Once()
+
+	c, w := gin_wrapper.CreateTestContext()
+	c.Reader = reader
+
+	createGetController().Body(c)
+	actual := bytes.TrimSpace([]byte(w.Body.String()))
+	expected := golden.Get(t, actual, "bad_request.malformed.user_id.golden.json")
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Equal(t, expected, actual)
+	reader.AssertExpectations(t)
+}
+
+func TestCodeGetControllerBody_400OnMalformedCodeId(t *testing.T) {
+	reader := new(http_wrapper.TestReader)
+	reader.On("Param", "user_id").Return("1000").Once()
+	reader.On("Param", "code_id").Return("not a number").Once()
+
+	c, w := gin_wrapper.CreateTestContext()
+	c.Reader = reader
+
+	createGetController().Body(c)
+	actual := bytes.TrimSpace([]byte(w.Body.String()))
+	expected := golden.Get(t, actual, "bad_request.malformed.code_id.golden.json")
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Equal(t, expected, actual)
+	reader.AssertExpectations(t)
+}
+
 func TestCodeGetControllerBody_400OnEmptyCodeId(t *testing.T) {
 	reader := new(http_wrapper.TestReader)
 	reader.On("Param", "user_id").Return("1000").Once()
@@ -70,7 +103,7 @@ func TestCodeGetControllerBody_400OnEmptyCodeId(t *testing.T) {
 
 func TestCodeGetControllerBody_500OnServiceReadError(t *testing.T) {
 	body := code.CreateGetBody(&SharedInMemoryCodeService{
-		codeId: "1000",
+		codeId: uint(1000),
 		code:   nil,
 		err:    errors.New("unexpected error"),
 	})
@@ -94,7 +127,7 @@ func TestCodeGetControllerBody_500OnServiceReadError(t *testing.T) {
 
 func TestCodeGetControllerBody_400OnNoCodeStoredInService(t *testing.T) {
 	body := code.CreateGetBody(&SharedInMemoryCodeService{
-		codeId: "1000",
+		codeId: uint(1000),
 		code:   nil,
 		err:    nil,
 	})
@@ -109,9 +142,9 @@ func TestCodeGetControllerBody_400OnNoCodeStoredInService(t *testing.T) {
 	body(c)
 
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
-	expected := golden.Get(t, actual, "bad_request.missing_code.read.service.golden.json")
+	expected := golden.Get(t, actual, "not_found.missing_code.read.service.golden.json")
 
-	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Equal(t, http.StatusNotFound, w.Code)
 	assert.Equal(t, expected, actual)
 	reader.AssertExpectations(t)
 }
@@ -129,7 +162,7 @@ func main() {
 }
 			`
 	body := code.CreateGetBody(&SharedInMemoryCodeService{
-		codeId: "1000",
+		codeId: uint(1000),
 		code:   &expectedCode,
 		err:    nil,
 	})
@@ -154,7 +187,7 @@ func main() {
 func TestCodeGetControllerBody_200OnEmptyCodeStoredOnService(t *testing.T) {
 	expectedCode := ""
 	body := code.CreateGetBody(&SharedInMemoryCodeService{
-		codeId: "1000",
+		codeId: uint(1000),
 		code:   &expectedCode,
 		err:    nil,
 	})

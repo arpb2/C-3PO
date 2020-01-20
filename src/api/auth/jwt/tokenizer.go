@@ -44,7 +44,7 @@ func (t TokenHandler) Create(authToken auth.Token) (*string, *auth.TokenError) {
 
 	if err != nil {
 		return nil, &auth.TokenError{
-			Error:  err,
+			Error:  errors.New("internal error"),
 			Status: http.StatusInternalServerError,
 		}
 	}

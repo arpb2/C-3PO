@@ -9,6 +9,7 @@ import (
 	"github.com/arpb2/C-3PO/src/api/service/code_service"
 	"github.com/arpb2/C-3PO/src/api/service/teacher_service"
 	"net/http"
+	"strconv"
 )
 
 func Binder(handler engine.ControllerRegistrable) {
@@ -20,26 +21,40 @@ func Binder(handler engine.ControllerRegistrable) {
 	handler.Register(CreatePutController(authMiddleware, codeService))
 }
 
-func FetchUserId(ctx *http_wrapper.Context) (string, bool) {
+func FetchUserId(ctx *http_wrapper.Context) (uint, bool) {
 	userId := ctx.Param("user_id")
 
 	if userId == "" {
 		controller.Halt(ctx, http.StatusBadRequest, "'user_id' empty")
-		return userId, true
+		return 0, true
 	}
 
-	return userId, false
+	userIdUint, err := strconv.ParseUint(userId, 10, 64)
+
+	if err != nil {
+		controller.Halt(ctx, http.StatusBadRequest, "'user_id' malformed. Expecting a positive number.")
+		return 0, true
+	}
+
+	return uint(userIdUint), false
 }
 
-func FetchCodeId(ctx *http_wrapper.Context) (string, bool) {
+func FetchCodeId(ctx *http_wrapper.Context) (uint, bool) {
 	codeId := ctx.Param("code_id")
 
 	if codeId == "" {
 		controller.Halt(ctx, http.StatusBadRequest, "'code_id' empty")
-		return codeId, true
+		return 0, true
 	}
 
-	return codeId, false
+	codeIdUint, err := strconv.ParseUint(codeId, 10, 64)
+
+	if err != nil {
+		controller.Halt(ctx, http.StatusBadRequest, "'code_id' malformed. Expecting a positive number.")
+		return 0, true
+	}
+
+	return uint(codeIdUint), false
 }
 
 func FetchCode(ctx *http_wrapper.Context) (*string, bool) {

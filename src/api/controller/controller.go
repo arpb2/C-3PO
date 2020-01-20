@@ -18,7 +18,7 @@ type Controller struct {
 func Halt(ctx *http_wrapper.Context, code int, errMessage string) {
 	if code >= 200 && code < 300 {
 		fmt.Printf(
-			"Request from %s was requested to be halted with code '%d' and message '%s' when its a successful repsonse",
+			"Request from %s was requested to be halted with code '%d' and message '%s' when its a successful response",
 			ctx.Url(),
 			code,
 			errMessage,

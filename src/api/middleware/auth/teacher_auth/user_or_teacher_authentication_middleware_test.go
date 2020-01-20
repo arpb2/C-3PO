@@ -26,11 +26,11 @@ func (m MockTeacherService) GetUser(userId uint) (user *model.User, err error) {
 	panic("implement me")
 }
 
-func (m MockTeacherService) CreateUser(authenticatedUser model.AuthenticatedUser) (user *model.User, err error) {
+func (m MockTeacherService) CreateUser(authenticatedUser *model.AuthenticatedUser) (user *model.User, err error) {
 	panic("implement me")
 }
 
-func (m MockTeacherService) UpdateUser(authenticatedUser model.AuthenticatedUser) (user *model.User, err error) {
+func (m MockTeacherService) UpdateUser(authenticatedUser *model.AuthenticatedUser) (user *model.User, err error) {
 	panic("implement me")
 }
 

@@ -5,6 +5,7 @@ import (
 	"github.com/arpb2/C-3PO/src/api/controller"
 	"github.com/arpb2/C-3PO/src/api/controller/user"
 	"github.com/arpb2/C-3PO/src/api/middleware/auth/single_auth"
+	"github.com/arpb2/C-3PO/src/api/service/user_service"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -14,6 +15,7 @@ func createDeleteController() controller.Controller {
 		single_auth.CreateMiddleware(
 			jwt.CreateTokenHandler(),
 		),
+		user_service.GetService(),
 	)
 }
 
