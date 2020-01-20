@@ -3,94 +3,96 @@ package code_test
 import (
 	"bytes"
 	"errors"
+	"github.com/arpb2/C-3PO/src/api/auth/jwt"
+	"github.com/arpb2/C-3PO/src/api/controller"
 	"github.com/arpb2/C-3PO/src/api/controller/code"
 	"github.com/arpb2/C-3PO/src/api/golden"
-	"github.com/gin-gonic/gin"
+	"github.com/arpb2/C-3PO/src/api/http_wrapper"
+	"github.com/arpb2/C-3PO/src/api/http_wrapper/gin_wrapper"
+	"github.com/arpb2/C-3PO/src/api/middleware/auth/teacher_auth"
+	"github.com/arpb2/C-3PO/src/api/service/code_service"
+	"github.com/arpb2/C-3PO/src/api/service/teacher_service"
 	"github.com/stretchr/testify/assert"
 	"net/http"
-	"net/http/httptest"
-	"strings"
 	"testing"
 )
 
+func createPostController() controller.Controller {
+	return code.CreatePostController(
+		teacher_auth.CreateMiddleware(
+			jwt.CreateTokenHandler(),
+			teacher_service.GetService(),
+		),
+		code_service.GetService(),
+	)
+}
+
 func TestCodePostControllerMethodIsPOST(t *testing.T) {
-	assert.Equal(t, "POST", code.CreatePostController().Method)
+	assert.Equal(t, "POST", createPostController().Method)
 }
 
 func TestCodePostControllerPathIsAsExpected(t *testing.T) {
-	assert.Equal(t, "/users/:user_id/codes", code.CreatePostController().Path)
+	assert.Equal(t, "/users/:user_id/codes", createPostController().Path)
 }
 
 func TestCodePostControllerBody_400OnEmptyUserId(t *testing.T) {
-	gin.SetMode(gin.TestMode)
+	reader := new(http_wrapper.TestReader)
+	reader.On("Param", "user_id").Return("").Once()
 
-	w := httptest.NewRecorder()
-	c, _ := gin.CreateTestContext(w)
-	c.Params = append(c.Params, gin.Param{
-		Key:   "user_id",
-		Value: "",
-	})
+	c, w := gin_wrapper.CreateTestContext()
+	c.Reader = reader
 
-	code.CreatePostController().Body(c)
+	createPostController().Body(c)
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "bad_request.empty.user_id.golden.json")
 
-	assert.Equal(t, http.StatusBadRequest, c.Writer.Status())
+	assert.Equal(t, http.StatusBadRequest, w.Code)
 	assert.Equal(t, expected, actual)
+	reader.AssertExpectations(t)
 }
 
 func TestCodePostControllerBody_400OnNoCode(t *testing.T) {
-	gin.SetMode(gin.TestMode)
+	reader := new(http_wrapper.TestReader)
+	reader.On("Param", "user_id").Return("1000").Once()
+	reader.On("GetPostForm", "code").Return("", false).Once()
 
-	w := httptest.NewRecorder()
-	c, _ := gin.CreateTestContext(w)
-	c.Params = append(c.Params, gin.Param{
-		Key:   "user_id",
-		Value: "1000",
-	})
-	c.Request, _ = http.NewRequest("GET", "/test", strings.NewReader(""))
-	c.Request.PostForm = map[string][]string{}
-	_ = c.Request.ParseForm()
+	c, w := gin_wrapper.CreateTestContext()
+	c.Reader = reader
 
-	code.CreatePostController().Body(c)
+	createPostController().Body(c)
+
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "bad_request.empty.code.golden.json")
 
-	assert.Equal(t, http.StatusBadRequest, c.Writer.Status())
+	assert.Equal(t, http.StatusBadRequest, w.Code)
 	assert.Equal(t, expected, actual)
+	reader.AssertExpectations(t)
 }
 
 func TestCodePostControllerBody_500OnServiceWriteError(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-
 	body := code.CreatePostBody(&SharedInMemoryCodeService{
 		codeId: "1000",
 		code:   nil,
 		err:    errors.New("unexpected error"),
 	})
-	w := httptest.NewRecorder()
-	c, _ := gin.CreateTestContext(w)
-	c.Params = append(c.Params, gin.Param{
-		Key:   "user_id",
-		Value: "1000",
-	})
-	c.Request, _ = http.NewRequest("GET", "/test", strings.NewReader(""))
-	c.Request.PostForm = map[string][]string{}
-	c.Request.PostForm.Set("code", "sending some code")
-	_ = c.Request.ParseForm()
+
+	reader := new(http_wrapper.TestReader)
+	reader.On("Param", "user_id").Return("1000").Once()
+	reader.On("GetPostForm", "code").Return("sending some code", true).Once()
+
+	c, w := gin_wrapper.CreateTestContext()
+	c.Reader = reader
 
 	body(c)
 
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "internal_server_error.error_write.service.golden.json")
 
-	assert.Equal(t, http.StatusInternalServerError, c.Writer.Status())
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
 	assert.Equal(t, expected, actual)
 }
 
 func TestCodePostControllerBody_200OnCodeStoredOnService(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-
 	expectedCode := `
 package main
 
@@ -107,51 +109,43 @@ func main() {
 		code:   nil,
 		err:    nil,
 	})
-	w := httptest.NewRecorder()
-	c, _ := gin.CreateTestContext(w)
-	c.Params = append(c.Params, gin.Param{
-		Key:   "user_id",
-		Value: "1000",
-	})
-	c.Request, _ = http.NewRequest("GET", "/test", strings.NewReader(""))
-	c.Request.PostForm = map[string][]string{}
-	c.Request.PostForm.Set("code", expectedCode)
-	_ = c.Request.ParseForm()
+
+	reader := new(http_wrapper.TestReader)
+	reader.On("Param", "user_id").Return("1000").Once()
+	reader.On("GetPostForm", "code").Return(expectedCode, true).Once()
+
+	c, w := gin_wrapper.CreateTestContext()
+	c.Reader = reader
 
 	body(c)
 
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "ok.write_code.golden.json")
 
-	assert.Equal(t, http.StatusOK, c.Writer.Status())
+	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Equal(t, expected, actual)
 }
 
 func TestCodePostControllerBody_200OnEmptyCodeStoredOnService(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-
 	expectedCode := ""
 	body := code.CreatePostBody(&SharedInMemoryCodeService{
 		codeId: "1000",
 		code:   nil,
 		err:    nil,
 	})
-	w := httptest.NewRecorder()
-	c, _ := gin.CreateTestContext(w)
-	c.Params = append(c.Params, gin.Param{
-		Key:   "user_id",
-		Value: "1000",
-	})
-	c.Request, _ = http.NewRequest("GET", "/test", strings.NewReader(""))
-	c.Request.PostForm = map[string][]string{}
-	c.Request.PostForm.Set("code", expectedCode)
-	_ = c.Request.ParseForm()
+
+	reader := new(http_wrapper.TestReader)
+	reader.On("Param", "user_id").Return("1000").Once()
+	reader.On("GetPostForm", "code").Return(expectedCode, true).Once()
+
+	c, w := gin_wrapper.CreateTestContext()
+	c.Reader = reader
 
 	body(c)
 
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "ok.write_empty_code.golden.json")
 
-	assert.Equal(t, http.StatusOK, c.Writer.Status())
+	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Equal(t, expected, actual)
 }

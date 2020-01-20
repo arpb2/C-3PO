@@ -1,4 +1,4 @@
-package c3po
+package gin_engine
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/arpb2/C-3PO/src/api/controller"
 	"github.com/arpb2/C-3PO/src/api/engine"
+	"github.com/arpb2/C-3PO/src/api/http_wrapper/gin_wrapper"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
@@ -78,9 +79,9 @@ func (server serverEngine) Shutdown() error {
 func (server serverEngine) Register(controller controller.Controller) {
 	var handlers []gin.HandlerFunc
 	if controller.Middleware != nil {
-		handlers = append(handlers, controller.Middleware...)
+		handlers = append(handlers, gin_wrapper.CreateHandlers(controller.Middleware...)...)
 	}
-	handlers = append(handlers, controller.Body)
+	handlers = append(handlers, gin_wrapper.CreateHandler(controller.Body))
 
 	server.engine.Handle(
 		controller.Method,

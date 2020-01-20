@@ -3,7 +3,7 @@ package integration_test
 import (
 	"bytes"
 	"fmt"
-	"github.com/arpb2/C-3PO/src/api/engine/c3po"
+	"github.com/arpb2/C-3PO/src/api/engine/gin_engine"
 	"github.com/arpb2/C-3PO/src/api/golden"
 	"github.com/arpb2/C-3PO/src/api/server"
 	"github.com/arpb2/C-3PO/src/api/service/code_service"
@@ -34,7 +34,7 @@ func dial(t *testing.T) {
 
 func Test_Get(t *testing.T) {
 	// Ignite server
-	engine := c3po.New()
+	engine := gin_engine.New()
 
 	defer engine.Shutdown()
 	go server.StartApplication(engine)
@@ -74,7 +74,7 @@ func Test_Get(t *testing.T) {
 
 func Test_Post(t *testing.T) {
 	// Ignite server
-	engine := c3po.New()
+	engine := gin_engine.New()
 
 	defer engine.Shutdown()
 	go server.StartApplication(engine)
@@ -111,7 +111,7 @@ func Test_Post(t *testing.T) {
 
 func Test_Put(t *testing.T) {
 	// Ignite server
-	engine := c3po.New()
+	engine := gin_engine.New()
 
 	defer engine.Shutdown()
 	go server.StartApplication(engine)

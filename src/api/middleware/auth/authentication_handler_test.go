@@ -5,9 +5,9 @@ import (
 	"github.com/arpb2/C-3PO/src/api/auth"
 	"github.com/arpb2/C-3PO/src/api/auth/jwt"
 	"github.com/arpb2/C-3PO/src/api/controller"
-	"github.com/arpb2/C-3PO/src/api/engine/c3po"
+	"github.com/arpb2/C-3PO/src/api/engine/gin_engine"
+	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	middleware_auth "github.com/arpb2/C-3PO/src/api/middleware/auth"
-	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"net/http"
@@ -34,16 +34,16 @@ func performRequest(r http.Handler, method, path, body string, headers map[strin
 }
 
 func Test_HandlingOfAuthentication_NoHeader(t *testing.T) {
-	e := c3po.New()
+	e := gin_engine.New()
 	e.Register(controller.Controller{
 		Method:        "GET",
 		Path:          "/test",
-		Middleware:    []gin.HandlerFunc{
-			func(context *gin.Context) {
+		Middleware:    []http_wrapper.Handler{
+			func(context *http_wrapper.Context) {
 				middleware_auth.HandleAuthentication(context, jwt.CreateTokenHandler())
 			},
 		},
-		Body:          func(ctx *gin.Context) {
+		Body:          func(ctx *http_wrapper.Context) {
 			panic("Shouldn't reach here!")
 		},
 	})
@@ -55,16 +55,16 @@ func Test_HandlingOfAuthentication_NoHeader(t *testing.T) {
 }
 
 func Test_HandlingOfAuthentication_BadHeader(t *testing.T) {
-	e := c3po.New()
+	e := gin_engine.New()
 	e.Register(controller.Controller{
 		Method:        "GET",
 		Path:          "/test",
-		Middleware:    []gin.HandlerFunc{
-			func(context *gin.Context) {
+		Middleware:    []http_wrapper.Handler{
+			func(context *http_wrapper.Context) {
 				middleware_auth.HandleAuthentication(context, jwt.CreateTokenHandler())
 			},
 		},
-		Body:          func(ctx *gin.Context) {
+		Body:          func(ctx *http_wrapper.Context) {
 			panic("Shouldn't reach here!")
 		},
 	})
@@ -78,16 +78,16 @@ func Test_HandlingOfAuthentication_BadHeader(t *testing.T) {
 }
 
 func Test_HandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
-	e := c3po.New()
+	e := gin_engine.New()
 	e.Register(controller.Controller{
 		Method:        "GET",
 		Path:          "/test/:user_id",
-		Middleware:    []gin.HandlerFunc{
-			func(context *gin.Context) {
+		Middleware:    []http_wrapper.Handler{
+			func(context *http_wrapper.Context) {
 				middleware_auth.HandleAuthentication(context, jwt.CreateTokenHandler())
 			},
 		},
-		Body:          func(ctx *gin.Context) {
+		Body:          func(ctx *http_wrapper.Context) {
 			panic("Shouldn't reach here!")
 		},
 	})
@@ -102,16 +102,16 @@ func Test_HandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
 }
 
 func Test_HandlingOfAuthentication_Authorized_SameUser(t *testing.T) {
-	e := c3po.New()
+	e := gin_engine.New()
 	e.Register(controller.Controller{
 		Method:        "GET",
 		Path:          "/test/:user_id",
-		Middleware:    []gin.HandlerFunc{
-			func(context *gin.Context) {
+		Middleware:    []http_wrapper.Handler{
+			func(context *http_wrapper.Context) {
 				middleware_auth.HandleAuthentication(context, jwt.CreateTokenHandler())
 			},
 		},
-		Body:          func(ctx *gin.Context) {
+		Body:          func(ctx *http_wrapper.Context) {
 			ctx.String(http.StatusOK, "Returned success")
 		},
 	})
@@ -131,16 +131,16 @@ func TestStrategy_Error_Halts(t *testing.T) {
 		return token.UserId == uint(1000)
 	}), "1001").Return(false, errors.New("whoops this fails")).Once()
 
-	e := c3po.New()
+	e := gin_engine.New()
 	e.Register(controller.Controller{
 		Method:        "GET",
 		Path:          "/test/:user_id",
-		Middleware:    []gin.HandlerFunc{
-			func(context *gin.Context) {
+		Middleware:    []http_wrapper.Handler{
+			func(context *http_wrapper.Context) {
 				middleware_auth.HandleAuthentication(context, jwt.CreateTokenHandler(), strategy)
 			},
 		},
-		Body:          func(ctx *gin.Context) {
+		Body:          func(ctx *http_wrapper.Context) {
 			ctx.String(http.StatusOK, "Returned success")
 		},
 	})
@@ -161,16 +161,16 @@ func TestStrategy_Unauthorized_Halts(t *testing.T) {
 		return token.UserId == uint(1000)
 	}), "1001").Return(false, nil).Once()
 
-	e := c3po.New()
+	e := gin_engine.New()
 	e.Register(controller.Controller{
 		Method:        "GET",
 		Path:          "/test/:user_id",
-		Middleware:    []gin.HandlerFunc{
-			func(context *gin.Context) {
+		Middleware:    []http_wrapper.Handler{
+			func(context *http_wrapper.Context) {
 				middleware_auth.HandleAuthentication(context, jwt.CreateTokenHandler(), strategy)
 			},
 		},
-		Body:          func(ctx *gin.Context) {
+		Body:          func(ctx *http_wrapper.Context) {
 			ctx.String(http.StatusOK, "Returned success")
 		},
 	})
@@ -191,16 +191,16 @@ func TestStrategy_Authorized_Continues(t *testing.T) {
 		return token.UserId == uint(1000)
 	}), "1001").Return(true, nil).Once()
 
-	e := c3po.New()
+	e := gin_engine.New()
 	e.Register(controller.Controller{
 		Method:        "GET",
 		Path:          "/test/:user_id",
-		Middleware:    []gin.HandlerFunc{
-			func(context *gin.Context) {
+		Middleware:    []http_wrapper.Handler{
+			func(context *http_wrapper.Context) {
 				middleware_auth.HandleAuthentication(context, jwt.CreateTokenHandler(), strategy)
 			},
 		},
-		Body:          func(ctx *gin.Context) {
+		Body:          func(ctx *http_wrapper.Context) {
 			ctx.String(http.StatusOK, "Returned success")
 		},
 	})
