@@ -9,11 +9,20 @@ import (
 	middleware_auth "github.com/arpb2/C-3PO/src/api/middleware/auth"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 )
+
+type MockAuthenticationStrategy struct{
+	mock.Mock
+}
+func (s MockAuthenticationStrategy) Authenticate(token *auth.Token, userId string) (authorized bool, err error) {
+	args := s.Called(token, userId)
+	return args.Bool(0), args.Error(1)
+}
 
 func performRequest(r http.Handler, method, path, body string, headers map[string][]string) *httptest.ResponseRecorder {
 	req, _ := http.NewRequest(method, path, strings.NewReader(body))
@@ -116,19 +125,19 @@ func Test_HandlingOfAuthentication_Authorized_SameUser(t *testing.T) {
 	assert.Equal(t, "Returned success", recorder.Body.String())
 }
 
-type FailingAuthenticationStrategy struct{}
-func (s FailingAuthenticationStrategy) Authenticate(token *auth.Token, userId string) (authorized bool, err error) {
-	return false, errors.New("woops this fails")
-}
-
 func TestStrategy_Error_Halts(t *testing.T) {
+	strategy := new(MockAuthenticationStrategy)
+	strategy.On("Authenticate", mock.MatchedBy(func(token *auth.Token) bool {
+		return token.UserId == uint(1000)
+	}), "1001").Return(false, errors.New("whoops this fails")).Once()
+
 	e := c3po.New()
 	e.Register(controller.Controller{
 		Method:        "GET",
 		Path:          "/test/:user_id",
 		Middleware:    []gin.HandlerFunc{
 			func(context *gin.Context) {
-				middleware_auth.HandleAuthentication(context, jwt.CreateTokenHandler(), FailingAuthenticationStrategy{})
+				middleware_auth.HandleAuthentication(context, jwt.CreateTokenHandler(), strategy)
 			},
 		},
 		Body:          func(ctx *gin.Context) {
@@ -143,21 +152,22 @@ func TestStrategy_Error_Halts(t *testing.T) {
 
 	assert.Equal(t, http.StatusInternalServerError, recorder.Code)
 	assert.Equal(t, "{\"error\":\"internal error\"}\n", recorder.Body.String())
-}
-
-type UnauthorizedAuthenticationStrategy struct{}
-func (s UnauthorizedAuthenticationStrategy) Authenticate(token *auth.Token, userId string) (authorized bool, err error) {
-	return false, nil
+	strategy.AssertExpectations(t)
 }
 
 func TestStrategy_Unauthorized_Halts(t *testing.T) {
+	strategy := new(MockAuthenticationStrategy)
+	strategy.On("Authenticate", mock.MatchedBy(func(token *auth.Token) bool {
+		return token.UserId == uint(1000)
+	}), "1001").Return(false, nil).Once()
+
 	e := c3po.New()
 	e.Register(controller.Controller{
 		Method:        "GET",
 		Path:          "/test/:user_id",
 		Middleware:    []gin.HandlerFunc{
 			func(context *gin.Context) {
-				middleware_auth.HandleAuthentication(context, jwt.CreateTokenHandler(), UnauthorizedAuthenticationStrategy{})
+				middleware_auth.HandleAuthentication(context, jwt.CreateTokenHandler(), strategy)
 			},
 		},
 		Body:          func(ctx *gin.Context) {
@@ -172,21 +182,22 @@ func TestStrategy_Unauthorized_Halts(t *testing.T) {
 
 	assert.Equal(t, http.StatusUnauthorized, recorder.Code)
 	assert.Equal(t, "{\"error\":\"unauthorized\"}\n", recorder.Body.String())
-}
-
-type AuthorizedAuthenticationStrategy struct{}
-func (s AuthorizedAuthenticationStrategy) Authenticate(token *auth.Token, userId string) (authorized bool, err error) {
-	return true, nil
+	strategy.AssertExpectations(t)
 }
 
 func TestStrategy_Authorized_Continues(t *testing.T) {
+	strategy := new(MockAuthenticationStrategy)
+	strategy.On("Authenticate", mock.MatchedBy(func(token *auth.Token) bool {
+		return token.UserId == uint(1000)
+	}), "1001").Return(true, nil).Once()
+
 	e := c3po.New()
 	e.Register(controller.Controller{
 		Method:        "GET",
 		Path:          "/test/:user_id",
 		Middleware:    []gin.HandlerFunc{
 			func(context *gin.Context) {
-				middleware_auth.HandleAuthentication(context, jwt.CreateTokenHandler(), AuthorizedAuthenticationStrategy{})
+				middleware_auth.HandleAuthentication(context, jwt.CreateTokenHandler(), strategy)
 			},
 		},
 		Body:          func(ctx *gin.Context) {
@@ -201,4 +212,5 @@ func TestStrategy_Authorized_Continues(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, recorder.Code)
 	assert.Equal(t, "Returned success", recorder.Body.String())
+	strategy.AssertExpectations(t)
 }
