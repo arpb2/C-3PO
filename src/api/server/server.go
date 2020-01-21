@@ -11,6 +11,7 @@ import (
 	"github.com/arpb2/C-3PO/src/api/middleware/auth/single_auth"
 	"github.com/arpb2/C-3PO/src/api/middleware/auth/teacher_auth"
 	"github.com/arpb2/C-3PO/src/api/service/code_service"
+	"github.com/arpb2/C-3PO/src/api/service/credential_service"
 	"github.com/arpb2/C-3PO/src/api/service/teacher_service"
 	"github.com/arpb2/C-3PO/src/api/service/user_service"
 )
@@ -31,6 +32,7 @@ func CreateBinders() []engine.ControllerBinder {
 	userService := user_service.CreateService()
 	teacherService := teacher_service.CreateService(userService)
 	codeService := code_service.CreateService()
+	credentialService := credential_service.CreateService()
 
 	singleAuthMiddleware := single_auth.CreateMiddleware(tokenHandler)
 	teacherAuthMiddleware := teacher_auth.CreateMiddleware(tokenHandler, teacherService)
@@ -39,7 +41,7 @@ func CreateBinders() []engine.ControllerBinder {
 		health.CreateBinder(),
 		code.CreateBinder(teacherAuthMiddleware, codeService),
 		user.CreateBinder(singleAuthMiddleware, userService),
-		session.CreateBinder(),
+		session.CreateBinder(tokenHandler, credentialService),
 	}
 }
 
