@@ -126,3 +126,12 @@ func TestUserDeleteRegistered(test *testing.T) {
 
 	assert.NotEqual(test, 404, w.Code)
 }
+
+func TestSessionPostRegistered(test *testing.T) {
+	engine := gin_engine.New()
+	server.RegisterRoutes(engine, server.CreateBinders())
+
+	w := performRequest(engine, "POST", "/session", "")
+
+	assert.NotEqual(test, 404, w.Code)
+}

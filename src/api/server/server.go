@@ -5,6 +5,7 @@ import (
 	"github.com/arpb2/C-3PO/src/api/auth/jwt"
 	"github.com/arpb2/C-3PO/src/api/controller/code"
 	"github.com/arpb2/C-3PO/src/api/controller/health"
+	"github.com/arpb2/C-3PO/src/api/controller/session"
 	"github.com/arpb2/C-3PO/src/api/controller/user"
 	"github.com/arpb2/C-3PO/src/api/engine"
 	"github.com/arpb2/C-3PO/src/api/middleware/auth/single_auth"
@@ -38,6 +39,7 @@ func CreateBinders() []engine.ControllerBinder {
 		health.CreateBinder(),
 		code.CreateBinder(teacherAuthMiddleware, codeService),
 		user.CreateBinder(singleAuthMiddleware, userService),
+		session.CreateBinder(),
 	}
 }
 
