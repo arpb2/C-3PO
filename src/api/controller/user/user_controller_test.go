@@ -32,7 +32,7 @@ func (m MockUserService) CreateUser(authenticatedUser *model.AuthenticatedUser) 
 
 	firstParam := args.Get(0)
 	if firstParam != nil {
-		user = firstParam.(*model.User)
+		user = firstParam.(*model.AuthenticatedUser).User
 	}
 
 	err = args.Error(1)
