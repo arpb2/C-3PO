@@ -3,15 +3,12 @@ package teacher_service
 import (
 	"github.com/arpb2/C-3PO/src/api/model"
 	"github.com/arpb2/C-3PO/src/api/service"
-	"github.com/arpb2/C-3PO/src/api/service/user_service"
 )
 
-func GetService() service.TeacherService {
-	return globalRef
-}
-
-var globalRef = &teacherService{
-	UserService: user_service.GetService(),
+func CreateService(userService service.UserService) service.TeacherService {
+	return &teacherService{
+		UserService: userService,
+	}
 }
 
 type teacherService struct {

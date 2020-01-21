@@ -21,7 +21,7 @@ func createDeleteController() controller.Controller {
 		single_auth.CreateMiddleware(
 			jwt.CreateTokenHandler(),
 		),
-		user_service.GetService(),
+		user_service.CreateService(),
 	)
 }
 

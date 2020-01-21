@@ -5,11 +5,9 @@ import (
 	"github.com/arpb2/C-3PO/src/api/service"
 )
 
-func GetService() service.UserService {
-	return globalRef
+func CreateService() service.UserService {
+	return &userService{}
 }
-
-var globalRef = &userService{}
 
 type userService struct {}
 func (u userService) GetUser(userId uint) (user *model.User, err error) {

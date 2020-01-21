@@ -1,26 +1,12 @@
 package user
 
 import (
-	"github.com/arpb2/C-3PO/src/api/auth/jwt"
 	"github.com/arpb2/C-3PO/src/api/controller"
-	"github.com/arpb2/C-3PO/src/api/engine"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
-	"github.com/arpb2/C-3PO/src/api/middleware/auth/single_auth"
 	"github.com/arpb2/C-3PO/src/api/model"
-	"github.com/arpb2/C-3PO/src/api/service/user_service"
 	"net/http"
 	"strconv"
 )
-
-func Binder(handler engine.ControllerRegistrable) {
-	authMiddleware := single_auth.CreateMiddleware(jwt.CreateTokenHandler())
-	userService := user_service.GetService()
-
-	handler.Register(CreateGetController(authMiddleware, userService))
-	handler.Register(CreatePostController(authMiddleware, userService))
-	handler.Register(CreatePutController(authMiddleware, userService))
-	handler.Register(CreateDeleteController(authMiddleware, userService))
-}
 
 func FetchUserId(ctx *http_wrapper.Context) (uint, bool) {
 	userId := ctx.GetParameter("user_id")

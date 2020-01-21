@@ -7,13 +7,10 @@ import (
 	"net/http"
 )
 
-func CreatePostController(authMiddleware http_wrapper.Handler, userService service.UserService) controller.Controller {
+func CreatePostController(userService service.UserService) controller.Controller {
 	return controller.Controller{
 		Method: "POST",
 		Path:   "/users",
-		Middleware: []http_wrapper.Handler{
-			authMiddleware,
-		},
 		Body: CreatePostBody(userService),
 	}
 }

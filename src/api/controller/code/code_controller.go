@@ -1,25 +1,11 @@
 package code
 
 import (
-	"github.com/arpb2/C-3PO/src/api/auth/jwt"
 	"github.com/arpb2/C-3PO/src/api/controller"
-	"github.com/arpb2/C-3PO/src/api/engine"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
-	"github.com/arpb2/C-3PO/src/api/middleware/auth/teacher_auth"
-	"github.com/arpb2/C-3PO/src/api/service/code_service"
-	"github.com/arpb2/C-3PO/src/api/service/teacher_service"
 	"net/http"
 	"strconv"
 )
-
-func Binder(handler engine.ControllerRegistrable) {
-	authMiddleware := teacher_auth.CreateMiddleware(jwt.CreateTokenHandler(), teacher_service.GetService())
-	codeService := code_service.GetService()
-
-	handler.Register(CreateGetController(authMiddleware, codeService))
-	handler.Register(CreatePostController(authMiddleware, codeService))
-	handler.Register(CreatePutController(authMiddleware, codeService))
-}
 
 func FetchUserId(ctx *http_wrapper.Context) (uint, bool) {
 	userId := ctx.GetParameter("user_id")
