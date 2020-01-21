@@ -112,7 +112,7 @@ func Test_HandlingOfAuthentication_Authorized_SameUser(t *testing.T) {
 			},
 		},
 		Body:          func(ctx *http_wrapper.Context) {
-			ctx.String(http.StatusOK, "Returned success")
+			ctx.WriteString(http.StatusOK, "Returned success")
 		},
 	})
 
@@ -141,7 +141,7 @@ func TestStrategy_Error_Halts(t *testing.T) {
 			},
 		},
 		Body:          func(ctx *http_wrapper.Context) {
-			ctx.String(http.StatusOK, "Returned success")
+			ctx.WriteString(http.StatusOK, "Returned success")
 		},
 	})
 
@@ -171,7 +171,7 @@ func TestStrategy_Unauthorized_Halts(t *testing.T) {
 			},
 		},
 		Body:          func(ctx *http_wrapper.Context) {
-			ctx.String(http.StatusOK, "Returned success")
+			ctx.WriteString(http.StatusOK, "Returned success")
 		},
 	})
 
@@ -201,7 +201,7 @@ func TestStrategy_Authorized_Continues(t *testing.T) {
 			},
 		},
 		Body:          func(ctx *http_wrapper.Context) {
-			ctx.String(http.StatusOK, "Returned success")
+			ctx.WriteString(http.StatusOK, "Returned success")
 		},
 	})
 

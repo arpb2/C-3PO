@@ -2,5 +2,5 @@ package model
 
 type AuthenticatedUser struct {
 	*User
-	*Credential
+	Password string `json:"password"`
 }

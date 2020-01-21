@@ -37,7 +37,7 @@ func TestCodePostControllerPathIsAsExpected(t *testing.T) {
 
 func TestCodePostControllerBody_400OnEmptyUserId(t *testing.T) {
 	reader := new(http_wrapper.TestReader)
-	reader.On("Param", "user_id").Return("").Once()
+	reader.On("GetParameter", "user_id").Return("").Once()
 
 	c, w := gin_wrapper.CreateTestContext()
 	c.Reader = reader
@@ -53,7 +53,7 @@ func TestCodePostControllerBody_400OnEmptyUserId(t *testing.T) {
 
 func TestCodePostControllerBody_400OnMalformedUserId(t *testing.T) {
 	reader := new(http_wrapper.TestReader)
-	reader.On("Param", "user_id").Return("not a number").Once()
+	reader.On("GetParameter", "user_id").Return("not a number").Once()
 
 	c, w := gin_wrapper.CreateTestContext()
 	c.Reader = reader
@@ -69,8 +69,8 @@ func TestCodePostControllerBody_400OnMalformedUserId(t *testing.T) {
 
 func TestCodePostControllerBody_400OnNoCode(t *testing.T) {
 	reader := new(http_wrapper.TestReader)
-	reader.On("Param", "user_id").Return("1000").Once()
-	reader.On("GetPostForm", "code").Return("", false).Once()
+	reader.On("GetParameter", "user_id").Return("1000").Once()
+	reader.On("GetFormData", "code").Return("", false).Once()
 
 	c, w := gin_wrapper.CreateTestContext()
 	c.Reader = reader
@@ -93,8 +93,8 @@ func TestCodePostControllerBody_500OnServiceWriteError(t *testing.T) {
 	})
 
 	reader := new(http_wrapper.TestReader)
-	reader.On("Param", "user_id").Return("1000").Once()
-	reader.On("GetPostForm", "code").Return("sending some code", true).Once()
+	reader.On("GetParameter", "user_id").Return("1000").Once()
+	reader.On("GetFormData", "code").Return("sending some code", true).Once()
 
 	c, w := gin_wrapper.CreateTestContext()
 	c.Reader = reader
@@ -127,8 +127,8 @@ func main() {
 	})
 
 	reader := new(http_wrapper.TestReader)
-	reader.On("Param", "user_id").Return("1000").Once()
-	reader.On("GetPostForm", "code").Return(expectedCode, true).Once()
+	reader.On("GetParameter", "user_id").Return("1000").Once()
+	reader.On("GetFormData", "code").Return(expectedCode, true).Once()
 
 	c, w := gin_wrapper.CreateTestContext()
 	c.Reader = reader
@@ -151,8 +151,8 @@ func TestCodePostControllerBody_200OnEmptyCodeStoredOnService(t *testing.T) {
 	})
 
 	reader := new(http_wrapper.TestReader)
-	reader.On("Param", "user_id").Return("1000").Once()
-	reader.On("GetPostForm", "code").Return(expectedCode, true).Once()
+	reader.On("GetParameter", "user_id").Return("1000").Once()
+	reader.On("GetFormData", "code").Return(expectedCode, true).Once()
 
 	c, w := gin_wrapper.CreateTestContext()
 	c.Reader = reader

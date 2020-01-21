@@ -22,7 +22,7 @@ func Binder(handler engine.ControllerRegistrable) {
 }
 
 func FetchUserId(ctx *http_wrapper.Context) (uint, bool) {
-	userId := ctx.Param("user_id")
+	userId := ctx.GetParameter("user_id")
 
 	if userId == "" {
 		controller.Halt(ctx, http.StatusBadRequest, "'user_id' empty")
@@ -40,7 +40,7 @@ func FetchUserId(ctx *http_wrapper.Context) (uint, bool) {
 }
 
 func FetchCodeId(ctx *http_wrapper.Context) (uint, bool) {
-	codeId := ctx.Param("code_id")
+	codeId := ctx.GetParameter("code_id")
 
 	if codeId == "" {
 		controller.Halt(ctx, http.StatusBadRequest, "'code_id' empty")
@@ -58,7 +58,7 @@ func FetchCodeId(ctx *http_wrapper.Context) (uint, bool) {
 }
 
 func FetchCode(ctx *http_wrapper.Context) (*string, bool) {
-	code, exists := ctx.GetPostForm("code")
+	code, exists := ctx.GetFormData("code")
 
 	if !exists {
 		controller.Halt(ctx, http.StatusBadRequest, "'code' part not found")

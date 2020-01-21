@@ -11,7 +11,7 @@ import (
 
 func TestHalt_OnResponseSuccess_DoNothing(t *testing.T) {
 	reader := new(http_wrapper.TestReader)
-	reader.On("Url").Return("https://localhost/test").Once()
+	reader.On("GetUrl").Return("https://localhost/test").Once()
 
 	c, recorder := gin_wrapper.CreateTestContext()
 	c.Reader = reader

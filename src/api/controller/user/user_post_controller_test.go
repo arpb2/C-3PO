@@ -37,7 +37,7 @@ func TestUserPostControllerPathIsAsExpected(t *testing.T) {
 
 func TestUserPostControllerBody_400OnEmptyOrMalformedUser(t *testing.T) {
 	reader := new(http_wrapper.TestReader)
-	reader.On("ShouldBindJSON", mock.MatchedBy(func(obj interface{}) bool {
+	reader.On("ReadBody", mock.MatchedBy(func(obj interface{}) bool {
 		return true
 	})).Return(errors.New("malformed")).Once()
 
@@ -57,12 +57,12 @@ func TestUserPostControllerBody_500OnServiceCreateError(t *testing.T) {
 	service := new(MockUserService)
 	service.On("CreateUser", mock.MatchedBy(func(obj interface{}) bool {
 		return true
-	})).Return(&model.User{}, errors.New("whoops error")).Once()
+	})).Return(&model.AuthenticatedUser{}, errors.New("whoops error")).Once()
 
 	body := user.CreatePostBody(service)
 
 	reader := new(http_wrapper.TestReader)
-	reader.On("ShouldBindJSON", mock.MatchedBy(func(obj interface{}) bool {
+	reader.On("ReadBody", mock.MatchedBy(func(obj interface{}) bool {
 		return true
 	})).Return(nil).Once()
 
@@ -89,7 +89,7 @@ func TestUserPostControllerBody_500OnNoUserStoredInService(t *testing.T) {
 	body := user.CreatePostBody(service)
 
 	reader := new(http_wrapper.TestReader)
-	reader.On("ShouldBindJSON", mock.MatchedBy(func(obj interface{}) bool {
+	reader.On("ReadBody", mock.MatchedBy(func(obj interface{}) bool {
 		return true
 	})).Return(nil).Once()
 
@@ -108,11 +108,14 @@ func TestUserPostControllerBody_500OnNoUserStoredInService(t *testing.T) {
 }
 
 func TestUserPostControllerBody_200OnUserStoredOnService(t *testing.T) {
-	expectedUser := &model.User{
-		Id:      1000,
-		Email:   "test@email.com",
-		Name:    "TestName",
-		Surname: "TestSurname",
+	expectedUser := &model.AuthenticatedUser{
+		User: &model.User{
+			Id:      1000,
+			Email:   "test@email.com",
+			Name:    "TestName",
+			Surname: "TestSurname",
+		},
+		Password: "testpassword",
 	}
 	service := new(MockUserService)
 	service.On("CreateUser", mock.MatchedBy(func(obj interface{}) bool {
@@ -122,7 +125,7 @@ func TestUserPostControllerBody_200OnUserStoredOnService(t *testing.T) {
 	body := user.CreatePostBody(service)
 
 	reader := new(http_wrapper.TestReader)
-	reader.On("ShouldBindJSON", mock.MatchedBy(func(obj *model.AuthenticatedUser) bool {
+	reader.On("ReadBody", mock.MatchedBy(func(obj *model.AuthenticatedUser) bool {
 		return true
 	})).Return(nil).Once()
 

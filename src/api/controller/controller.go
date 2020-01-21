@@ -19,12 +19,12 @@ func Halt(ctx *http_wrapper.Context, code int, errMessage string) {
 	if code >= 200 && code < 300 {
 		fmt.Printf(
 			"Request from %s was requested to be halted with code '%d' and message '%s' when its a successful response",
-			ctx.Url(),
+			ctx.GetUrl(),
 			code,
 			errMessage,
 		)
 	} else {
-		ctx.AbortWithStatusJSON(code, http_wrapper.Json{
+		ctx.AbortTransactionWithStatus(code, http_wrapper.Json{
 			"error": errMessage,
 		})
 	}

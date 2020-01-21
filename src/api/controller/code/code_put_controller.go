@@ -42,7 +42,7 @@ func CreatePutBody(codeService service.CodeService) http_wrapper.Handler {
 			return
 		}
 
-		ctx.JSON(http.StatusOK, http_wrapper.Json{
+		ctx.WriteJson(http.StatusOK, http_wrapper.Json{
 			"code":    *code,
 			"user_id": userId,
 			"code_id": codeId,

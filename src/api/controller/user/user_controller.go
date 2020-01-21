@@ -23,7 +23,7 @@ func Binder(handler engine.ControllerRegistrable) {
 }
 
 func FetchUserId(ctx *http_wrapper.Context) (uint, bool) {
-	userId := ctx.Param("user_id")
+	userId := ctx.GetParameter("user_id")
 
 	if userId == "" {
 		controller.Halt(ctx, http.StatusBadRequest, "'user_id' empty")
@@ -43,7 +43,7 @@ func FetchUserId(ctx *http_wrapper.Context) (uint, bool) {
 func FetchAuthenticatedUser(ctx *http_wrapper.Context) (*model.AuthenticatedUser, bool) {
 	var authenticatedUser model.AuthenticatedUser
 
-	if err := ctx.ShouldBindJSON(&authenticatedUser); err != nil {
+	if err := ctx.ReadBody(&authenticatedUser); err != nil {
 		controller.Halt(ctx, http.StatusBadRequest, "bad 'user' body")
 		return nil, true
 	}

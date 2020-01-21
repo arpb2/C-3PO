@@ -6,19 +6,19 @@ type TestReader struct{
 	mock.Mock
 }
 
-func (m TestReader) ShouldBindJSON(obj interface{}) error {
+func (m TestReader) ReadBody(obj interface{}) error {
 	args := m.Called(obj)
 
 	return args.Error(0)
 }
 
-func (m TestReader) Url() string {
+func (m TestReader) GetUrl() string {
 	args := m.Called()
 
 	return args.String(0)
 }
 
-func (m TestReader) Param(key string) string {
+func (m TestReader) GetParameter(key string) string {
 	args := m.Called(key)
 
 	return args.String(0)
@@ -30,7 +30,7 @@ func (m TestReader) GetHeader(key string) string {
 	return args.String(0)
 }
 
-func (m TestReader) GetPostForm(key string) (string, bool) {
+func (m TestReader) GetFormData(key string) (string, bool) {
 	args := m.Called(key)
 
 	return args.String(0), args.Bool(1)
