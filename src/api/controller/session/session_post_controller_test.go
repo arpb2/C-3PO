@@ -126,13 +126,10 @@ type tokenHandler struct{
 	mock.Mock
 }
 
-func (t tokenHandler) Create(token auth.Token) (tokenStr *string, err *auth.TokenError) {
+func (t tokenHandler) Create(token *auth.Token) (tokenStr string, err *auth.TokenError) {
 	args := t.Called(token)
 
-	tokenParam := args.Get(0)
-	if tokenParam != nil {
-		tokenStr = tokenParam.(*string)
-	}
+	tokenStr = args.String(0)
 
 	errParam := args.Get(1)
 	if errParam != nil {
@@ -165,7 +162,9 @@ func TestFetchUserIdTaskImpl_FailsOnTokenFailure(t *testing.T) {
 	credentialService.On("Retrieve", "", "").Return(uint(1000), nil)
 
 	tokenHandler := new(tokenHandler)
-	tokenHandler.On("Create", auth.Token{UserId:1000}).Return(nil, &auth.TokenError{
+	tokenHandler.On("Create", mock.MatchedBy(func(tkn *auth.Token) bool {
+		return tkn.UserId == uint(1000)
+	})).Return("", &auth.TokenError{
 		Error:  errors.New("error"),
 		Status: 500,
 	})
@@ -208,10 +207,10 @@ func TestFetchUserIdTaskImpl_SuccessReturnsToken(t *testing.T) {
 	credentialService := new(credentialService)
 	credentialService.On("Retrieve", "test@email.com", "test password").Return(uint(1000), nil)
 
-	tokenStr := "test token"
-
 	tokenHandler := new(tokenHandler)
-	tokenHandler.On("Create", auth.Token{UserId:1000}).Return(&tokenStr, nil)
+	tokenHandler.On("Create", mock.MatchedBy(func(tkn *auth.Token) bool {
+		return tkn.UserId == uint(1000)
+	})).Return("test token", nil)
 
 	postController := session.CreatePostController(
 		tokenHandler,

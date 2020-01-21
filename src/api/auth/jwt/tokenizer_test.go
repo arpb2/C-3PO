@@ -40,12 +40,12 @@ func TestSecret_UsesOsEnv(t *testing.T) {
 var expectedToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEwMDB9.GVS-KC5nOCHybzzFIIH864u4KcGu-ZSd-96krqTUGWo"
 
 func TestCreate_CreatesExpectedToken(t *testing.T) {
-	token, err := DefaultTokenHandler.Create(auth.Token{
+	token, err := DefaultTokenHandler.Create(&auth.Token{
 		UserId: 1000,
 	})
 
 	assert.Nil(t, err)
-	assert.Equal(t, expectedToken, *token)
+	assert.Equal(t, expectedToken, token)
 }
 
 func TestRetrieve_GetsExpectedUserId(t *testing.T) {

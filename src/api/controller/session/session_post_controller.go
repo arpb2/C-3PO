@@ -59,7 +59,7 @@ func (b PostBody) getUserData(ctx *http_wrapper.Context) (email, password string
 	return
 }
 
-func (b PostBody) authenticate(ctx *http_wrapper.Context, email, password string) (token *string, userId uint, ok bool) {
+func (b PostBody) authenticate(ctx *http_wrapper.Context, email, password string) (token string, userId uint, ok bool) {
 	userId, err := b.Service.Retrieve(email, password)
 
 	if err != nil {
@@ -68,7 +68,7 @@ func (b PostBody) authenticate(ctx *http_wrapper.Context, email, password string
 		return
 	}
 
-	token, tokenErr := b.TokenHandler.Create(auth.Token{
+	token, tokenErr := b.TokenHandler.Create(&auth.Token{
 		UserId: userId,
 	})
 
@@ -87,7 +87,7 @@ func (b PostBody) Post(ctx *http_wrapper.Context) {
 		if token, userId, ok := b.authenticate(ctx, email, password); ok {
 			ctx.WriteJson(http.StatusOK, http_wrapper.Json{
 				"user_id": userId,
-				"token": *token,
+				"token": token,
 			})
 		}
 	}

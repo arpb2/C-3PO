@@ -25,7 +25,7 @@ func FetchJwtSecret() []byte {
 }
 
 type token struct{
-	auth.Token
+	*auth.Token
 	jwt.StandardClaims
 }
 
@@ -33,7 +33,7 @@ type TokenHandler struct{
 	Secret []byte
 }
 
-func (t TokenHandler) Create(authToken auth.Token) (*string, *auth.TokenError) {
+func (t TokenHandler) Create(authToken *auth.Token) (string, *auth.TokenError) {
 	claims := &token{
 		Token: authToken,
 		StandardClaims: jwt.StandardClaims{},
@@ -43,12 +43,12 @@ func (t TokenHandler) Create(authToken auth.Token) (*string, *auth.TokenError) {
 	tokenString, err := tkn.SignedString(t.Secret)
 
 	if err != nil {
-		return nil, &auth.TokenError{
+		return "", &auth.TokenError{
 			Error:  errors.New("internal error"),
 			Status: http.StatusInternalServerError,
 		}
 	}
-	return &tokenString, nil
+	return tokenString, nil
 }
 
 func (t TokenHandler) Retrieve(authToken string) (*auth.Token, *auth.TokenError) {
@@ -78,5 +78,5 @@ func (t TokenHandler) Retrieve(authToken string) (*auth.Token, *auth.TokenError)
 		}
 	}
 
-	return &claims.Token, nil
+	return claims.Token, nil
 }

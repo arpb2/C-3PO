@@ -10,6 +10,6 @@ type TokenError struct {
 }
 
 type TokenHandler interface {
-	Create(token Token) (*string, *TokenError)
+	Create(token *Token) (string, *TokenError)
 	Retrieve(token string) (*Token, *TokenError)
 }
