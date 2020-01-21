@@ -5,8 +5,8 @@ import (
 )
 
 func Binder(handler engine.ControllerRegistrable) {
-	handler.Register(GetController)
-	handler.Register(PostController)
-	handler.Register(PutController)
-	handler.Register(DeleteController)
+	handler.Register(CreateGetController())
+	handler.Register(CreatePostController())
+	handler.Register(CreatePutController())
+	handler.Register(CreateDeleteController())
 }

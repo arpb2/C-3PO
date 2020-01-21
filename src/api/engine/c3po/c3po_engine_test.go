@@ -1,8 +1,8 @@
-package engine_test
+package c3po_test
 
 import (
 	"github.com/arpb2/C-3PO/src/api/controller"
-	"github.com/arpb2/C-3PO/src/api/engine"
+	"github.com/arpb2/C-3PO/src/api/engine/c3po"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"net/http"
@@ -14,16 +14,16 @@ import (
 
 func TestGetPortReturnsSpecificIfUsingEnvVar(t *testing.T) {
 	_ = os.Setenv("PORT", "1234")
-	assert.Equal(t, "1234", engine.GetPort())
+	assert.Equal(t, "1234", c3po.GetPort())
 	_ = os.Unsetenv("PORT")
 }
 
 func TestGetPortReturns8080(t *testing.T) {
-	assert.Equal(t, "8080", engine.GetPort())
+	assert.Equal(t, "8080", c3po.GetPort())
 }
 
 func TestRegisterMiddleware(t *testing.T) {
-	e := engine.CreateBasicServerEngine()
+	e := c3po.New()
 	e.Register(controller.Controller{
 		Method:     "GET",
 		Path:       "/test",

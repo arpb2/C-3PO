@@ -4,14 +4,16 @@ import (
 	"fmt"
 	"github.com/arpb2/C-3PO/src/api/auth"
 	"github.com/arpb2/C-3PO/src/api/controller"
-	"github.com/arpb2/C-3PO/src/api/engine"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
 )
 
-type AuthenticationStrategy func(token *auth.Token, userId string) (authorized bool, err error)
-func handleAuthentication(ctx *gin.Context, strategies ...AuthenticationStrategy) {
+type AuthenticationStrategy interface {
+	Authenticate(token *auth.Token, userId string) (authorized bool, err error)
+}
+
+func HandleAuthentication(ctx *gin.Context, tokenHandler auth.TokenHandler, strategies ...AuthenticationStrategy) {
 	authToken := ctx.GetHeader("Authorization")
 
 	if authToken == "" {
@@ -19,7 +21,7 @@ func handleAuthentication(ctx *gin.Context, strategies ...AuthenticationStrategy
 		return
 	}
 
-	token, err := engine.DefaultTokenHandler.Retrieve(authToken)
+	token, err := tokenHandler.Retrieve(authToken)
 
 	if err != nil {
 		controller.Halt(ctx, err.Status, err.Error.Error())
@@ -34,7 +36,7 @@ func handleAuthentication(ctx *gin.Context, strategies ...AuthenticationStrategy
 	}
 
 	for _, strategy := range strategies {
-		authenticated, err := strategy(token, requestedUserId)
+		authenticated, err := strategy.Authenticate(token, requestedUserId)
 
 		// If any of our strategies has an error we will instantly fail the authentication process.
 		// TODO: In a future consider silently dismissing this, logging it somewhere but giving the user a 401.

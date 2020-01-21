@@ -1,7 +1,10 @@
 package main
 
-import "github.com/arpb2/C-3PO/src/api/server"
+import (
+	engine "github.com/arpb2/C-3PO/src/api/engine/c3po"
+	"github.com/arpb2/C-3PO/src/api/server"
+)
 
 func main() {
-	_ = server.StartApplication()
+	_ = server.StartApplication(engine.New())
 }
