@@ -23,7 +23,7 @@ func CreatePostController(tokenHandler auth.TokenHandler,
 			Service:         service,
 			Validations:     validations,
 			FetchUserTask:   fetchUserTask,
-		}.Handle,
+		}.Post,
 	}
 }
 
@@ -36,25 +36,35 @@ type PostBody struct {
 	FetchUserTask func(ctx *http_wrapper.Context) (user *model.AuthenticatedUser, err error)
 }
 
-func (b PostBody) Handle(ctx *http_wrapper.Context) {
+func (b PostBody) getUserData(ctx *http_wrapper.Context) (email, password string, ok bool){
 	user, err := b.FetchUserTask(ctx)
 
 	if err != nil {
 		controller.Halt(ctx, http.StatusBadRequest, err.Error())
+		ok = false
 		return
 	}
 
 	for _, requirement := range b.Validations {
 		if err := requirement(user); err != nil {
 			controller.Halt(ctx, http.StatusBadRequest, err.Error())
+			ok = false
 			return
 		}
 	}
 
-	userId, err := b.Service.Retrieve(user.Email, user.Password)
+	email = user.Email
+	password = user.Password
+	ok = true
+	return
+}
+
+func (b PostBody) authenticate(ctx *http_wrapper.Context, email, password string) (token *string, userId uint, ok bool) {
+	userId, err := b.Service.Retrieve(email, password)
 
 	if err != nil {
 		controller.Halt(ctx, http.StatusInternalServerError, "internal error")
+		ok = false
 		return
 	}
 
@@ -64,11 +74,21 @@ func (b PostBody) Handle(ctx *http_wrapper.Context) {
 
 	if tokenErr != nil {
 		controller.Halt(ctx, tokenErr.Status, tokenErr.Error.Error())
+		ok = false
 		return
 	}
 
-	ctx.WriteJson(http.StatusOK, http_wrapper.Json{
-		"user_id": userId,
-		"token": *token,
-	})
+	ok = true
+	return
+}
+
+func (b PostBody) Post(ctx *http_wrapper.Context) {
+	if email, password, ok := b.getUserData(ctx); ok {
+		if token, userId, ok := b.authenticate(ctx, email, password); ok {
+			ctx.WriteJson(http.StatusOK, http_wrapper.Json{
+				"user_id": userId,
+				"token": *token,
+			})
+		}
+	}
 }
