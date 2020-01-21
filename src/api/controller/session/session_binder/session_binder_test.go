@@ -1,8 +1,8 @@
-package health_test
+package session_binder_test
 
 import (
 	"github.com/arpb2/C-3PO/src/api/controller"
-	"github.com/arpb2/C-3PO/src/api/controller/health"
+	"github.com/arpb2/C-3PO/src/api/controller/session/session_binder"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -16,7 +16,7 @@ func (m *MockControllerRegistrable) Register(controller controller.Controller) {
 }
 
 func bindControllers() *MockControllerRegistrable {
-	binder := health.CreateBinder()
+	binder := session_binder.CreateBinder(nil, nil)
 	registrable := &MockControllerRegistrable{}
 
 	binder.BindControllers(registrable)
@@ -38,7 +38,7 @@ func lookupController(method, path string) *controller.Controller {
 }
 
 func TestCreateBinder_RegistersRoutes(t *testing.T) {
-	assert.NotNil(t, lookupController("GET", "/ping"))
+	assert.NotNil(t, lookupController("POST", "/session"))
 }
 
 func TestCreateBinder_RegistersOnlyRoutes(t *testing.T) {

@@ -1,6 +1,7 @@
-package code
+package code_binder
 
 import (
+	"github.com/arpb2/C-3PO/src/api/controller/code"
 	"github.com/arpb2/C-3PO/src/api/engine"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/arpb2/C-3PO/src/api/service"
@@ -12,9 +13,9 @@ type binder struct {
 }
 
 func (b binder) BindControllers(controllerRegistrable engine.ControllerRegistrable) {
-	controllerRegistrable.Register(CreateGetController(b.AuthMiddleware, b.CodeService))
-	controllerRegistrable.Register(CreatePostController(b.AuthMiddleware, b.CodeService))
-	controllerRegistrable.Register(CreatePutController(b.AuthMiddleware, b.CodeService))
+	controllerRegistrable.Register(code.CreateGetController(b.AuthMiddleware, b.CodeService))
+	controllerRegistrable.Register(code.CreatePostController(b.AuthMiddleware, b.CodeService))
+	controllerRegistrable.Register(code.CreatePutController(b.AuthMiddleware, b.CodeService))
 }
 
 func CreateBinder(authMiddleware http_wrapper.Handler, codeService service.CodeService) engine.ControllerBinder {

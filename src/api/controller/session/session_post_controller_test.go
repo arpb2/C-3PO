@@ -5,12 +5,10 @@ import (
 	"github.com/arpb2/C-3PO/src/api/auth"
 	"github.com/arpb2/C-3PO/src/api/controller"
 	"github.com/arpb2/C-3PO/src/api/controller/session"
+	"github.com/arpb2/C-3PO/src/api/controller/session/session_task"
+	"github.com/arpb2/C-3PO/src/api/controller/session/session_validation"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/arpb2/C-3PO/src/api/model"
-	"github.com/arpb2/C-3PO/src/api/service"
-	"github.com/arpb2/C-3PO/src/api/task/authenticated_user_task"
-	"github.com/arpb2/C-3PO/src/api/task/token_task"
-	"github.com/arpb2/C-3PO/src/api/validation/authenticated_user_validation"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"net/http"
@@ -19,8 +17,6 @@ import (
 
 func createPostController() controller.Controller {
 	return session.CreatePostController(
-		nil,
-		nil,
 		nil,
 		nil,
 		nil,
@@ -49,7 +45,7 @@ func TestPostController_FetchUserIdTask_FailsOnValidationFail(t *testing.T) {
 		"error": err.Error(),
 	}).Once()
 
-	validations := []authenticated_user_validation.Validation{
+	validations := []session_validation.Validation{
 		func(user *model.AuthenticatedUser) error {
 			return nil
 		},
@@ -57,15 +53,13 @@ func TestPostController_FetchUserIdTask_FailsOnValidationFail(t *testing.T) {
 			return err
 		},
 	}
-	fetchUserTask := authenticated_user_task.FetchUserTaskImpl
+	fetchUserTask := session_task.CreateFetchUserTask()
 
 	postController := session.CreatePostController(
 		nil,
 		nil,
 		validations,
 		fetchUserTask,
-		nil,
-		nil,
 	)
 
 	postController.Body(&http_wrapper.Context{
@@ -101,7 +95,7 @@ func TestFetchUserIdTaskImpl_FailsOnServiceFailure(t *testing.T) {
 	service := new(credentialService)
 	service.On("Retrieve", "test@email.com", "testpassword").Return(uint(0), errors.New("error")).Once()
 
-	var validations []authenticated_user_validation.Validation
+	var validations []session_validation.Validation
 	fetchUserTask := func(ctx *http_wrapper.Context) (user *model.AuthenticatedUser, err error) {
 		return &model.AuthenticatedUser{
 			User: &model.User{
@@ -110,15 +104,12 @@ func TestFetchUserIdTaskImpl_FailsOnServiceFailure(t *testing.T) {
 			Password: "testpassword",
 		}, nil
 	}
-	fetchUserIdTask := authenticated_user_task.FetchUserIdTaskImpl
 
 	postController := session.CreatePostController(
 		nil,
 		service,
 		validations,
 		fetchUserTask,
-		fetchUserIdTask,
-		nil,
 	)
 
 	postController.Body(&http_wrapper.Context{
@@ -131,13 +122,24 @@ func TestFetchUserIdTaskImpl_FailsOnServiceFailure(t *testing.T) {
 	service.AssertExpectations(t)
 }
 
-type tokenHandler struct{}
+type tokenHandler struct{
+	mock.Mock
+}
 
-func (t tokenHandler) Create(token auth.Token) (*string, *auth.TokenError) {
-	return nil, &auth.TokenError{
-		Error:  errors.New("error"),
-		Status: 500,
+func (t tokenHandler) Create(token auth.Token) (tokenStr *string, err *auth.TokenError) {
+	args := t.Called(token)
+
+	tokenParam := args.Get(0)
+	if tokenParam != nil {
+		tokenStr = tokenParam.(*string)
 	}
+
+	errParam := args.Get(1)
+	if errParam != nil {
+		err = errParam.(*auth.TokenError)
+	}
+
+	return
 }
 
 func (t tokenHandler) Retrieve(token string) (*auth.Token, *auth.TokenError) {
@@ -150,22 +152,29 @@ func TestFetchUserIdTaskImpl_FailsOnTokenFailure(t *testing.T) {
 		"error": "error",
 	}).Once()
 
-	var validations []authenticated_user_validation.Validation
+	var validations []session_validation.Validation
 	fetchUserTask := func(ctx *http_wrapper.Context) (user *model.AuthenticatedUser, err error) {
-		return &model.AuthenticatedUser{}, nil
+		return &model.AuthenticatedUser{
+			User: &model.User{
+				Id: 1000,
+			},
+		}, nil
 	}
-	fetchUserIdTask := func(credentialService service.CredentialService, user *model.AuthenticatedUser) (u uint, err error) {
-		return uint(1000), nil
-	}
-	createTokenTask := token_task.CreateTokenTaskImpl
+
+	credentialService := new(credentialService)
+	credentialService.On("Retrieve", "", "").Return(uint(1000), nil)
+
+	tokenHandler := new(tokenHandler)
+	tokenHandler.On("Create", auth.Token{UserId:1000}).Return(nil, &auth.TokenError{
+		Error:  errors.New("error"),
+		Status: 500,
+	})
 
 	postController := session.CreatePostController(
-		&tokenHandler{},
-		nil,
+		tokenHandler,
+		credentialService,
 		validations,
 		fetchUserTask,
-		fetchUserIdTask,
-		createTokenTask,
 	)
 
 	postController.Body(&http_wrapper.Context{
@@ -175,6 +184,8 @@ func TestFetchUserIdTaskImpl_FailsOnTokenFailure(t *testing.T) {
 	})
 
 	middleware.AssertExpectations(t)
+	credentialService.AssertExpectations(t)
+	tokenHandler.AssertExpectations(t)
 }
 
 func TestFetchUserIdTaskImpl_SuccessReturnsToken(t *testing.T) {
@@ -184,25 +195,29 @@ func TestFetchUserIdTaskImpl_SuccessReturnsToken(t *testing.T) {
 		"token": "test token",
 	}).Once()
 
-	var validations []authenticated_user_validation.Validation
+	var validations []session_validation.Validation
 	fetchUserTask := func(ctx *http_wrapper.Context) (user *model.AuthenticatedUser, err error) {
-		return &model.AuthenticatedUser{}, nil
-	}
-	fetchUserIdTask := func(credentialService service.CredentialService, user *model.AuthenticatedUser) (u uint, err error) {
-		return uint(1000), nil
-	}
-	createTokenTask := func(userId uint, handler auth.TokenHandler) (token *string, err *auth.TokenError) {
-		tokenStr := "test token"
-		return &tokenStr, nil
+		return &model.AuthenticatedUser{
+			User: &model.User{
+				Email: "test@email.com",
+			},
+			Password: "test password",
+		}, nil
 	}
 
+	credentialService := new(credentialService)
+	credentialService.On("Retrieve", "test@email.com", "test password").Return(uint(1000), nil)
+
+	tokenStr := "test token"
+
+	tokenHandler := new(tokenHandler)
+	tokenHandler.On("Create", auth.Token{UserId:1000}).Return(&tokenStr, nil)
+
 	postController := session.CreatePostController(
-		nil,
-		nil,
+		tokenHandler,
+		credentialService,
 		validations,
 		fetchUserTask,
-		fetchUserIdTask,
-		createTokenTask,
 	)
 
 	postController.Body(&http_wrapper.Context{
@@ -212,4 +227,6 @@ func TestFetchUserIdTaskImpl_SuccessReturnsToken(t *testing.T) {
 	})
 
 	writer.AssertExpectations(t)
+	credentialService.AssertExpectations(t)
+	tokenHandler.AssertExpectations(t)
 }

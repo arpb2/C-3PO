@@ -3,10 +3,10 @@ package server
 import (
 	"fmt"
 	"github.com/arpb2/C-3PO/src/api/auth/jwt"
-	"github.com/arpb2/C-3PO/src/api/controller/code"
-	"github.com/arpb2/C-3PO/src/api/controller/health"
-	"github.com/arpb2/C-3PO/src/api/controller/session"
-	"github.com/arpb2/C-3PO/src/api/controller/user"
+	"github.com/arpb2/C-3PO/src/api/controller/code/code_binder"
+	"github.com/arpb2/C-3PO/src/api/controller/health/health_binder"
+	"github.com/arpb2/C-3PO/src/api/controller/session/session_binder"
+	"github.com/arpb2/C-3PO/src/api/controller/user/user_binder"
 	"github.com/arpb2/C-3PO/src/api/engine"
 	"github.com/arpb2/C-3PO/src/api/middleware/auth/single_auth"
 	"github.com/arpb2/C-3PO/src/api/middleware/auth/teacher_auth"
@@ -38,10 +38,10 @@ func CreateBinders() []engine.ControllerBinder {
 	teacherAuthMiddleware := teacher_auth.CreateMiddleware(tokenHandler, teacherService)
 
 	return []engine.ControllerBinder{
-		health.CreateBinder(),
-		code.CreateBinder(teacherAuthMiddleware, codeService),
-		user.CreateBinder(singleAuthMiddleware, userService),
-		session.CreateBinder(tokenHandler, credentialService),
+		health_binder.CreateBinder(),
+		code_binder.CreateBinder(teacherAuthMiddleware, codeService),
+		user_binder.CreateBinder(singleAuthMiddleware, userService),
+		session_binder.CreateBinder(tokenHandler, credentialService),
 	}
 }
 

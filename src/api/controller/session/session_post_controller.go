@@ -3,20 +3,18 @@ package session
 import (
 	"github.com/arpb2/C-3PO/src/api/auth"
 	"github.com/arpb2/C-3PO/src/api/controller"
+	"github.com/arpb2/C-3PO/src/api/controller/session/session_task"
+	"github.com/arpb2/C-3PO/src/api/controller/session/session_validation"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
+	"github.com/arpb2/C-3PO/src/api/model"
 	"github.com/arpb2/C-3PO/src/api/service"
-	"github.com/arpb2/C-3PO/src/api/task/authenticated_user_task"
-	"github.com/arpb2/C-3PO/src/api/task/token_task"
-	"github.com/arpb2/C-3PO/src/api/validation/authenticated_user_validation"
 	"net/http"
 )
 
 func CreatePostController(tokenHandler auth.TokenHandler,
 	                      service service.CredentialService,
-	                      validations []authenticated_user_validation.Validation,
-	                      fetchUserTask authenticated_user_task.FetchUserTask,
-	                      fetchUserIdTask authenticated_user_task.FetchUserIdTask,
-	                      createTokenTask token_task.CreateTokenTask) controller.Controller {
+	                      validations []session_validation.Validation,
+	                      fetchUserTask session_task.FetchUserTask) controller.Controller {
 	return controller.Controller{
 		Method: "POST",
 		Path:   "/session",
@@ -25,8 +23,6 @@ func CreatePostController(tokenHandler auth.TokenHandler,
 			Service:         service,
 			Validations:     validations,
 			FetchUserTask:   fetchUserTask,
-			FetchUserIdTask: fetchUserIdTask,
-			CreateTokenTask: createTokenTask,
 		}.Handle,
 	}
 }
@@ -34,11 +30,10 @@ func CreatePostController(tokenHandler auth.TokenHandler,
 type PostBody struct {
 	TokenHandler auth.TokenHandler
 	Service      service.CredentialService
-	Validations  []authenticated_user_validation.Validation
 
-	FetchUserTask authenticated_user_task.FetchUserTask
-	FetchUserIdTask authenticated_user_task.FetchUserIdTask
-	CreateTokenTask token_task.CreateTokenTask
+	Validations  []session_validation.Validation
+
+	FetchUserTask func(ctx *http_wrapper.Context) (user *model.AuthenticatedUser, err error)
 }
 
 func (b PostBody) Handle(ctx *http_wrapper.Context) {
@@ -56,14 +51,16 @@ func (b PostBody) Handle(ctx *http_wrapper.Context) {
 		}
 	}
 
-	userId, err := b.FetchUserIdTask(b.Service, user)
+	userId, err := b.Service.Retrieve(user.Email, user.Password)
 
 	if err != nil {
 		controller.Halt(ctx, http.StatusInternalServerError, "internal error")
 		return
 	}
 
-	token, tokenErr := b.CreateTokenTask(userId, b.TokenHandler)
+	token, tokenErr := b.TokenHandler.Create(auth.Token{
+		UserId: userId,
+	})
 
 	if tokenErr != nil {
 		controller.Halt(ctx, tokenErr.Status, tokenErr.Error.Error())
