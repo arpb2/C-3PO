@@ -32,7 +32,7 @@ func (s *SharedInMemoryCodeService) ReplaceCode(userId uint, codeId uint, code *
 
 func TestFetchCodeId_RetrievesFromParam(t *testing.T) {
 	reader := new(http_wrapper.TestReader)
-	reader.On("Param", "code_id").Return("1234").Once()
+	reader.On("GetParameter", "code_id").Return("1234").Once()
 
 	c, _ := gin_wrapper.CreateTestContext()
 	c.Reader = reader
@@ -56,7 +56,7 @@ func TestFetchCodeId_HaltsWith400OnError(t *testing.T) {
 
 func TestFetchCodeId_RetrievesFromParam_400IfMalformed(t *testing.T) {
 	reader := new(http_wrapper.TestReader)
-	reader.On("Param", "code_id").Return("not a number").Once()
+	reader.On("GetParameter", "code_id").Return("not a number").Once()
 
 	c, _ := gin_wrapper.CreateTestContext()
 	c.Reader = reader
@@ -70,7 +70,7 @@ func TestFetchCodeId_RetrievesFromParam_400IfMalformed(t *testing.T) {
 
 func TestFetchUserId_RetrievesFromParam_400IfMalformed(t *testing.T) {
 	reader := new(http_wrapper.TestReader)
-	reader.On("Param", "user_id").Return("not a number").Once()
+	reader.On("GetParameter", "user_id").Return("not a number").Once()
 
 	c, _ := gin_wrapper.CreateTestContext()
 	c.Reader = reader
@@ -84,7 +84,7 @@ func TestFetchUserId_RetrievesFromParam_400IfMalformed(t *testing.T) {
 
 func TestFetchUserId_RetrievesFromParam(t *testing.T) {
 	reader := new(http_wrapper.TestReader)
-	reader.On("Param", "user_id").Return("1234").Once()
+	reader.On("GetParameter", "user_id").Return("1234").Once()
 
 	c, _ := gin_wrapper.CreateTestContext()
 	c.Reader = reader
@@ -108,7 +108,7 @@ func TestFetchUserId_HaltsWith400OnError(t *testing.T) {
 
 func TestFetchCode_RetrievesFromPart(t *testing.T) {
 	reader := new(http_wrapper.TestReader)
-	reader.On("GetPostForm", "code").Return("test code", true).Once()
+	reader.On("GetFormData", "code").Return("test code", true).Once()
 
 	c, _ := gin_wrapper.CreateTestContext()
 	c.Reader = reader
@@ -122,7 +122,7 @@ func TestFetchCode_RetrievesFromPart(t *testing.T) {
 
 func TestFetchCode_HaltsWith400_OnError(t *testing.T) {
 	reader := new(http_wrapper.TestReader)
-	reader.On("GetPostForm", "code").Return("", false).Once()
+	reader.On("GetFormData", "code").Return("", false).Once()
 
 	c, recorder := gin_wrapper.CreateTestContext()
 	c.Reader = reader

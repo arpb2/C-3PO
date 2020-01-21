@@ -28,8 +28,8 @@ func TestRegisterMiddleware(t *testing.T) {
 		Method:     "GET",
 		Path:       "/test",
 		Middleware: []http_wrapper.Handler{func(c *http_wrapper.Context) {
-			c.String(http.StatusOK, "Test response")
-			c.Abort()
+			c.WriteString(http.StatusOK, "Test response")
+			c.AbortTransaction()
 		}},
 		Body:       func(c *http_wrapper.Context) {
 			panic("shouldn't reach here.")

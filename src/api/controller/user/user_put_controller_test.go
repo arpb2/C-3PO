@@ -37,7 +37,7 @@ func TestUserPutControllerPathIsAsExpected(t *testing.T) {
 
 func TestUserPutControllerBody_400OnNoUserId(t *testing.T) {
 	reader := new(http_wrapper.TestReader)
-	reader.On("Param", "user_id").Return("").Once()
+	reader.On("GetParameter", "user_id").Return("").Once()
 
 	c, w := gin_wrapper.CreateTestContext()
 	c.Reader = reader
@@ -53,7 +53,7 @@ func TestUserPutControllerBody_400OnNoUserId(t *testing.T) {
 
 func TestUserPutControllerBody_400OnMalformedUserId(t *testing.T) {
 	reader := new(http_wrapper.TestReader)
-	reader.On("Param", "user_id").Return("not a number").Once()
+	reader.On("GetParameter", "user_id").Return("not a number").Once()
 
 	c, w := gin_wrapper.CreateTestContext()
 	c.Reader = reader
@@ -69,8 +69,8 @@ func TestUserPutControllerBody_400OnMalformedUserId(t *testing.T) {
 
 func TestUserPutControllerBody_400OnEmptyOrMalformedUser(t *testing.T) {
 	reader := new(http_wrapper.TestReader)
-	reader.On("Param", "user_id").Return("1000").Once()
-	reader.On("ShouldBindJSON", mock.MatchedBy(func(obj interface{}) bool {
+	reader.On("GetParameter", "user_id").Return("1000").Once()
+	reader.On("ReadBody", mock.MatchedBy(func(obj interface{}) bool {
 		return true
 	})).Return(errors.New("malformed")).Once()
 
@@ -100,8 +100,8 @@ func TestUserPutControllerBody_500OnServiceCreateError(t *testing.T) {
 	body := user.CreatePutBody(service)
 
 	reader := new(http_wrapper.TestReader)
-	reader.On("Param", "user_id").Return("1000").Once()
-	reader.On("ShouldBindJSON", mock.MatchedBy(func(obj interface{}) bool {
+	reader.On("GetParameter", "user_id").Return("1000").Once()
+	reader.On("ReadBody", mock.MatchedBy(func(obj interface{}) bool {
 		return true
 	})).Run(func(args mock.Arguments) {
 		args.Get(0).(*model.AuthenticatedUser).User = &model.User{
@@ -135,8 +135,8 @@ func TestUserPutControllerBody_500OnNoUserStoredInService(t *testing.T) {
 	body := user.CreatePutBody(service)
 
 	reader := new(http_wrapper.TestReader)
-	reader.On("Param", "user_id").Return("1000").Once()
-	reader.On("ShouldBindJSON", mock.MatchedBy(func(obj interface{}) bool {
+	reader.On("GetParameter", "user_id").Return("1000").Once()
+	reader.On("ReadBody", mock.MatchedBy(func(obj interface{}) bool {
 		return true
 	})).Run(func(args mock.Arguments) {
 		args.Get(0).(*model.AuthenticatedUser).User = &model.User{
@@ -166,8 +166,8 @@ func TestUserPutControllerBody_400OnIdSpecified(t *testing.T) {
 	body := user.CreatePutBody(service)
 
 	reader := new(http_wrapper.TestReader)
-	reader.On("Param", "user_id").Return("1000").Once()
-	reader.On("ShouldBindJSON", mock.MatchedBy(func(obj *model.AuthenticatedUser) bool {
+	reader.On("GetParameter", "user_id").Return("1000").Once()
+	reader.On("ReadBody", mock.MatchedBy(func(obj *model.AuthenticatedUser) bool {
 		return true
 	})).Run(func(args mock.Arguments) {
 		args.Get(0).(*model.AuthenticatedUser).User = &model.User{
@@ -204,8 +204,8 @@ func TestUserPutControllerBody_200OnUserStoredOnService(t *testing.T) {
 	body := user.CreatePutBody(service)
 
 	reader := new(http_wrapper.TestReader)
-	reader.On("Param", "user_id").Return("1000").Once()
-	reader.On("ShouldBindJSON", mock.MatchedBy(func(obj *model.AuthenticatedUser) bool {
+	reader.On("GetParameter", "user_id").Return("1000").Once()
+	reader.On("ReadBody", mock.MatchedBy(func(obj *model.AuthenticatedUser) bool {
 		return true
 	})).Run(func(args mock.Arguments) {
 		args.Get(0).(*model.AuthenticatedUser).User = &model.User{

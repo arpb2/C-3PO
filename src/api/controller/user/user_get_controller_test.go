@@ -36,7 +36,7 @@ func TestUserGetControllerPathIsAsExpected(t *testing.T) {
 
 func TestUserGetControllerBody_400OnEmptyUserId(t *testing.T) {
 	reader := new(http_wrapper.TestReader)
-	reader.On("Param", "user_id").Return("").Once()
+	reader.On("GetParameter", "user_id").Return("").Once()
 
 	c, w := gin_wrapper.CreateTestContext()
 	c.Reader = reader
@@ -52,7 +52,7 @@ func TestUserGetControllerBody_400OnEmptyUserId(t *testing.T) {
 
 func TestUserGetControllerBody_400OnMalformedUserId(t *testing.T) {
 	reader := new(http_wrapper.TestReader)
-	reader.On("Param", "user_id").Return("not a number").Once()
+	reader.On("GetParameter", "user_id").Return("not a number").Once()
 
 	c, w := gin_wrapper.CreateTestContext()
 	c.Reader = reader
@@ -73,7 +73,7 @@ func TestUserGetControllerBody_500OnServiceReadError(t *testing.T) {
 	body := user.CreateGetBody(service)
 
 	reader := new(http_wrapper.TestReader)
-	reader.On("Param", "user_id").Return("1000").Once()
+	reader.On("GetParameter", "user_id").Return("1000").Once()
 
 	c, w := gin_wrapper.CreateTestContext()
 	c.Reader = reader
@@ -96,7 +96,7 @@ func TestUserGetControllerBody_400OnNoUserStoredInService(t *testing.T) {
 	body := user.CreateGetBody(service)
 
 	reader := new(http_wrapper.TestReader)
-	reader.On("Param", "user_id").Return("1000").Once()
+	reader.On("GetParameter", "user_id").Return("1000").Once()
 
 	c, w := gin_wrapper.CreateTestContext()
 	c.Reader = reader
@@ -125,7 +125,7 @@ func TestUserGetControllerBody_200OnUserStoredOnService(t *testing.T) {
 	body := user.CreateGetBody(service)
 
 	reader := new(http_wrapper.TestReader)
-	reader.On("Param", "user_id").Return("1000").Once()
+	reader.On("GetParameter", "user_id").Return("1000").Once()
 
 	c, w := gin_wrapper.CreateTestContext()
 	c.Reader = reader

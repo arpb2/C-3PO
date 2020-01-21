@@ -37,7 +37,7 @@ func TestUserPostControllerPathIsAsExpected(t *testing.T) {
 
 func TestUserPostControllerBody_400OnEmptyOrMalformedUser(t *testing.T) {
 	reader := new(http_wrapper.TestReader)
-	reader.On("ShouldBindJSON", mock.MatchedBy(func(obj interface{}) bool {
+	reader.On("ReadBody", mock.MatchedBy(func(obj interface{}) bool {
 		return true
 	})).Return(errors.New("malformed")).Once()
 
@@ -62,7 +62,7 @@ func TestUserPostControllerBody_500OnServiceCreateError(t *testing.T) {
 	body := user.CreatePostBody(service)
 
 	reader := new(http_wrapper.TestReader)
-	reader.On("ShouldBindJSON", mock.MatchedBy(func(obj interface{}) bool {
+	reader.On("ReadBody", mock.MatchedBy(func(obj interface{}) bool {
 		return true
 	})).Return(nil).Once()
 
@@ -89,7 +89,7 @@ func TestUserPostControllerBody_500OnNoUserStoredInService(t *testing.T) {
 	body := user.CreatePostBody(service)
 
 	reader := new(http_wrapper.TestReader)
-	reader.On("ShouldBindJSON", mock.MatchedBy(func(obj interface{}) bool {
+	reader.On("ReadBody", mock.MatchedBy(func(obj interface{}) bool {
 		return true
 	})).Return(nil).Once()
 
@@ -125,7 +125,7 @@ func TestUserPostControllerBody_200OnUserStoredOnService(t *testing.T) {
 	body := user.CreatePostBody(service)
 
 	reader := new(http_wrapper.TestReader)
-	reader.On("ShouldBindJSON", mock.MatchedBy(func(obj *model.AuthenticatedUser) bool {
+	reader.On("ReadBody", mock.MatchedBy(func(obj *model.AuthenticatedUser) bool {
 		return true
 	})).Return(nil).Once()
 

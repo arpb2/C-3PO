@@ -135,7 +135,7 @@ func Test_Multi_HandlingOfAuthentication_Authorized_SameUser(t *testing.T) {
 			teacher_auth.CreateMiddleware(MultiTokenHandler, MockTeacherService{}),
 		},
 		Body:          func(ctx *http_wrapper.Context) {
-			ctx.String(http.StatusOK, "Returned success")
+			ctx.WriteString(http.StatusOK, "Returned success")
 		},
 	})
 
@@ -167,7 +167,7 @@ func Test_Multi_HandlingOfAuthentication_Authorized_Student(t *testing.T) {
 			teacher_auth.CreateMiddleware(MultiTokenHandler, service),
 		},
 		Body:          func(ctx *http_wrapper.Context) {
-			ctx.String(http.StatusOK, "Returned success")
+			ctx.WriteString(http.StatusOK, "Returned success")
 		},
 	})
 
@@ -204,7 +204,7 @@ func Test_Multi_HandlingOfAuthentication_Unauthorized_Student(t *testing.T) {
 			teacher_auth.CreateMiddleware(MultiTokenHandler, service),
 		},
 		Body:          func(ctx *http_wrapper.Context) {
-			ctx.String(http.StatusOK, "Returned success")
+			ctx.WriteString(http.StatusOK, "Returned success")
 		},
 	})
 
@@ -230,7 +230,7 @@ func Test_Multi_HandlingOfAuthentication_Service_Error(t *testing.T) {
 			teacher_auth.CreateMiddleware(MultiTokenHandler, service),
 		},
 		Body:          func(ctx *http_wrapper.Context) {
-			ctx.String(http.StatusOK, "Returned success")
+			ctx.WriteString(http.StatusOK, "Returned success")
 		},
 	})
 

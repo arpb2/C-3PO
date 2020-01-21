@@ -4,8 +4,10 @@ type Json map[string]interface{}
 
 type Writer interface {
 
-	JSON(code int, obj interface{})
+	WriteJson(code int, obj interface{})
 
-	String(code int, format string, values ...interface{})
+	WriteString(code int, format string, values ...interface{})
+
+	WriteStatus(code int)
 
 }

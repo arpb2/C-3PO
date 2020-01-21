@@ -2,10 +2,10 @@ package http_wrapper
 
 type Middleware interface {
 
-	Next()
+	NextHandler()
 
-	Abort()
+	AbortTransaction()
 
-	AbortWithStatusJSON(code int, jsonObj interface{})
+	AbortTransactionWithStatus(code int, jsonObj interface{})
 
 }

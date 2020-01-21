@@ -95,7 +95,7 @@ func Test_Single_HandlingOfAuthentication_Authorized_SameUser(t *testing.T) {
 			single_auth.CreateMiddleware(SingleTokenHandler),
 		},
 		Body:          func(ctx *http_wrapper.Context) {
-			ctx.String(http.StatusOK, "Returned success")
+			ctx.WriteString(http.StatusOK, "Returned success")
 		},
 	})
 

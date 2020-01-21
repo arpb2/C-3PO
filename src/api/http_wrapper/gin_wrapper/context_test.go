@@ -6,29 +6,23 @@ import (
 	"testing"
 )
 
-func TestCreateContext_Reader_DelegatesToGin(t *testing.T) {
+func TestCreateContext_Reader_Exists(t *testing.T) {
 	ginContext := new(gin.Context)
-	ginContext.Params = gin.Params{
-		gin.Param{
-			Key:   "test",
-			Value: "test",
-		},
-	}
 	context := CreateContext(ginContext)
 
-	assert.Equal(t, "test", context.Param("test"))
+	assert.NotNil(t, context.Reader)
 }
 
-func TestCreateContext_Writer_DelegatesToGin(t *testing.T) {
+func TestCreateContext_Writer_Exists(t *testing.T) {
 	ginContext := new(gin.Context)
 	context := CreateContext(ginContext)
 
-	assert.Equal(t, context.Writer, ginContext)
+	assert.NotNil(t, context.Writer)
 }
 
-func TestCreateContext_Middleware_DelegatesToGin(t *testing.T) {
+func TestCreateContext_Middleware_Exists(t *testing.T) {
 	ginContext := new(gin.Context)
 	context := CreateContext(ginContext)
 
-	assert.Equal(t, context.Middleware, ginContext)
+	assert.NotNil(t, context.Middleware)
 }

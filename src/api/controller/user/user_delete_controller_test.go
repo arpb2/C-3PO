@@ -35,7 +35,7 @@ func TestUserDeleteControllerPathIsAsExpected(t *testing.T) {
 
 func TestUserDeleteControllerBody_400OnNoUserId(t *testing.T) {
 	reader := new(http_wrapper.TestReader)
-	reader.On("Param", "user_id").Return("").Once()
+	reader.On("GetParameter", "user_id").Return("").Once()
 
 	c, w := gin_wrapper.CreateTestContext()
 	c.Reader = reader
@@ -51,7 +51,7 @@ func TestUserDeleteControllerBody_400OnNoUserId(t *testing.T) {
 
 func TestUserDeleteControllerBody_400OnMalformedUserId(t *testing.T) {
 	reader := new(http_wrapper.TestReader)
-	reader.On("Param", "user_id").Return("not a number").Once()
+	reader.On("GetParameter", "user_id").Return("not a number").Once()
 
 	c, w := gin_wrapper.CreateTestContext()
 	c.Reader = reader
@@ -72,7 +72,7 @@ func TestUserDeleteControllerBody_500OnServiceDeleteError(t *testing.T) {
 	body := user.CreateDeleteBody(service)
 
 	reader := new(http_wrapper.TestReader)
-	reader.On("Param", "user_id").Return("1000").Once()
+	reader.On("GetParameter", "user_id").Return("1000").Once()
 
 	c, w := gin_wrapper.CreateTestContext()
 	c.Reader = reader
@@ -95,7 +95,7 @@ func TestUserDeleteControllerBody_200OnUserDeletedOnService(t *testing.T) {
 	body := user.CreateDeleteBody(service)
 
 	reader := new(http_wrapper.TestReader)
-	reader.On("Param", "user_id").Return("1000").Once()
+	reader.On("GetParameter", "user_id").Return("1000").Once()
 
 	c, w := gin_wrapper.CreateTestContext()
 	c.Reader = reader

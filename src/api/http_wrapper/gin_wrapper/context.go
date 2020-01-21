@@ -9,8 +9,8 @@ import (
 func CreateContext(context *gin.Context) *http_wrapper.Context {
 	return &http_wrapper.Context{
 		Reader:     CreateReader(context),
-		Writer:     context,
-		Middleware: context,
+		Writer:     CreateWriter(context),
+		Middleware: CreateMiddleware(context),
 	}
 }
 

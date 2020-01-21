@@ -32,6 +32,6 @@ func CreatePostBody(userService service.UserService) http_wrapper.Handler {
 			return
 		}
 
-		ctx.JSON(http.StatusOK, user)
+		ctx.WriteJson(http.StatusOK, user)
 	}
 }

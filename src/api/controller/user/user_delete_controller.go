@@ -32,6 +32,6 @@ func CreateDeleteBody(userService service.UserService) http_wrapper.Handler {
 			return
 		}
 
-		ctx.String(http.StatusOK, "")
+		ctx.WriteStatus(http.StatusOK)
 	}
 }

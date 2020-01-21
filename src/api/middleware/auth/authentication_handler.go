@@ -28,10 +28,10 @@ func HandleAuthentication(ctx *http_wrapper.Context, tokenHandler auth.TokenHand
 		return
 	}
 
-	requestedUserId := ctx.Param("user_id")
+	requestedUserId := ctx.GetParameter("user_id")
 
 	if strconv.FormatUint(uint64(token.UserId), 10) == requestedUserId {
-		ctx.Next()
+		ctx.NextHandler()
 		return
 	}
 
@@ -47,7 +47,7 @@ func HandleAuthentication(ctx *http_wrapper.Context, tokenHandler auth.TokenHand
 
 		// If at least one of the strategies considers us authenticated, then we can continue.
 		if authenticated {
-			ctx.Next()
+			ctx.NextHandler()
 			return
 		}
 	}
@@ -57,7 +57,7 @@ func HandleAuthentication(ctx *http_wrapper.Context, tokenHandler auth.TokenHand
 			fmt.Printf("Got an unauthorized because of no existing parameter 'user_id' in request " +
 				"'%s'. Maybe you are malforming the Controller?", requestUrl)
 		}
-	}(requestedUserId, ctx.Url())
+	}(requestedUserId, ctx.GetUrl())
 
 	controller.Halt(ctx, http.StatusUnauthorized, "unauthorized")
 }

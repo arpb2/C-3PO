@@ -60,7 +60,7 @@ func Test_Get(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
-	// Parse response body
+	// ReadBody response body
 	defer resp.Body.Close()
 	bodyBytes, err := ioutil.ReadAll(resp.Body)
 
@@ -97,7 +97,7 @@ func Test_Post(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
-	// Parse response body
+	// ReadBody response body
 	defer resp.Body.Close()
 	bodyBytes, err := ioutil.ReadAll(resp.Body)
 
@@ -140,7 +140,7 @@ func Test_Put(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
-	// Parse response body
+	// ReadBody response body
 	defer resp.Body.Close()
 	bodyBytes, err := ioutil.ReadAll(resp.Body)
 

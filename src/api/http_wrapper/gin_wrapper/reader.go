@@ -9,7 +9,19 @@ type ginReader struct {
 	*gin.Context
 }
 
-func (g ginReader) Url() string {
+func (g ginReader) GetParameter(key string) string {
+	return g.Param(key)
+}
+
+func (g ginReader) GetFormData(key string) (string, bool) {
+	return g.GetPostForm(key)
+}
+
+func (g ginReader) ReadBody(obj interface{}) error {
+	return g.ShouldBindJSON(obj)
+}
+
+func (g ginReader) GetUrl() string {
 	return g.Request.URL.String()
 }
 

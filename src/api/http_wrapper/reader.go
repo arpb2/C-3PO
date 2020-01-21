@@ -2,14 +2,14 @@ package http_wrapper
 
 type Reader interface {
 
-	Url() string
+	GetUrl() string
 
-	ShouldBindJSON(obj interface{}) error
-
-	Param(key string) string
+	GetParameter(key string) string
 
 	GetHeader(key string) string
 
-	GetPostForm(key string) (string, bool)
+	GetFormData(key string) (string, bool)
+
+	ReadBody(obj interface{}) error
 
 }

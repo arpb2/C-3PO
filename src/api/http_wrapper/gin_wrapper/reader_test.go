@@ -22,7 +22,7 @@ func TestCreateReader_Url(t *testing.T) {
 	}
 	reader := gin_wrapper.CreateReader(ctx)
 
-	assert.Equal(t, "https://host/path", reader.Url())
+	assert.Equal(t, "https://host/path", reader.GetUrl())
 }
 
 func TestCreateReader_GetHeader(t *testing.T) {
@@ -51,7 +51,7 @@ func TestCreateReader_Param(t *testing.T) {
 	}
 	reader := gin_wrapper.CreateReader(ctx)
 
-	assert.Equal(t, expectedValue, reader.Param(expectedKey))
+	assert.Equal(t, expectedValue, reader.GetParameter(expectedKey))
 }
 
 func TestCreateReader_GetPostForm(t *testing.T) {
@@ -69,7 +69,7 @@ func TestCreateReader_GetPostForm(t *testing.T) {
 
 	reader := gin_wrapper.CreateReader(ctx)
 
-	resultValue, exists := reader.GetPostForm(expectedKey)
+	resultValue, exists := reader.GetFormData(expectedKey)
 
 	assert.True(t, exists)
 	assert.Equal(t, expectedValue, resultValue)
@@ -101,7 +101,7 @@ func TestCreateReader_ShouldBindJson(t *testing.T) {
 	reader := gin_wrapper.CreateReader(ctx)
 
 	var result testStruct
-	err := reader.ShouldBindJSON(&result)
+	err := reader.ReadBody(&result)
 
 	assert.Nil(t, err)
 	assert.Equal(t, "test name", result.Name)

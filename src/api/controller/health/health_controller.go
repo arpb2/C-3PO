@@ -18,5 +18,5 @@ var GetController = controller.Controller{
 }
 
 func healthGet(ctx *http_wrapper.Context) {
-	ctx.String(http.StatusOK, "pong")
+	ctx.WriteString(http.StatusOK, "pong")
 }
