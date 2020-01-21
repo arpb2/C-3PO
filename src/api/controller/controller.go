@@ -2,7 +2,7 @@ package controller
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
+	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 )
 
 type Controller struct {
@@ -10,21 +10,21 @@ type Controller struct {
 
 	Path string
 
-	Middleware []gin.HandlerFunc
+	Middleware []http_wrapper.Handler
 
-	Body gin.HandlerFunc
+	Body http_wrapper.Handler
 }
 
-func Halt(ctx *gin.Context, code int, errMessage string) {
+func Halt(ctx *http_wrapper.Context, code int, errMessage string) {
 	if code >= 200 && code < 300 {
 		fmt.Printf(
 			"Request from %s was requested to be halted with code '%d' and message '%s' when its a successful repsonse",
-			ctx.Request.URL.String(),
+			ctx.Url(),
 			code,
 			errMessage,
 		)
 	} else {
-		ctx.AbortWithStatusJSON(code, gin.H{
+		ctx.AbortWithStatusJSON(code, http_wrapper.Json{
 			"error": errMessage,
 		})
 	}

@@ -2,11 +2,10 @@ package code_test
 
 import (
 	"github.com/arpb2/C-3PO/src/api/controller/code"
-	"github.com/gin-gonic/gin"
+	"github.com/arpb2/C-3PO/src/api/http_wrapper"
+	"github.com/arpb2/C-3PO/src/api/http_wrapper/gin_wrapper"
 	"github.com/stretchr/testify/assert"
 	"net/http"
-	"net/http/httptest"
-	"strings"
 	"testing"
 )
 
@@ -31,27 +30,22 @@ func (s *SharedInMemoryCodeService) ReplaceCode(userId string, codeId string, co
 	return s.err
 }
 
-func init() {
-	gin.SetMode(gin.TestMode)
-}
-
 func TestFetchCodeId_RetrievesFromParam(t *testing.T) {
-	recorder := httptest.NewRecorder()
-	c, _ := gin.CreateTestContext(recorder)
-	c.Params = append(c.Params, gin.Param{
-		Key:   "code_id",
-		Value: "1234",
-	})
+	reader := new(http_wrapper.TestReader)
+	reader.On("Param", "code_id").Return("1234").Once()
+
+	c, _ := gin_wrapper.CreateTestContext()
+	c.Reader = reader
 
 	codeId, halt := code.FetchCodeId(c)
 
 	assert.False(t, halt)
 	assert.Equal(t, "1234", codeId)
+	reader.AssertExpectations(t)
 }
 
 func TestFetchCodeId_HaltsWith400OnError(t *testing.T) {
-	recorder := httptest.NewRecorder()
-	c, _ := gin.CreateTestContext(recorder)
+	c, recorder := gin_wrapper.CreateTestContext()
 
 	codeId, halt := code.FetchCodeId(c)
 
@@ -61,22 +55,21 @@ func TestFetchCodeId_HaltsWith400OnError(t *testing.T) {
 }
 
 func TestFetchUserId_RetrievesFromParam(t *testing.T) {
-	recorder := httptest.NewRecorder()
-	c, _ := gin.CreateTestContext(recorder)
-	c.Params = append(c.Params, gin.Param{
-		Key:   "user_id",
-		Value: "1234",
-	})
+	reader := new(http_wrapper.TestReader)
+	reader.On("Param", "user_id").Return("1234").Once()
+
+	c, _ := gin_wrapper.CreateTestContext()
+	c.Reader = reader
 
 	userId, halt := code.FetchUserId(c)
 
 	assert.False(t, halt)
 	assert.Equal(t, "1234", userId)
+	reader.AssertExpectations(t)
 }
 
 func TestFetchUserId_HaltsWith400OnError(t *testing.T) {
-	recorder := httptest.NewRecorder()
-	c, _ := gin.CreateTestContext(recorder)
+	c, recorder := gin_wrapper.CreateTestContext()
 
 	userId, halt := code.FetchUserId(c)
 
@@ -86,29 +79,30 @@ func TestFetchUserId_HaltsWith400OnError(t *testing.T) {
 }
 
 func TestFetchCode_RetrievesFromPart(t *testing.T) {
-	recorder := httptest.NewRecorder()
-	c, _ := gin.CreateTestContext(recorder)
-	c.Request, _ = http.NewRequest("GET", "/test", strings.NewReader(""))
-	c.Request.PostForm = map[string][]string{}
-	c.Request.PostForm.Set("code", "test code")
-	_ = c.Request.ParseForm()
+	reader := new(http_wrapper.TestReader)
+	reader.On("GetPostForm", "code").Return("test code", true).Once()
+
+	c, _ := gin_wrapper.CreateTestContext()
+	c.Reader = reader
 
 	rawCode, halt := code.FetchCode(c)
 
 	assert.False(t, halt)
 	assert.Equal(t, "test code", *rawCode)
+	reader.AssertExpectations(t)
 }
 
-func TestFetchCode_HaltsWith400OnError(t *testing.T) {
-	recorder := httptest.NewRecorder()
-	c, _ := gin.CreateTestContext(recorder)
-	c.Request, _ = http.NewRequest("GET", "/test", strings.NewReader(""))
-	c.Request.PostForm = map[string][]string{}
-	_ = c.Request.ParseForm()
+func TestFetchCode_HaltsWith400_OnError(t *testing.T) {
+	reader := new(http_wrapper.TestReader)
+	reader.On("GetPostForm", "code").Return("", false).Once()
+
+	c, recorder := gin_wrapper.CreateTestContext()
+	c.Reader = reader
 
 	rawCode, halt := code.FetchCode(c)
 
 	assert.True(t, halt)
 	assert.Nil(t, rawCode)
 	assert.Equal(t, http.StatusBadRequest, recorder.Code)
+	reader.AssertExpectations(t)
 }

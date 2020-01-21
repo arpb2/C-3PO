@@ -1,32 +1,25 @@
 package code
 
 import (
-	"github.com/arpb2/C-3PO/src/api/auth/jwt"
+	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/arpb2/C-3PO/src/api/controller"
-	"github.com/arpb2/C-3PO/src/api/middleware/auth/teacher_auth"
 	"github.com/arpb2/C-3PO/src/api/service"
-	"github.com/arpb2/C-3PO/src/api/service/code_service"
-	"github.com/arpb2/C-3PO/src/api/service/teacher_service"
-	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
-func CreatePutController() controller.Controller {
+func CreatePutController(authMiddleware http_wrapper.Handler, codeService service.CodeService) controller.Controller {
 	return controller.Controller{
 		Method: "PUT",
 		Path:   "/users/:user_id/codes/:code_id",
-		Middleware: []gin.HandlerFunc{
-			teacher_auth.CreateMiddleware(
-				jwt.CreateTokenHandler(),
-				teacher_service.GetService(),
-			),
+		Middleware: []http_wrapper.Handler{
+			authMiddleware,
 		},
-		Body:   CreatePutBody(code_service.GetService()),
+		Body:   CreatePutBody(codeService),
 	}
 }
 
-func CreatePutBody(codeService service.CodeService) gin.HandlerFunc {
-	return func(ctx *gin.Context) {
+func CreatePutBody(codeService service.CodeService) http_wrapper.Handler {
+	return func(ctx *http_wrapper.Context) {
 		userId, halt := FetchUserId(ctx)
 		if halt {
 			return
@@ -49,7 +42,7 @@ func CreatePutBody(codeService service.CodeService) gin.HandlerFunc {
 			return
 		}
 
-		ctx.JSON(http.StatusOK, gin.H{
+		ctx.JSON(http.StatusOK, http_wrapper.Json{
 			"code":    *code,
 			"user_id": userId,
 			"code_id": codeId,

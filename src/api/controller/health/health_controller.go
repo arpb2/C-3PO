@@ -1,9 +1,9 @@
 package health
 
 import (
+	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/arpb2/C-3PO/src/api/controller"
 	"github.com/arpb2/C-3PO/src/api/engine"
-	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
@@ -17,6 +17,6 @@ var GetController = controller.Controller{
 	Body:   healthGet,
 }
 
-func healthGet(ctx *gin.Context) {
+func healthGet(ctx *http_wrapper.Context) {
 	ctx.String(http.StatusOK, "pong")
 }

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/arpb2/C-3PO/src/api/auth"
 	"github.com/arpb2/C-3PO/src/api/controller"
-	"github.com/gin-gonic/gin"
+	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"net/http"
 	"strconv"
 )
@@ -13,7 +13,7 @@ type AuthenticationStrategy interface {
 	Authenticate(token *auth.Token, userId string) (authorized bool, err error)
 }
 
-func HandleAuthentication(ctx *gin.Context, tokenHandler auth.TokenHandler, strategies ...AuthenticationStrategy) {
+func HandleAuthentication(ctx *http_wrapper.Context, tokenHandler auth.TokenHandler, strategies ...AuthenticationStrategy) {
 	authToken := ctx.GetHeader("Authorization")
 
 	if authToken == "" {
@@ -57,7 +57,7 @@ func HandleAuthentication(ctx *gin.Context, tokenHandler auth.TokenHandler, stra
 			fmt.Printf("Got an unauthorized because of no existing parameter 'user_id' in request " +
 				"'%s'. Maybe you are malforming the Controller?", requestUrl)
 		}
-	}(requestedUserId, ctx.Request.URL.String())
+	}(requestedUserId, ctx.Url())
 
 	controller.Halt(ctx, http.StatusUnauthorized, "unauthorized")
 }

@@ -2,18 +2,18 @@ package teacher_auth
 
 import (
 	"github.com/arpb2/C-3PO/src/api/auth"
+	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	middleware_auth "github.com/arpb2/C-3PO/src/api/middleware/auth"
 	"github.com/arpb2/C-3PO/src/api/service"
-	"github.com/gin-gonic/gin"
 	"strconv"
 )
 
-func CreateMiddleware(tokenHandler auth.TokenHandler, teacherService service.TeacherService) gin.HandlerFunc {
+func CreateMiddleware(tokenHandler auth.TokenHandler, teacherService service.TeacherService) http_wrapper.Handler {
 	strategy := &teacherAuthenticationStrategy{
 		teacherService,
 	}
 
-	return func(ctx *gin.Context) {
+	return func(ctx *http_wrapper.Context) {
 		middleware_auth.HandleAuthentication(ctx, tokenHandler, strategy)
 	}
 }
