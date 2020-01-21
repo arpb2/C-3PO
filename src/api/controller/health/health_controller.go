@@ -6,10 +6,12 @@ import (
 	"net/http"
 )
 
-var GetController = controller.Controller{
-	Method: "GET",
-	Path:   "/ping",
-	Body:   healthGet,
+func CreateGetController() controller.Controller {
+	return controller.Controller{
+		Method: "GET",
+		Path:   "/ping",
+		Body:   healthGet,
+	}
 }
 
 func healthGet(ctx *http_wrapper.Context) {
