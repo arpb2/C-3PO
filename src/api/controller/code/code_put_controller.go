@@ -1,8 +1,8 @@
 package code
 
 import (
-	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/arpb2/C-3PO/src/api/controller"
+	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/arpb2/C-3PO/src/api/service"
 	"net/http"
 )
@@ -38,7 +38,7 @@ func CreatePutBody(codeService service.CodeService) http_wrapper.Handler {
 		err := codeService.ReplaceCode(userId, codeId, code)
 
 		if err != nil {
-			controller.Halt(ctx, http.StatusInternalServerError, err.Error())
+			controller.Halt(ctx, http.StatusInternalServerError, "internal error")
 			return
 		}
 

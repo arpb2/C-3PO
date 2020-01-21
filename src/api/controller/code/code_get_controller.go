@@ -2,8 +2,8 @@ package code
 
 import (
 	"fmt"
-	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/arpb2/C-3PO/src/api/controller"
+	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/arpb2/C-3PO/src/api/service"
 	"net/http"
 )
@@ -34,12 +34,12 @@ func CreateGetBody(codeService service.CodeService) http_wrapper.Handler {
 		code, err := codeService.GetCode(userId, codeId)
 
 		if err != nil {
-			controller.Halt(ctx, http.StatusInternalServerError, err.Error())
+			controller.Halt(ctx, http.StatusInternalServerError, "internal error")
 			return
 		}
 
 		if code == nil {
-			controller.Halt(ctx, http.StatusBadRequest, fmt.Sprintf("no code associated to the user_id '%s' and code_id '%s'", userId, codeId))
+			controller.Halt(ctx, http.StatusNotFound, fmt.Sprintf("no code associated to the user_id '%d' and code_id '%d'", userId, codeId))
 			return
 		}
 

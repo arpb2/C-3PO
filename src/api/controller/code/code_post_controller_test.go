@@ -51,6 +51,22 @@ func TestCodePostControllerBody_400OnEmptyUserId(t *testing.T) {
 	reader.AssertExpectations(t)
 }
 
+func TestCodePostControllerBody_400OnMalformedUserId(t *testing.T) {
+	reader := new(http_wrapper.TestReader)
+	reader.On("Param", "user_id").Return("not a number").Once()
+
+	c, w := gin_wrapper.CreateTestContext()
+	c.Reader = reader
+
+	createPostController().Body(c)
+	actual := bytes.TrimSpace([]byte(w.Body.String()))
+	expected := golden.Get(t, actual, "bad_request.malformed.user_id.golden.json")
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Equal(t, expected, actual)
+	reader.AssertExpectations(t)
+}
+
 func TestCodePostControllerBody_400OnNoCode(t *testing.T) {
 	reader := new(http_wrapper.TestReader)
 	reader.On("Param", "user_id").Return("1000").Once()
@@ -71,7 +87,7 @@ func TestCodePostControllerBody_400OnNoCode(t *testing.T) {
 
 func TestCodePostControllerBody_500OnServiceWriteError(t *testing.T) {
 	body := code.CreatePostBody(&SharedInMemoryCodeService{
-		codeId: "1000",
+		codeId: uint(1000),
 		code:   nil,
 		err:    errors.New("unexpected error"),
 	})
@@ -105,7 +121,7 @@ func main() {
 }
 			`
 	body := code.CreatePostBody(&SharedInMemoryCodeService{
-		codeId: "1000",
+		codeId: uint(1000),
 		code:   nil,
 		err:    nil,
 	})
@@ -129,7 +145,7 @@ func main() {
 func TestCodePostControllerBody_200OnEmptyCodeStoredOnService(t *testing.T) {
 	expectedCode := ""
 	body := code.CreatePostBody(&SharedInMemoryCodeService{
-		codeId: "1000",
+		codeId: uint(1000),
 		code:   nil,
 		err:    nil,
 	})

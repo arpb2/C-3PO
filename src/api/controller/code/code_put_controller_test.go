@@ -50,6 +50,39 @@ func TestCodePutControllerBody_400OnEmptyUserId(t *testing.T) {
 	assert.Equal(t, expected, actual)
 }
 
+func TestCodePutControllerBody_400OnMalformedUserId(t *testing.T) {
+	reader := new(http_wrapper.TestReader)
+	reader.On("Param", "user_id").Return("not a number").Once()
+
+	c, w := gin_wrapper.CreateTestContext()
+	c.Reader = reader
+
+	createPutController().Body(c)
+	actual := bytes.TrimSpace([]byte(w.Body.String()))
+	expected := golden.Get(t, actual, "bad_request.malformed.user_id.golden.json")
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Equal(t, expected, actual)
+	reader.AssertExpectations(t)
+}
+
+func TestCodePutControllerBody_400OnMalformedCodeId(t *testing.T) {
+	reader := new(http_wrapper.TestReader)
+	reader.On("Param", "user_id").Return("1000").Once()
+	reader.On("Param", "code_id").Return("not a number").Once()
+
+	c, w := gin_wrapper.CreateTestContext()
+	c.Reader = reader
+
+	createPutController().Body(c)
+	actual := bytes.TrimSpace([]byte(w.Body.String()))
+	expected := golden.Get(t, actual, "bad_request.malformed.code_id.golden.json")
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Equal(t, expected, actual)
+	reader.AssertExpectations(t)
+}
+
 func TestCodePutControllerBody_400OnEmptyCodeId(t *testing.T) {
 	reader := new(http_wrapper.TestReader)
 	reader.On("Param", "user_id").Return("1000").Once()
@@ -87,7 +120,7 @@ func TestCodePutControllerBody_400OnNoCode(t *testing.T) {
 
 func TestCodePutControllerBody_500OnServiceWriteError(t *testing.T) {
 	body := code.CreatePutBody(&SharedInMemoryCodeService{
-		codeId: "1000",
+		codeId: uint(1000),
 		code:   nil,
 		err:    errors.New("unexpected error"),
 	})
@@ -122,7 +155,7 @@ func main() {
 }
 			`
 	body := code.CreatePutBody(&SharedInMemoryCodeService{
-		codeId: "1000",
+		codeId: uint(1000),
 		code:   nil,
 		err:    nil,
 	})
@@ -147,7 +180,7 @@ func main() {
 func TestCodePutControllerBody_200OnEmptyCodeStoredOnService(t *testing.T) {
 	expectedCode := ""
 	body := code.CreatePutBody(&SharedInMemoryCodeService{
-		codeId: "1000",
+		codeId: uint(1000),
 		code:   &expectedCode,
 		err:    nil,
 	})

@@ -6,6 +6,12 @@ type TestReader struct{
 	mock.Mock
 }
 
+func (m TestReader) ShouldBindJSON(obj interface{}) error {
+	args := m.Called(obj)
+
+	return args.Error(0)
+}
+
 func (m TestReader) Url() string {
 	args := m.Called()
 

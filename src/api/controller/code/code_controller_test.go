@@ -10,21 +10,21 @@ import (
 )
 
 type SharedInMemoryCodeService struct {
-	codeId string
+	codeId uint
 	code   *string
 	err    error
 }
-func (s *SharedInMemoryCodeService) GetCode(userId string, codeId string) (code *string, err error) {
+func (s *SharedInMemoryCodeService) GetCode(userId uint, codeId uint) (code *string, err error) {
 	s.codeId = codeId
 	return s.code, s.err
 }
 
-func (s *SharedInMemoryCodeService) CreateCode(userId string, code *string) (codeId string, err error) {
+func (s *SharedInMemoryCodeService) CreateCode(userId uint, code *string) (codeId uint, err error) {
 	s.code = code
 	return s.codeId, s.err
 }
 
-func (s *SharedInMemoryCodeService) ReplaceCode(userId string, codeId string, code *string) error {
+func (s *SharedInMemoryCodeService) ReplaceCode(userId uint, codeId uint, code *string) error {
 	s.code = code
 	s.codeId = codeId
 	return s.err
@@ -40,7 +40,7 @@ func TestFetchCodeId_RetrievesFromParam(t *testing.T) {
 	codeId, halt := code.FetchCodeId(c)
 
 	assert.False(t, halt)
-	assert.Equal(t, "1234", codeId)
+	assert.Equal(t, uint(1234), codeId)
 	reader.AssertExpectations(t)
 }
 
@@ -50,8 +50,36 @@ func TestFetchCodeId_HaltsWith400OnError(t *testing.T) {
 	codeId, halt := code.FetchCodeId(c)
 
 	assert.True(t, halt)
-	assert.Empty(t, codeId)
+	assert.Zero(t, codeId)
 	assert.Equal(t, http.StatusBadRequest, recorder.Code)
+}
+
+func TestFetchCodeId_RetrievesFromParam_400IfMalformed(t *testing.T) {
+	reader := new(http_wrapper.TestReader)
+	reader.On("Param", "code_id").Return("not a number").Once()
+
+	c, _ := gin_wrapper.CreateTestContext()
+	c.Reader = reader
+
+	codeId, halt := code.FetchCodeId(c)
+
+	assert.True(t, halt)
+	assert.Zero(t, codeId)
+	reader.AssertExpectations(t)
+}
+
+func TestFetchUserId_RetrievesFromParam_400IfMalformed(t *testing.T) {
+	reader := new(http_wrapper.TestReader)
+	reader.On("Param", "user_id").Return("not a number").Once()
+
+	c, _ := gin_wrapper.CreateTestContext()
+	c.Reader = reader
+
+	userId, halt := code.FetchUserId(c)
+
+	assert.True(t, halt)
+	assert.Zero(t, userId)
+	reader.AssertExpectations(t)
 }
 
 func TestFetchUserId_RetrievesFromParam(t *testing.T) {
@@ -64,7 +92,7 @@ func TestFetchUserId_RetrievesFromParam(t *testing.T) {
 	userId, halt := code.FetchUserId(c)
 
 	assert.False(t, halt)
-	assert.Equal(t, "1234", userId)
+	assert.Equal(t, uint(1234), userId)
 	reader.AssertExpectations(t)
 }
 
@@ -74,7 +102,7 @@ func TestFetchUserId_HaltsWith400OnError(t *testing.T) {
 	userId, halt := code.FetchUserId(c)
 
 	assert.True(t, halt)
-	assert.Empty(t, userId)
+	assert.Zero(t, userId)
 	assert.Equal(t, http.StatusBadRequest, recorder.Code)
 }
 
