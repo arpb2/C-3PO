@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"github.com/arpb2/C-3PO/src/api/auth/jwt"
+	"github.com/arpb2/C-3PO/src/api/circuit_breaker/hystrix"
 	"github.com/arpb2/C-3PO/src/api/controller/code/code_binder"
 	"github.com/arpb2/C-3PO/src/api/controller/health/health_binder"
 	"github.com/arpb2/C-3PO/src/api/controller/session/session_binder"
@@ -27,6 +28,8 @@ func StartApplication(engine engine.ServerEngine) error {
 }
 
 func CreateBinders() []engine.ControllerBinder {
+	circuitBreaker := hystrix.CreateCircuitBreaker()
+
 	tokenHandler := jwt.CreateTokenHandler()
 
 	userService := user_service.CreateService()
@@ -41,7 +44,7 @@ func CreateBinders() []engine.ControllerBinder {
 		health_binder.CreateBinder(),
 		code_binder.CreateBinder(teacherAuthMiddleware, codeService),
 		user_binder.CreateBinder(singleAuthMiddleware, userService),
-		session_binder.CreateBinder(tokenHandler, credentialService),
+		session_binder.CreateBinder(circuitBreaker, tokenHandler, credentialService),
 	}
 }
 

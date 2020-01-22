@@ -2,14 +2,15 @@ package session_binder
 
 import (
 	"github.com/arpb2/C-3PO/src/api/auth"
+	"github.com/arpb2/C-3PO/src/api/circuit_breaker"
 	"github.com/arpb2/C-3PO/src/api/controller/session"
-	"github.com/arpb2/C-3PO/src/api/controller/session/session_task"
 	"github.com/arpb2/C-3PO/src/api/controller/session/session_validation"
 	"github.com/arpb2/C-3PO/src/api/engine"
 	"github.com/arpb2/C-3PO/src/api/service"
 )
 
 type binder struct{
+	CircuitBreaker circuit_breaker.CircuitBreaker
 	TokenHandler auth.TokenHandler
 	CredentialService service.CredentialService
 }
@@ -20,18 +21,20 @@ func (b binder) BindControllers(controllerRegistrable engine.ControllerRegistrab
 		session_validation.EmailValidation,
 		session_validation.PasswordValidation,
 	}
-	fetchUserTask := session_task.CreateFetchUserTask()
 
 	controllerRegistrable.Register(session.CreatePostController(
+		b.CircuitBreaker,
 		b.TokenHandler,
 		b.CredentialService,
 		validations,
-		fetchUserTask,
 	))
 }
 
-func CreateBinder(tokenHandler auth.TokenHandler, credentialService service.CredentialService) engine.ControllerBinder {
+func CreateBinder(circuitBreaker circuit_breaker.CircuitBreaker,
+	              tokenHandler auth.TokenHandler,
+	              credentialService service.CredentialService) engine.ControllerBinder {
 	return &binder{
+		CircuitBreaker:    circuitBreaker,
 		TokenHandler:      tokenHandler,
 		CredentialService: credentialService,
 	}

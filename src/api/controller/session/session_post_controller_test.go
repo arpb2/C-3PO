@@ -3,9 +3,9 @@ package session_test
 import (
 	"errors"
 	"github.com/arpb2/C-3PO/src/api/auth"
+	"github.com/arpb2/C-3PO/src/api/circuit_breaker/blocking"
 	"github.com/arpb2/C-3PO/src/api/controller"
 	"github.com/arpb2/C-3PO/src/api/controller/session"
-	"github.com/arpb2/C-3PO/src/api/controller/session/session_task"
 	"github.com/arpb2/C-3PO/src/api/controller/session/session_validation"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/arpb2/C-3PO/src/api/model"
@@ -36,7 +36,11 @@ func TestPostController_FetchUserIdTask_FailsOnValidationFail(t *testing.T) {
 	err := errors.New("second throws error")
 
 	reader := new(http_wrapper.TestReader)
-	reader.On("ReadBody", mock.MatchedBy(func(obj interface{}) bool {
+	reader.On("ReadBody", mock.MatchedBy(func(obj *model.AuthenticatedUser) bool {
+		obj.User = &model.User{
+			Email: "test@email.com",
+		}
+		obj.Password = "test password"
 		return true
 	})).Return(nil).Once()
 
@@ -44,6 +48,8 @@ func TestPostController_FetchUserIdTask_FailsOnValidationFail(t *testing.T) {
 	middleware.On("AbortTransactionWithStatus", http.StatusBadRequest, http_wrapper.Json{
 		"error": err.Error(),
 	}).Once()
+	middleware.On("IsAborted").Return(false).Once()
+	middleware.On("IsAborted").Return(true).Once()
 
 	validations := []session_validation.Validation{
 		func(user *model.AuthenticatedUser) error {
@@ -53,13 +59,12 @@ func TestPostController_FetchUserIdTask_FailsOnValidationFail(t *testing.T) {
 			return err
 		},
 	}
-	fetchUserTask := session_task.CreateFetchUserTask()
 
 	postController := session.CreatePostController(
+		blocking.CreateCircuitBreaker(),
 		nil,
 		nil,
 		validations,
-		fetchUserTask,
 	)
 
 	postController.Body(&http_wrapper.Context{
@@ -88,38 +93,41 @@ func (c credentialService) Retrieve(email, password string) (uint, error) {
 
 func TestFetchUserIdTaskImpl_FailsOnServiceFailure(t *testing.T) {
 	middleware := new(http_wrapper.TestMiddleware)
+	middleware.On("IsAborted").Return(false).Times(3)
 	middleware.On("AbortTransactionWithStatus", http.StatusInternalServerError, http_wrapper.Json{
 		"error": "internal error",
 	}).Once()
+
+	reader := new (http_wrapper.TestReader)
+	reader.On("ReadBody", mock.MatchedBy(func(obj *model.AuthenticatedUser) bool {
+		obj.User = &model.User{
+				Email: "test@email.com",
+			}
+		obj.Password = "testpassword"
+		return true
+	})).Return(nil).Once()
 
 	service := new(credentialService)
 	service.On("Retrieve", "test@email.com", "testpassword").Return(uint(0), errors.New("error")).Once()
 
 	var validations []session_validation.Validation
-	fetchUserTask := func(ctx *http_wrapper.Context) (user *model.AuthenticatedUser, err error) {
-		return &model.AuthenticatedUser{
-			User: &model.User{
-				Email: "test@email.com",
-			},
-			Password: "testpassword",
-		}, nil
-	}
 
 	postController := session.CreatePostController(
+		blocking.CreateCircuitBreaker(),
 		nil,
 		service,
 		validations,
-		fetchUserTask,
 	)
 
 	postController.Body(&http_wrapper.Context{
-		Reader:     nil,
+		Reader:     reader,
 		Writer:     nil,
 		Middleware: middleware,
 	})
 
 	middleware.AssertExpectations(t)
 	service.AssertExpectations(t)
+	reader.AssertExpectations(t)
 }
 
 type tokenHandler struct{
@@ -146,20 +154,23 @@ func (t tokenHandler) Retrieve(token string) (*auth.Token, *auth.TokenError) {
 func TestFetchUserIdTaskImpl_FailsOnTokenFailure(t *testing.T) {
 	middleware := new(http_wrapper.TestMiddleware)
 	middleware.On("AbortTransactionWithStatus", http.StatusInternalServerError, http_wrapper.Json{
-		"error": "error",
+		"error": "internal error",
 	}).Once()
+	middleware.On("IsAborted").Return(false).Times(4)
+
+	reader := new (http_wrapper.TestReader)
+	reader.On("ReadBody", mock.MatchedBy(func(obj *model.AuthenticatedUser) bool {
+		obj.User = &model.User{
+			Email: "test@email.com",
+		}
+		obj.Password = "testpassword"
+		return true
+	})).Return(nil).Once()
 
 	var validations []session_validation.Validation
-	fetchUserTask := func(ctx *http_wrapper.Context) (user *model.AuthenticatedUser, err error) {
-		return &model.AuthenticatedUser{
-			User: &model.User{
-				Id: 1000,
-			},
-		}, nil
-	}
 
 	credentialService := new(credentialService)
-	credentialService.On("Retrieve", "", "").Return(uint(1000), nil)
+	credentialService.On("Retrieve", "test@email.com", "testpassword").Return(uint(1000), nil)
 
 	tokenHandler := new(tokenHandler)
 	tokenHandler.On("Create", mock.MatchedBy(func(tkn *auth.Token) bool {
@@ -170,19 +181,20 @@ func TestFetchUserIdTaskImpl_FailsOnTokenFailure(t *testing.T) {
 	})
 
 	postController := session.CreatePostController(
+		blocking.CreateCircuitBreaker(),
 		tokenHandler,
 		credentialService,
 		validations,
-		fetchUserTask,
 	)
 
 	postController.Body(&http_wrapper.Context{
-		Reader:     nil,
+		Reader:     reader,
 		Writer:     nil,
 		Middleware: middleware,
 	})
 
 	middleware.AssertExpectations(t)
+	reader.AssertExpectations(t)
 	credentialService.AssertExpectations(t)
 	tokenHandler.AssertExpectations(t)
 }
@@ -190,19 +202,22 @@ func TestFetchUserIdTaskImpl_FailsOnTokenFailure(t *testing.T) {
 func TestFetchUserIdTaskImpl_SuccessReturnsToken(t *testing.T) {
 	writer := new(http_wrapper.TestWriter)
 	writer.On("WriteJson", http.StatusOK, http_wrapper.Json{
-		"user_id": uint(1000),
 		"token": "test token",
 	}).Once()
 
+	middleware := new(http_wrapper.TestMiddleware)
+	middleware.On("IsAborted").Return(false).Times(4)
+
+	reader := new (http_wrapper.TestReader)
+	reader.On("ReadBody", mock.MatchedBy(func(obj *model.AuthenticatedUser) bool {
+		obj.User = &model.User{
+			Email: "test@email.com",
+		}
+		obj.Password = "test password"
+		return true
+	})).Return(nil).Once()
+
 	var validations []session_validation.Validation
-	fetchUserTask := func(ctx *http_wrapper.Context) (user *model.AuthenticatedUser, err error) {
-		return &model.AuthenticatedUser{
-			User: &model.User{
-				Email: "test@email.com",
-			},
-			Password: "test password",
-		}, nil
-	}
 
 	credentialService := new(credentialService)
 	credentialService.On("Retrieve", "test@email.com", "test password").Return(uint(1000), nil)
@@ -213,19 +228,21 @@ func TestFetchUserIdTaskImpl_SuccessReturnsToken(t *testing.T) {
 	})).Return("test token", nil)
 
 	postController := session.CreatePostController(
+		blocking.CreateCircuitBreaker(),
 		tokenHandler,
 		credentialService,
 		validations,
-		fetchUserTask,
 	)
 
 	postController.Body(&http_wrapper.Context{
-		Reader:     nil,
+		Reader:     reader,
 		Writer:     writer,
-		Middleware: nil,
+		Middleware: middleware,
 	})
 
 	writer.AssertExpectations(t)
+	reader.AssertExpectations(t)
+	middleware.AssertExpectations(t)
 	credentialService.AssertExpectations(t)
 	tokenHandler.AssertExpectations(t)
 }

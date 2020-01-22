@@ -1,94 +1,70 @@
 package session
 
 import (
+	"fmt"
 	"github.com/arpb2/C-3PO/src/api/auth"
+	"github.com/arpb2/C-3PO/src/api/circuit_breaker"
 	"github.com/arpb2/C-3PO/src/api/controller"
-	"github.com/arpb2/C-3PO/src/api/controller/session/session_task"
+	"github.com/arpb2/C-3PO/src/api/controller/session/session_command"
 	"github.com/arpb2/C-3PO/src/api/controller/session/session_validation"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
-	"github.com/arpb2/C-3PO/src/api/model"
 	"github.com/arpb2/C-3PO/src/api/service"
 	"net/http"
 )
 
-func CreatePostController(tokenHandler auth.TokenHandler,
+func CreatePostController(circuitBreaker circuit_breaker.CircuitBreaker,
+						  tokenHandler auth.TokenHandler,
 	                      service service.CredentialService,
-	                      validations []session_validation.Validation,
-	                      fetchUserTask session_task.FetchUserTask) controller.Controller {
+	                      validations []session_validation.Validation) controller.Controller {
 	return controller.Controller{
 		Method: "POST",
 		Path:   "/session",
 		Body:   PostBody{
+			CircuitBreaker:  circuitBreaker,
 			TokenHandler:    tokenHandler,
 			Service:         service,
 			Validations:     validations,
-			FetchUserTask:   fetchUserTask,
-		}.Post,
+		}.Method,
 	}
 }
 
 type PostBody struct {
-	TokenHandler auth.TokenHandler
-	Service      service.CredentialService
+	CircuitBreaker circuit_breaker.CircuitBreaker
+	TokenHandler   auth.TokenHandler
+	Service        service.CredentialService
 
-	Validations  []session_validation.Validation
-
-	FetchUserTask func(ctx *http_wrapper.Context) (user *model.AuthenticatedUser, err error)
+	Validations    []session_validation.Validation
 }
 
-func (b PostBody) getUserData(ctx *http_wrapper.Context) (email, password string, ok bool){
-	user, err := b.FetchUserTask(ctx)
+func (b PostBody) Method(ctx *http_wrapper.Context) {
+	fetchUserCommand := session_command.CreateFetchUserCommand(ctx)
+	validateParamsCommand := session_command.CreateValidateParametersCommand(ctx, fetchUserCommand.OutputStream, b.Validations)
+	authenticateCommand := session_command.CreateAuthenticateCommand(ctx, b.Service, validateParamsCommand.Stream)
+	createTokenCommand := session_command.CreateTokenCommand(ctx, b.TokenHandler, authenticateCommand.Stream)
 
-	if err != nil {
-		controller.Halt(ctx, http.StatusBadRequest, err.Error())
-		ok = false
-		return
+	commands := []circuit_breaker.Command{
+		fetchUserCommand,
+		validateParamsCommand,
+		authenticateCommand,
+		createTokenCommand,
 	}
 
-	for _, requirement := range b.Validations {
-		if err := requirement(user); err != nil {
-			controller.Halt(ctx, http.StatusBadRequest, err.Error())
-			ok = false
+	for _, command := range commands {
+		err := b.CircuitBreaker.Do(command)
+
+		if ctx.IsAborted() {
+			return
+		}
+
+		if err != nil {
+			fmt.Print(err.Error())
+			controller.Halt(ctx, http.StatusInternalServerError, "internal error")
 			return
 		}
 	}
 
-	email = user.Email
-	password = user.Password
-	ok = true
-	return
-}
-
-func (b PostBody) authenticate(ctx *http_wrapper.Context, email, password string) (token string, userId uint, ok bool) {
-	userId, err := b.Service.Retrieve(email, password)
-
-	if err != nil {
-		controller.Halt(ctx, http.StatusInternalServerError, "internal error")
-		ok = false
-		return
-	}
-
-	token, tokenErr := b.TokenHandler.Create(&auth.Token{
-		UserId: userId,
+	token := <-createTokenCommand.OutputStream
+	ctx.WriteJson(http.StatusOK, http_wrapper.Json{
+		"token": token,
 	})
-
-	if tokenErr != nil {
-		controller.Halt(ctx, tokenErr.Status, tokenErr.Error.Error())
-		ok = false
-		return
-	}
-
-	ok = true
-	return
-}
-
-func (b PostBody) Post(ctx *http_wrapper.Context) {
-	if email, password, ok := b.getUserData(ctx); ok {
-		if token, userId, ok := b.authenticate(ctx, email, password); ok {
-			ctx.WriteJson(http.StatusOK, http_wrapper.Json{
-				"user_id": userId,
-				"token": token,
-			})
-		}
-	}
 }
