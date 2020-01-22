@@ -1,4 +1,4 @@
-package session_command
+package user_command
 
 import (
 	"github.com/arpb2/C-3PO/src/api/controller"
@@ -7,16 +7,16 @@ import (
 	"net/http"
 )
 
-type FetchUserCommand struct {
+type FetchAuthenticatedUserCommand struct {
 	Context      *http_wrapper.Context
 	OutputStream chan *model.AuthenticatedUser
 }
 
-func (c *FetchUserCommand) Name() string {
+func (c *FetchAuthenticatedUserCommand) Name() string {
 	return "fetch_user_command"
 }
 
-func (c *FetchUserCommand) Run() error {
+func (c *FetchAuthenticatedUserCommand) Run() error {
 	var authenticatedUser model.AuthenticatedUser
 
 	if err := c.Context.ReadBody(&authenticatedUser); err != nil {
@@ -28,12 +28,12 @@ func (c *FetchUserCommand) Run() error {
 	return nil
 }
 
-func (c *FetchUserCommand) Fallback(err error) error {
+func (c *FetchAuthenticatedUserCommand) Fallback(err error) error {
 	return err
 }
 
-func CreateFetchUserCommand(ctx *http_wrapper.Context) *FetchUserCommand {
-	return &FetchUserCommand{
+func CreateFetchAuthenticatedUserCommand(ctx *http_wrapper.Context) *FetchAuthenticatedUserCommand {
+	return &FetchAuthenticatedUserCommand{
 		Context:      ctx,
 		OutputStream: make(chan *model.AuthenticatedUser, 1),
 	}

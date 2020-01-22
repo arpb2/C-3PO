@@ -1,4 +1,4 @@
-package session_command_test
+package user_command_test
 
 import (
 	"errors"

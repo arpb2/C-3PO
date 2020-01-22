@@ -3,6 +3,7 @@ package session
 import (
 	"fmt"
 	"github.com/arpb2/C-3PO/src/api/auth"
+	"github.com/arpb2/C-3PO/src/api/controller/user/user_command"
 	"github.com/arpb2/C-3PO/src/api/executor"
 	"github.com/arpb2/C-3PO/src/api/controller"
 	"github.com/arpb2/C-3PO/src/api/controller/session/session_command"
@@ -37,10 +38,10 @@ type PostBody struct {
 }
 
 func (b PostBody) Method(ctx *http_wrapper.Context) {
-	fetchUserCommand := session_command.CreateFetchUserCommand(ctx)
+	fetchUserCommand := user_command.CreateFetchAuthenticatedUserCommand(ctx)
 	validateParamsCommand := session_command.CreateValidateParametersCommand(ctx, fetchUserCommand.OutputStream, b.Validations)
 	authenticateCommand := session_command.CreateAuthenticateCommand(ctx, b.Service, validateParamsCommand.Stream)
-	createTokenCommand := session_command.CreateTokenCommand(ctx, b.TokenHandler, authenticateCommand.Stream)
+	createTokenCommand := session_command.CreateCreateTokenCommand(ctx, b.TokenHandler, authenticateCommand.Stream)
 
 	commands := []executor.Command{
 		fetchUserCommand,

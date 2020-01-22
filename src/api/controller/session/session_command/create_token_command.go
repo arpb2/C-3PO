@@ -8,18 +8,18 @@ import (
 	"net/http"
 )
 
-type TokenCommand struct {
+type CreateTokenCommand struct {
 	Context      *http_wrapper.Context
 	TokenHandler auth.TokenHandler
 	InputStream  chan *model.AuthenticatedUser
 	OutputStream chan string
 }
 
-func (c *TokenCommand) Name() string {
+func (c *CreateTokenCommand) Name() string {
 	return "create_token_command"
 }
 
-func (c *TokenCommand) Run() error {
+func (c *CreateTokenCommand) Run() error {
 	user := <-c.InputStream
 
 	token, tokenErr := c.TokenHandler.Create(&auth.Token{
@@ -39,14 +39,14 @@ func (c *TokenCommand) Run() error {
 	return nil
 }
 
-func (c *TokenCommand) Fallback(err error) error {
+func (c *CreateTokenCommand) Fallback(err error) error {
 	return err
 }
 
-func CreateTokenCommand(ctx *http_wrapper.Context,
+func CreateCreateTokenCommand(ctx *http_wrapper.Context,
 						tokenHandler auth.TokenHandler,
-						inputStream chan *model.AuthenticatedUser) *TokenCommand {
-	return &TokenCommand{
+						inputStream chan *model.AuthenticatedUser) *CreateTokenCommand {
+	return &CreateTokenCommand{
 		Context:      ctx,
 		TokenHandler: tokenHandler,
 		InputStream:  inputStream,

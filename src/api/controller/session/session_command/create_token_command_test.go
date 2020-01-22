@@ -12,11 +12,11 @@ import (
 )
 
 func TestTokenCommand_Name(t *testing.T) {
-	assert.Equal(t, "create_token_command", session_command.CreateTokenCommand(nil, nil, nil).Name())
+	assert.Equal(t, "create_token_command", session_command.CreateCreateTokenCommand(nil, nil, nil).Name())
 }
 
 func TestTokenCommand_Fallback_DoesNothing(t *testing.T) {
-	command := session_command.CreateTokenCommand(nil, nil, nil)
+	command := session_command.CreateCreateTokenCommand(nil, nil, nil)
 	runErr := errors.New("run err")
 
 	assert.Equal(t, runErr, command.Fallback(runErr))
@@ -35,7 +35,7 @@ func TestTokenCommand_Run_OnBadToken_InternalError_ReturnsError(t *testing.T) {
 		Status: http.StatusInternalServerError,
 	}).Once()
 
-	command := session_command.CreateTokenCommand(
+	command := session_command.CreateCreateTokenCommand(
 		&http_wrapper.Context{
 			Reader: nil,
 			Writer: nil,
@@ -75,7 +75,7 @@ func TestTokenCommand_Run_OnBadToken_OtherError_Halts_ReturnsNothing(t *testing.
 		"error": expectedErr.Error(),
 	})
 
-	command := session_command.CreateTokenCommand(
+	command := session_command.CreateCreateTokenCommand(
 		&http_wrapper.Context{
 			Reader: nil,
 			Writer: nil,
@@ -108,7 +108,7 @@ func TestTokenCommand_Run_OnGoodToken_PublishesToken(t *testing.T) {
 		UserId: expectedUserId,
 	}).Return(expectedToken, nil).Once()
 
-	command := session_command.CreateTokenCommand(
+	command := session_command.CreateCreateTokenCommand(
 		&http_wrapper.Context{
 			Reader: nil,
 			Writer: nil,
