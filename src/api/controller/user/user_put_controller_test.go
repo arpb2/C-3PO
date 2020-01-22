@@ -36,7 +36,7 @@ func TestUserPutControllerPathIsAsExpected(t *testing.T) {
 }
 
 func TestUserPutControllerBody_400OnNoUserId(t *testing.T) {
-	reader := new(http_wrapper.TestReader)
+	reader := new(http_wrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("").Once()
 
 	c, w := gin_wrapper.CreateTestContext()
@@ -52,7 +52,7 @@ func TestUserPutControllerBody_400OnNoUserId(t *testing.T) {
 }
 
 func TestUserPutControllerBody_400OnMalformedUserId(t *testing.T) {
-	reader := new(http_wrapper.TestReader)
+	reader := new(http_wrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("not a number").Once()
 
 	c, w := gin_wrapper.CreateTestContext()
@@ -68,7 +68,7 @@ func TestUserPutControllerBody_400OnMalformedUserId(t *testing.T) {
 }
 
 func TestUserPutControllerBody_400OnEmptyOrMalformedUser(t *testing.T) {
-	reader := new(http_wrapper.TestReader)
+	reader := new(http_wrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("1000").Once()
 	reader.On("ReadBody", mock.MatchedBy(func(obj interface{}) bool {
 		return true
@@ -99,7 +99,7 @@ func TestUserPutControllerBody_500OnServiceCreateError(t *testing.T) {
 
 	body := user.CreatePutBody(service)
 
-	reader := new(http_wrapper.TestReader)
+	reader := new(http_wrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("1000").Once()
 	reader.On("ReadBody", mock.MatchedBy(func(obj interface{}) bool {
 		return true
@@ -134,7 +134,7 @@ func TestUserPutControllerBody_500OnNoUserStoredInService(t *testing.T) {
 
 	body := user.CreatePutBody(service)
 
-	reader := new(http_wrapper.TestReader)
+	reader := new(http_wrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("1000").Once()
 	reader.On("ReadBody", mock.MatchedBy(func(obj interface{}) bool {
 		return true
@@ -165,7 +165,7 @@ func TestUserPutControllerBody_400OnIdSpecified(t *testing.T) {
 	service := new(MockUserService)
 	body := user.CreatePutBody(service)
 
-	reader := new(http_wrapper.TestReader)
+	reader := new(http_wrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("1000").Once()
 	reader.On("ReadBody", mock.MatchedBy(func(obj *model.AuthenticatedUser) bool {
 		return true
@@ -203,7 +203,7 @@ func TestUserPutControllerBody_200OnUserStoredOnService(t *testing.T) {
 
 	body := user.CreatePutBody(service)
 
-	reader := new(http_wrapper.TestReader)
+	reader := new(http_wrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("1000").Once()
 	reader.On("ReadBody", mock.MatchedBy(func(obj *model.AuthenticatedUser) bool {
 		return true

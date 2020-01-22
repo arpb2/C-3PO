@@ -2,23 +2,23 @@ package http_wrapper
 
 import "github.com/stretchr/testify/mock"
 
-type TestMiddleware struct{
+type MockMiddleware struct{
 	mock.Mock
 }
 
-func (t TestMiddleware) IsAborted() bool {
+func (t MockMiddleware) IsAborted() bool {
 	args := t.Called()
 	return args.Bool(0)
 }
 
-func (t TestMiddleware) NextHandler() {
+func (t MockMiddleware) NextHandler() {
 	_ = t.Called()
 }
 
-func (t TestMiddleware) AbortTransaction() {
+func (t MockMiddleware) AbortTransaction() {
 	_ = t.Called()
 }
 
-func (t TestMiddleware) AbortTransactionWithStatus(code int, jsonObj interface{}) {
+func (t MockMiddleware) AbortTransactionWithStatus(code int, jsonObj interface{}) {
 	_ = t.Called(code, jsonObj)
 }

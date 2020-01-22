@@ -37,7 +37,7 @@ func TestCodePostControllerPathIsAsExpected(t *testing.T) {
 }
 
 func TestCodePostControllerBody_400OnEmptyUserId(t *testing.T) {
-	reader := new(http_wrapper.TestReader)
+	reader := new(http_wrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("").Once()
 
 	c, w := gin_wrapper.CreateTestContext()
@@ -53,7 +53,7 @@ func TestCodePostControllerBody_400OnEmptyUserId(t *testing.T) {
 }
 
 func TestCodePostControllerBody_400OnMalformedUserId(t *testing.T) {
-	reader := new(http_wrapper.TestReader)
+	reader := new(http_wrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("not a number").Once()
 
 	c, w := gin_wrapper.CreateTestContext()
@@ -69,7 +69,7 @@ func TestCodePostControllerBody_400OnMalformedUserId(t *testing.T) {
 }
 
 func TestCodePostControllerBody_400OnNoCode(t *testing.T) {
-	reader := new(http_wrapper.TestReader)
+	reader := new(http_wrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("1000").Once()
 	reader.On("GetFormData", "code").Return("", false).Once()
 
@@ -93,7 +93,7 @@ func TestCodePostControllerBody_500OnServiceWriteError(t *testing.T) {
 		err:    errors.New("unexpected error"),
 	})
 
-	reader := new(http_wrapper.TestReader)
+	reader := new(http_wrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("1000").Once()
 	reader.On("GetFormData", "code").Return("sending some code", true).Once()
 
@@ -127,7 +127,7 @@ func main() {
 		err:    nil,
 	})
 
-	reader := new(http_wrapper.TestReader)
+	reader := new(http_wrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("1000").Once()
 	reader.On("GetFormData", "code").Return(expectedCode, true).Once()
 
@@ -151,7 +151,7 @@ func TestCodePostControllerBody_200OnEmptyCodeStoredOnService(t *testing.T) {
 		err:    nil,
 	})
 
-	reader := new(http_wrapper.TestReader)
+	reader := new(http_wrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("1000").Once()
 	reader.On("GetFormData", "code").Return(expectedCode, true).Once()
 

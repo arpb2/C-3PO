@@ -57,7 +57,7 @@ func (m MockUserService) DeleteUser(userId uint) error {
 }
 
 func TestFetchUserId_RetrievesFromParam(t *testing.T) {
-	reader := new(http_wrapper.TestReader)
+	reader := new(http_wrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("1234").Once()
 
 	c, _ := gin_wrapper.CreateTestContext()
@@ -71,7 +71,7 @@ func TestFetchUserId_RetrievesFromParam(t *testing.T) {
 }
 
 func TestFetchUserId_RetrievesFromParam_400IfMalformed(t *testing.T) {
-	reader := new(http_wrapper.TestReader)
+	reader := new(http_wrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("not a number").Once()
 
 	c, _ := gin_wrapper.CreateTestContext()
