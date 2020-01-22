@@ -6,20 +6,17 @@ type MockTokenHandler struct{
 	mock.Mock
 }
 
-func (t MockTokenHandler) Create(token *Token) (tokenStr string, err *TokenError) {
+func (t MockTokenHandler) Create(token *Token) (tokenStr string, err error) {
 	args := t.Called(token)
 
 	tokenStr = args.String(0)
 
-	errParam := args.Get(1)
-	if errParam != nil {
-		err = errParam.(*TokenError)
-	}
+	err = args.Error(1)
 
 	return
 }
 
-func (t MockTokenHandler) Retrieve(token string) (tkn *Token, err *TokenError) {
+func (t MockTokenHandler) Retrieve(token string) (tkn *Token, err error) {
 	args := t.Called(token)
 
 	tokenParam := args.Get(0)
@@ -27,10 +24,7 @@ func (t MockTokenHandler) Retrieve(token string) (tkn *Token, err *TokenError) {
 		tkn = tokenParam.(*Token)
 	}
 
-	errParam := args.Get(1)
-	if errParam != nil {
-		err = errParam.(*TokenError)
-	}
+	err = args.Error(1)
 
 	return
 }

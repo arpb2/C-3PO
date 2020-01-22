@@ -2,7 +2,9 @@ package jwt
 
 import (
 	"github.com/arpb2/C-3PO/src/api/auth"
+	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/xerrors"
 	"net/http"
 	"os"
 	"testing"
@@ -59,6 +61,10 @@ func TestRetrieve_OnBadToken(t *testing.T) {
 	token, err := DefaultTokenHandler.Retrieve("bad token")
 
 	assert.NotNil(t, err)
-	assert.Equal(t, http.StatusBadRequest, err.Status)
+
+	var httpError http_wrapper.HttpError
+	assert.True(t, xerrors.As(err, &httpError))
+	assert.Equal(t, http.StatusBadRequest, httpError.Code)
+
 	assert.Nil(t, token)
 }

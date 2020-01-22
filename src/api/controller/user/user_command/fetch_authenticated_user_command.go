@@ -4,6 +4,7 @@ import (
 	"github.com/arpb2/C-3PO/src/api/controller"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/arpb2/C-3PO/src/api/model"
+	"golang.org/x/xerrors"
 	"net/http"
 )
 
@@ -20,8 +21,7 @@ func (c *FetchAuthenticatedUserCommand) Run() error {
 	var authenticatedUser model.AuthenticatedUser
 
 	if err := c.Context.ReadBody(&authenticatedUser); err != nil {
-		controller.Halt(c.Context, http.StatusBadRequest, "malformed body")
-		return nil
+		return http_wrapper.CreateBadRequestError("malformed body")
 	}
 
 	c.OutputStream <- &authenticatedUser
@@ -29,6 +29,16 @@ func (c *FetchAuthenticatedUserCommand) Run() error {
 }
 
 func (c *FetchAuthenticatedUserCommand) Fallback(err error) error {
+	var httpError http_wrapper.HttpError
+	if xerrors.As(err, &httpError) {
+		if httpError.Code == http.StatusInternalServerError {
+			return err
+		} else {
+			controller.Halt(c.Context, httpError.Code, httpError.Error())
+			return nil
+		}
+	}
+
 	return err
 }
 

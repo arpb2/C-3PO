@@ -5,6 +5,7 @@ import (
 	"github.com/arpb2/C-3PO/src/api/controller/session/session_validation"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/arpb2/C-3PO/src/api/model"
+	"golang.org/x/xerrors"
 	"net/http"
 )
 
@@ -22,8 +23,7 @@ func (c *ValidateParametersCommand) Run() error {
 	user := <-c.Stream
 	for _, requirement := range c.Validations {
 		if err := requirement(user); err != nil {
-			controller.Halt(c.Context, http.StatusBadRequest, err.Error())
-			return nil
+			return http_wrapper.CreateBadRequestError(err.Error())
 		}
 	}
 
@@ -32,6 +32,16 @@ func (c *ValidateParametersCommand) Run() error {
 }
 
 func (c *ValidateParametersCommand) Fallback(err error) error {
+	var httpError http_wrapper.HttpError
+	if xerrors.As(err, &httpError) {
+		if httpError.Code == http.StatusInternalServerError {
+			return err
+		} else {
+			controller.Halt(c.Context, httpError.Code, httpError.Error())
+			return nil
+		}
+	}
+
 	return err
 }
 

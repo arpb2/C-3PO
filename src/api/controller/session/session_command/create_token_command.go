@@ -5,6 +5,7 @@ import (
 	"github.com/arpb2/C-3PO/src/api/controller"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/arpb2/C-3PO/src/api/model"
+	"golang.org/x/xerrors"
 	"net/http"
 )
 
@@ -22,17 +23,12 @@ func (c *CreateTokenCommand) Name() string {
 func (c *CreateTokenCommand) Run() error {
 	user := <-c.InputStream
 
-	token, tokenErr := c.TokenHandler.Create(&auth.Token{
+	token, err := c.TokenHandler.Create(&auth.Token{
 		UserId: user.Id,
 	})
 
-	if tokenErr != nil {
-		if tokenErr.Status == http.StatusInternalServerError {
-			return tokenErr.Error
-		} else {
-			controller.Halt(c.Context, tokenErr.Status, tokenErr.Error.Error())
-			return nil
-		}
+	if err != nil {
+		return err
 	}
 
 	c.OutputStream <- token
@@ -40,6 +36,16 @@ func (c *CreateTokenCommand) Run() error {
 }
 
 func (c *CreateTokenCommand) Fallback(err error) error {
+	var httpError http_wrapper.HttpError
+	if xerrors.As(err, &httpError) {
+		if httpError.Code == http.StatusInternalServerError {
+			return err
+		} else {
+			controller.Halt(c.Context, httpError.Code, httpError.Error())
+			return nil
+		}
+	}
+
 	return err
 }
 

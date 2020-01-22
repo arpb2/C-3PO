@@ -5,6 +5,7 @@ import (
 	"github.com/arpb2/C-3PO/src/api/auth"
 	"github.com/arpb2/C-3PO/src/api/controller"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
+	"golang.org/x/xerrors"
 	"net/http"
 	"strconv"
 )
@@ -24,7 +25,12 @@ func HandleAuthentication(ctx *http_wrapper.Context, tokenHandler auth.TokenHand
 	token, err := tokenHandler.Retrieve(authToken)
 
 	if err != nil {
-		controller.Halt(ctx, err.Status, err.Error.Error())
+		var httpError http_wrapper.HttpError
+		if xerrors.As(err, &httpError) {
+			controller.Halt(ctx, httpError.Code, httpError.Error())
+		} else {
+			controller.Halt(ctx, http.StatusInternalServerError, err.Error())
+		}
 		return
 	}
 

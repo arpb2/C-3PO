@@ -1,11 +1,10 @@
 package jwt
 
 import (
-	"errors"
 	"fmt"
 	"github.com/arpb2/C-3PO/src/api/auth"
+	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/dgrijalva/jwt-go"
-	"net/http"
 	"os"
 )
 
@@ -33,7 +32,7 @@ type TokenHandler struct{
 	Secret []byte
 }
 
-func (t TokenHandler) Create(authToken *auth.Token) (string, *auth.TokenError) {
+func (t TokenHandler) Create(authToken *auth.Token) (string, error) {
 	claims := &token{
 		Token: authToken,
 		StandardClaims: jwt.StandardClaims{},
@@ -43,15 +42,12 @@ func (t TokenHandler) Create(authToken *auth.Token) (string, *auth.TokenError) {
 	tokenString, err := tkn.SignedString(t.Secret)
 
 	if err != nil {
-		return "", &auth.TokenError{
-			Error:  errors.New("internal error"),
-			Status: http.StatusInternalServerError,
-		}
+		return "", http_wrapper.CreateInternalError()
 	}
 	return tokenString, nil
 }
 
-func (t TokenHandler) Retrieve(authToken string) (*auth.Token, *auth.TokenError) {
+func (t TokenHandler) Retrieve(authToken string) (*auth.Token, error) {
 	claims := &token{}
 
 	tkn, err := jwt.ParseWithClaims(authToken, claims, func(token *jwt.Token) (interface{}, error) {
@@ -60,22 +56,13 @@ func (t TokenHandler) Retrieve(authToken string) (*auth.Token, *auth.TokenError)
 
 	if err != nil {
 		if err == jwt.ErrSignatureInvalid {
-			return nil, &auth.TokenError{
-				Error:  errors.New("invalid signature"),
-				Status: http.StatusUnauthorized,
-			}
+			return nil, http_wrapper.CreateUnauthorizedError()
 		}
-		return nil, &auth.TokenError{
-			Error: errors.New("malformed token"),
-			Status: http.StatusBadRequest,
-		}
+		return nil, http_wrapper.CreateBadRequestError("malformed token")
 	}
 
 	if !tkn.Valid {
-		return nil, &auth.TokenError{
-			Error:  errors.New("invalid token"),
-			Status: http.StatusUnauthorized,
-		}
+		return nil, http_wrapper.CreateUnauthorizedError()
 	}
 
 	return claims.Token, nil

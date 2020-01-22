@@ -2,7 +2,7 @@ package user_command_test
 
 import (
 	"errors"
-	"github.com/arpb2/C-3PO/src/api/controller/session/session_command"
+	"github.com/arpb2/C-3PO/src/api/controller/user/user_command"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/arpb2/C-3PO/src/api/model"
 	"github.com/stretchr/testify/assert"
@@ -12,14 +12,32 @@ import (
 )
 
 func TestFetchUserCommand_Name(t *testing.T) {
-	assert.Equal(t, "fetch_user_command", session_command.CreateFetchUserCommand(nil).Name())
+	assert.Equal(t, "fetch_user_command", user_command.CreateFetchAuthenticatedUserCommand(nil).Name())
 }
 
-func TestFetchUserCommand_Fallback_DoesNothing(t *testing.T) {
-	command := session_command.CreateFetchUserCommand(nil)
+func TestFetchUserCommand_Fallback_DoesNothingOnUnknownError(t *testing.T) {
+	command := user_command.CreateFetchAuthenticatedUserCommand(nil)
 	runErr := errors.New("run err")
 
 	assert.Equal(t, runErr, command.Fallback(runErr))
+}
+
+func TestFetchUserCommand_Fallback_ReturnsNilAndNotifies_OnBadRequest(t *testing.T) {
+	middleware := new(http_wrapper.MockMiddleware)
+	middleware.On("AbortTransactionWithStatus", http.StatusBadRequest, http_wrapper.Json{
+		"error": "some message",
+	})
+
+	command := user_command.CreateFetchAuthenticatedUserCommand(&http_wrapper.Context{
+		Reader: nil,
+		Writer: nil,
+		Middleware: middleware,
+	})
+
+	runErr := http_wrapper.CreateBadRequestError("some message")
+
+	assert.Nil(t, command.Fallback(runErr))
+	middleware.AssertExpectations(t)
 }
 
 func TestFetchUserCommand_Run_OnBadRead_Halts_NoErrorReturned(t *testing.T) {
@@ -28,22 +46,17 @@ func TestFetchUserCommand_Run_OnBadRead_Halts_NoErrorReturned(t *testing.T) {
 		return true
 	})).Return(errors.New("bad read error")).Once()
 
-	middleware := new(http_wrapper.MockMiddleware)
-	middleware.On("AbortTransactionWithStatus", http.StatusBadRequest, http_wrapper.Json{
-		"error": "malformed body",
-	})
-
-	command := session_command.CreateFetchUserCommand(&http_wrapper.Context{
+	command := user_command.CreateFetchAuthenticatedUserCommand(&http_wrapper.Context{
 			Reader: reader,
 			Writer: nil,
-			Middleware: middleware,
+			Middleware: nil,
 		})
 
 	err := command.Run()
 
-	assert.Nil(t, err)
+	assert.NotNil(t, err)
+	assert.Equal(t, "malformed body", err.Error())
 	assert.Zero(t, len(command.OutputStream))
-	middleware.AssertExpectations(t)
 	reader.AssertExpectations(t)
 }
 
@@ -60,7 +73,7 @@ func TestFetchUserCommand_Run_OnGoodRead_PublishesUser(t *testing.T) {
 		return true
 	})).Return(nil).Once()
 
-	command := session_command.CreateFetchUserCommand(&http_wrapper.Context{
+	command := user_command.CreateFetchAuthenticatedUserCommand(&http_wrapper.Context{
 		Reader: reader,
 		Writer: nil,
 		Middleware: nil,

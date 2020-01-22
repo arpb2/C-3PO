@@ -141,10 +141,7 @@ func TestFetchUserIdTaskImpl_FailsOnTokenFailure(t *testing.T) {
 	tokenHandler := new(auth.MockTokenHandler)
 	tokenHandler.On("Create", mock.MatchedBy(func(tkn *auth.Token) bool {
 		return tkn.UserId == uint(1000)
-	})).Return("", &auth.TokenError{
-		Error:  errors.New("error"),
-		Status: 500,
-	})
+	})).Return("", http_wrapper.CreateInternalError())
 
 	postController := session.CreatePostController(
 		blocking.CreateExecutor(),

@@ -15,25 +15,47 @@ func TestTokenCommand_Name(t *testing.T) {
 	assert.Equal(t, "create_token_command", session_command.CreateCreateTokenCommand(nil, nil, nil).Name())
 }
 
-func TestTokenCommand_Fallback_DoesNothing(t *testing.T) {
+func TestTokenCommand_Fallback_DoesNothing_OnInternalError(t *testing.T) {
+	command := session_command.CreateCreateTokenCommand(nil, nil, nil)
+	runErr := http_wrapper.CreateInternalError()
+
+	assert.Equal(t, runErr, command.Fallback(runErr))
+}
+
+func TestTokenCommand_Fallback_DoesNothing_OnNonHttpError(t *testing.T) {
 	command := session_command.CreateCreateTokenCommand(nil, nil, nil)
 	runErr := errors.New("run err")
 
 	assert.Equal(t, runErr, command.Fallback(runErr))
 }
 
+func TestTokenCommand_Fallback_Halts_OnHttpError_NotInternal(t *testing.T) {
+	middleware := new(http_wrapper.MockMiddleware)
+	middleware.On("AbortTransactionWithStatus", http.StatusBadRequest, http_wrapper.Json{
+		"error": "some message",
+	})
+
+	command := session_command.CreateCreateTokenCommand(&http_wrapper.Context{
+		Reader: nil,
+		Writer: nil,
+		Middleware: middleware,
+	}, nil, nil)
+
+	runErr := http_wrapper.CreateBadRequestError("some message")
+
+	assert.Nil(t, command.Fallback(runErr))
+	middleware.AssertExpectations(t)
+}
+
 func TestTokenCommand_Run_OnBadToken_InternalError_ReturnsError(t *testing.T) {
 	expectedUserId := uint(1000)
-	expectedErr := errors.New("err")
+	expectedErr := http_wrapper.CreateInternalError()
 
 	input := make(chan *model.AuthenticatedUser, 1)
 	tokenHandler := new(auth.MockTokenHandler)
 	tokenHandler.On("Create", &auth.Token{
 		UserId: expectedUserId,
-	}).Return("", &auth.TokenError{
-		Error:  expectedErr,
-		Status: http.StatusInternalServerError,
-	}).Once()
+	}).Return("", expectedErr).Once()
 
 	command := session_command.CreateCreateTokenCommand(
 		&http_wrapper.Context{
@@ -65,21 +87,13 @@ func TestTokenCommand_Run_OnBadToken_OtherError_Halts_ReturnsNothing(t *testing.
 	tokenHandler := new(auth.MockTokenHandler)
 	tokenHandler.On("Create", &auth.Token{
 		UserId: expectedUserId,
-	}).Return("", &auth.TokenError{
-		Error:  expectedErr,
-		Status: http.StatusBadRequest,
-	}).Once()
-
-	middleware := new(http_wrapper.MockMiddleware)
-	middleware.On("AbortTransactionWithStatus", http.StatusBadRequest, http_wrapper.Json{
-		"error": expectedErr.Error(),
-	})
+	}).Return("", http_wrapper.CreateBadRequestError(expectedErr.Error())).Once()
 
 	command := session_command.CreateCreateTokenCommand(
 		&http_wrapper.Context{
 			Reader: nil,
 			Writer: nil,
-			Middleware: middleware,
+			Middleware: nil,
 		},
 		tokenHandler,
 		input)
@@ -92,10 +106,10 @@ func TestTokenCommand_Run_OnBadToken_OtherError_Halts_ReturnsNothing(t *testing.
 
 	err := command.Run()
 
-	assert.Nil(t, err)
+	assert.NotNil(t, err)
+	assert.Error(t, expectedErr, err)
 	assert.Zero(t, len(command.OutputStream))
 	tokenHandler.AssertExpectations(t)
-	middleware.AssertExpectations(t)
 }
 
 func TestTokenCommand_Run_OnGoodToken_PublishesToken(t *testing.T) {

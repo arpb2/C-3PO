@@ -15,15 +15,40 @@ func TestValidateParametersCommand_Name(t *testing.T) {
 	assert.Equal(t, "validate_parameters_command", session_command.CreateValidateParametersCommand(nil, nil, nil).Name())
 }
 
-func TestValidateParametersCommand_Fallback_DoesNothing(t *testing.T) {
+func TestValidateParametersCommand_Fallback_DoesNothing_OnInternalError(t *testing.T) {
+	command := session_command.CreateValidateParametersCommand(nil, nil, nil)
+	runErr := http_wrapper.CreateInternalError()
+
+	assert.Equal(t, runErr, command.Fallback(runErr))
+}
+
+func TestValidateParametersCommand_Fallback_DoesNothing_OnNonHttpError(t *testing.T) {
 	command := session_command.CreateValidateParametersCommand(nil, nil, nil)
 	runErr := errors.New("run err")
 
 	assert.Equal(t, runErr, command.Fallback(runErr))
 }
 
-func TestValidateParametersCommand_Run_OnWrongValidation_Halts_AndNotifies_AndReturnsNil(t *testing.T) {
-	expectedErr := errors.New("err")
+func TestValidateParametersCommand_Fallback_Halts_OnHttpError_NotInternal(t *testing.T) {
+	middleware := new(http_wrapper.MockMiddleware)
+	middleware.On("AbortTransactionWithStatus", http.StatusBadRequest, http_wrapper.Json{
+		"error": "some message",
+	})
+
+	command := session_command.CreateValidateParametersCommand(&http_wrapper.Context{
+		Reader: nil,
+		Writer: nil,
+		Middleware: middleware,
+	}, nil, nil)
+
+	runErr := http_wrapper.CreateBadRequestError("some message")
+
+	assert.Nil(t, command.Fallback(runErr))
+	middleware.AssertExpectations(t)
+}
+
+func TestValidateParametersCommand_Run_OnWrongValidation_ReturnsError(t *testing.T) {
+	expectedErr := http_wrapper.CreateBadRequestError("bad error")
 
 	input := make(chan *model.AuthenticatedUser, 1)
 
@@ -58,10 +83,10 @@ func TestValidateParametersCommand_Run_OnWrongValidation_Halts_AndNotifies_AndRe
 
 	err := command.Run()
 
-	assert.Nil(t, err)
+	assert.NotNil(t, err)
+	assert.Equal(t, expectedErr, err)
 	assert.False(t, finalFuncCalled)
 	assert.Zero(t, len(command.Stream))
-	middleware.AssertExpectations(t)
 }
 
 func TestValidateParametersCommand_Run_OnGoodValidations_PublishesSameUser(t *testing.T) {
