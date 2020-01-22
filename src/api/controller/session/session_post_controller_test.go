@@ -3,7 +3,7 @@ package session_test
 import (
 	"errors"
 	"github.com/arpb2/C-3PO/src/api/auth"
-	"github.com/arpb2/C-3PO/src/api/circuit_breaker/blocking"
+	"github.com/arpb2/C-3PO/src/api/executor/blocking"
 	"github.com/arpb2/C-3PO/src/api/controller"
 	"github.com/arpb2/C-3PO/src/api/controller/session"
 	"github.com/arpb2/C-3PO/src/api/controller/session/session_validation"
@@ -62,7 +62,7 @@ func TestPostController_FetchUserIdTask_FailsOnValidationFail(t *testing.T) {
 	}
 
 	postController := session.CreatePostController(
-		blocking.CreateCircuitBreaker(),
+		blocking.CreateExecutor(),
 		nil,
 		nil,
 		validations,
@@ -100,7 +100,7 @@ func TestFetchUserIdTaskImpl_FailsOnServiceFailure(t *testing.T) {
 	var validations []session_validation.Validation
 
 	postController := session.CreatePostController(
-		blocking.CreateCircuitBreaker(),
+		blocking.CreateExecutor(),
 		nil,
 		service,
 		validations,
@@ -147,7 +147,7 @@ func TestFetchUserIdTaskImpl_FailsOnTokenFailure(t *testing.T) {
 	})
 
 	postController := session.CreatePostController(
-		blocking.CreateCircuitBreaker(),
+		blocking.CreateExecutor(),
 		tokenHandler,
 		credentialService,
 		validations,
@@ -194,7 +194,7 @@ func TestFetchUserIdTaskImpl_SuccessReturnsToken(t *testing.T) {
 	})).Return("test token", nil)
 
 	postController := session.CreatePostController(
-		blocking.CreateCircuitBreaker(),
+		blocking.CreateExecutor(),
 		tokenHandler,
 		credentialService,
 		validations,

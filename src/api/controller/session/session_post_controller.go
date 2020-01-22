@@ -3,7 +3,7 @@ package session
 import (
 	"fmt"
 	"github.com/arpb2/C-3PO/src/api/auth"
-	"github.com/arpb2/C-3PO/src/api/circuit_breaker"
+	"github.com/arpb2/C-3PO/src/api/executor"
 	"github.com/arpb2/C-3PO/src/api/controller"
 	"github.com/arpb2/C-3PO/src/api/controller/session/session_command"
 	"github.com/arpb2/C-3PO/src/api/controller/session/session_validation"
@@ -12,7 +12,7 @@ import (
 	"net/http"
 )
 
-func CreatePostController(circuitBreaker circuit_breaker.CircuitBreaker,
+func CreatePostController(executor executor.Executor,
 						  tokenHandler auth.TokenHandler,
 	                      service service.CredentialService,
 	                      validations []session_validation.Validation) controller.Controller {
@@ -20,18 +20,18 @@ func CreatePostController(circuitBreaker circuit_breaker.CircuitBreaker,
 		Method: "POST",
 		Path:   "/session",
 		Body:   PostBody{
-			CircuitBreaker:  circuitBreaker,
-			TokenHandler:    tokenHandler,
-			Service:         service,
-			Validations:     validations,
+			Executor:     executor,
+			TokenHandler: tokenHandler,
+			Service:      service,
+			Validations:  validations,
 		}.Method,
 	}
 }
 
 type PostBody struct {
-	CircuitBreaker circuit_breaker.CircuitBreaker
-	TokenHandler   auth.TokenHandler
-	Service        service.CredentialService
+	Executor     executor.Executor
+	TokenHandler auth.TokenHandler
+	Service      service.CredentialService
 
 	Validations    []session_validation.Validation
 }
@@ -42,7 +42,7 @@ func (b PostBody) Method(ctx *http_wrapper.Context) {
 	authenticateCommand := session_command.CreateAuthenticateCommand(ctx, b.Service, validateParamsCommand.Stream)
 	createTokenCommand := session_command.CreateTokenCommand(ctx, b.TokenHandler, authenticateCommand.Stream)
 
-	commands := []circuit_breaker.Command{
+	commands := []executor.Command{
 		fetchUserCommand,
 		validateParamsCommand,
 		authenticateCommand,
@@ -50,7 +50,7 @@ func (b PostBody) Method(ctx *http_wrapper.Context) {
 	}
 
 	for _, command := range commands {
-		err := b.CircuitBreaker.Do(command)
+		err := b.Executor.Do(command)
 
 		if ctx.IsAborted() {
 			return

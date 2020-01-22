@@ -1,4 +1,4 @@
-package circuit_breaker
+package executor
 
 type Command interface {
 
@@ -10,7 +10,7 @@ type Command interface {
 
 }
 
-type CircuitBreaker interface {
+type Executor interface {
 
 	Go(command Command) chan error
 
