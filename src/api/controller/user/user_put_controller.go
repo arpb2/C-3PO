@@ -1,49 +1,56 @@
 package user
 
 import (
+	"fmt"
 	"github.com/arpb2/C-3PO/src/api/controller"
+	"github.com/arpb2/C-3PO/src/api/controller/user/user_command"
+	"github.com/arpb2/C-3PO/src/api/controller/user/user_validation"
+	"github.com/arpb2/C-3PO/src/api/executor"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/arpb2/C-3PO/src/api/service"
 	"net/http"
 )
 
-func CreatePutController(authMiddleware http_wrapper.Handler, userService service.UserService) controller.Controller {
+func CreatePutController(exec executor.Executor, validations []user_validation.Validation, authMiddleware http_wrapper.Handler, userService service.UserService) controller.Controller {
 	return controller.Controller{
 		Method: "PUT",
 		Path:   "/users/:user_id",
 		Middleware: []http_wrapper.Handler{
 			authMiddleware,
 		},
-		Body:   CreatePutBody(userService),
+		Body:   CreatePutBody(exec, validations, userService),
 	}
 }
 
-func CreatePutBody(userService service.UserService) http_wrapper.Handler {
+func CreatePutBody(exec executor.Executor, validations []user_validation.Validation, userService service.UserService) http_wrapper.Handler {
 	return func(ctx *http_wrapper.Context) {
-		userId, halt := FetchUserId(ctx)
-		if halt {
-			return
+		fetchUserIdCommand := user_command.CreateFetchUserIdCommand(ctx)
+		fetchUserCommand := user_command.CreateFetchAuthenticatedUserCommand(ctx)
+		validateCommand := user_command.CreateValidateParametersCommand(ctx, fetchUserCommand.OutputStream, validations)
+		serviceCommand := user_command.CreateUpdateUserCommand(ctx, userService, fetchUserIdCommand.OutputStream, fetchUserCommand.OutputStream)
+
+		commands := []executor.Command{
+			fetchUserIdCommand,
+			fetchUserCommand,
+			validateCommand,
+			serviceCommand,
 		}
 
-		authenticatedUser, halt := FetchAuthenticatedUser(ctx)
-		if halt {
-			return
+		for _, command := range commands {
+			err := exec.Do(command)
+
+			if ctx.IsAborted() {
+				return
+			}
+
+			if err != nil {
+				fmt.Print(err.Error())
+				controller.Halt(ctx, http.StatusInternalServerError, "internal error")
+				return
+			}
 		}
 
-		if authenticatedUser.Id != 0 {
-			controller.Halt(ctx, http.StatusBadRequest, "'id' in user is immutable")
-			return
-		}
-
-		authenticatedUser.Id = userId
-
-		user, err := userService.UpdateUser(authenticatedUser)
-
-		if err != nil || user == nil {
-			controller.Halt(ctx, http.StatusInternalServerError, "internal error")
-			return
-		}
-
+		user := <-serviceCommand.OutputStream
 		ctx.WriteJson(http.StatusOK, user)
 	}
 }

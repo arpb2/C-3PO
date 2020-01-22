@@ -1,14 +1,14 @@
-package session_validation_test
+package user_validation_test
 
 import (
-	"github.com/arpb2/C-3PO/src/api/controller/session/session_validation"
+	"github.com/arpb2/C-3PO/src/api/controller/user/user_validation"
 	"github.com/arpb2/C-3PO/src/api/model"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestEmptyEmailValidation_Error(t *testing.T) {
-	err := session_validation.EmailValidation(&model.AuthenticatedUser{
+	err := user_validation.EmptyEmailValidation(&model.AuthenticatedUser{
 		User:     &model.User{},
 		Password: "",
 	})
@@ -19,7 +19,7 @@ func TestEmptyEmailValidation_Error(t *testing.T) {
 
 
 func TestEmptyEmailValidation_Success(t *testing.T) {
-	err := session_validation.EmailValidation(&model.AuthenticatedUser{
+	err := user_validation.EmptyEmailValidation(&model.AuthenticatedUser{
 		User:     &model.User{
 			Email: "test@email.com",
 		},

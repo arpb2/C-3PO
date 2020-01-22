@@ -1,4 +1,4 @@
-package session_validation
+package user_validation
 
 import (
 	"errors"

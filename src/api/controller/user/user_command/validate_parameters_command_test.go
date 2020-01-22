@@ -1,9 +1,9 @@
-package session_command_test
+package user_command_test
 
 import (
 	"errors"
-	"github.com/arpb2/C-3PO/src/api/controller/session/session_command"
-	"github.com/arpb2/C-3PO/src/api/controller/session/session_validation"
+	"github.com/arpb2/C-3PO/src/api/controller/user/user_command"
+	"github.com/arpb2/C-3PO/src/api/controller/user/user_validation"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/arpb2/C-3PO/src/api/model"
 	"github.com/stretchr/testify/assert"
@@ -12,10 +12,10 @@ import (
 )
 
 func TestValidateParametersCommand_Name(t *testing.T) {
-	assert.Equal(t, "validate_session_parameters_command", session_command.CreateValidateParametersCommand(nil, nil, nil).Name())
+	assert.Equal(t, "validate_user_parameters_command", user_command.CreateValidateParametersCommand(nil, nil, nil).Name())
 }
 
-func TestValidateParametersCommand_Fallback_DoesNothing_OnInternalError(t *testing.T) {
+func TestValidateParametersCommand_Fallback_Consumes_InternalError(t *testing.T) {
 	runErr := http_wrapper.CreateInternalError()
 
 	middleware := new(http_wrapper.MockMiddleware)
@@ -23,18 +23,18 @@ func TestValidateParametersCommand_Fallback_DoesNothing_OnInternalError(t *testi
 		"error": runErr.Error(),
 	})
 
-	command := session_command.CreateValidateParametersCommand(&http_wrapper.Context{
+	command := user_command.CreateValidateParametersCommand(&http_wrapper.Context{
 		Reader: nil,
 		Writer: nil,
 		Middleware: middleware,
 	}, nil, nil)
 
-	assert.Nil(t, command.Fallback(runErr))
+	assert.Equal(t, nil, command.Fallback(runErr))
 	middleware.AssertExpectations(t)
 }
 
 func TestValidateParametersCommand_Fallback_DoesNothing_OnNonHttpError(t *testing.T) {
-	command := session_command.CreateValidateParametersCommand(nil, nil, nil)
+	command := user_command.CreateValidateParametersCommand(nil, nil, nil)
 	runErr := errors.New("run err")
 
 	assert.Equal(t, runErr, command.Fallback(runErr))
@@ -46,7 +46,7 @@ func TestValidateParametersCommand_Fallback_Halts_OnHttpError_NotInternal(t *tes
 		"error": "some message",
 	})
 
-	command := session_command.CreateValidateParametersCommand(&http_wrapper.Context{
+	command := user_command.CreateValidateParametersCommand(&http_wrapper.Context{
 		Reader: nil,
 		Writer: nil,
 		Middleware: middleware,
@@ -70,14 +70,14 @@ func TestValidateParametersCommand_Run_OnWrongValidation_ReturnsError(t *testing
 
 	finalFuncCalled := false
 
-	command := session_command.CreateValidateParametersCommand(
+	command := user_command.CreateValidateParametersCommand(
 		&http_wrapper.Context{
 			Reader: nil,
 			Writer: nil,
 			Middleware: middleware,
 		},
 		input,
-		[]session_validation.Validation{
+		[]user_validation.Validation{
 			func(user *model.AuthenticatedUser) error {
 				return nil
 			},
@@ -105,14 +105,14 @@ func TestValidateParametersCommand_Run_OnGoodValidations_PublishesSameUser(t *te
 	finalFuncCalled := false
 
 	input := make(chan *model.AuthenticatedUser, 1)
-	command := session_command.CreateValidateParametersCommand(
+	command := user_command.CreateValidateParametersCommand(
 		&http_wrapper.Context{
 			Reader: nil,
 			Writer: nil,
 			Middleware: nil,
 		},
 		input,
-		[]session_validation.Validation{
+		[]user_validation.Validation{
 			func(user *model.AuthenticatedUser) error {
 				return nil
 			},

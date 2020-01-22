@@ -27,3 +27,7 @@ func CreateInternalError() error {
 func CreateUnauthorizedError() error {
 	return createHttpError(http.StatusUnauthorized, "unauthorized")
 }
+
+func CreateNotFoundError() error {
+	return createHttpError(http.StatusNotFound, "not found")
+}

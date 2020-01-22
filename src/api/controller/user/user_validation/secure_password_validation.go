@@ -1,4 +1,4 @@
-package session_validation
+package user_validation
 
 import (
 	"errors"
@@ -6,7 +6,7 @@ import (
 )
 
 func SecurePasswordValidation(user *model.AuthenticatedUser) error {
-	if len(user.Password) < 8 {
+	if len(user.Password) > 0 && len(user.Password) < 8 {
 		return errors.New("password must have at least 8 characters")
 	}
 

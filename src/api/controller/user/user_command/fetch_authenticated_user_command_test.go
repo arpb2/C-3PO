@@ -26,7 +26,7 @@ func TestFetchUserCommand_Fallback_ReturnsNilAndNotifies_OnBadRequest(t *testing
 	middleware := new(http_wrapper.MockMiddleware)
 	middleware.On("AbortTransactionWithStatus", http.StatusBadRequest, http_wrapper.Json{
 		"error": "some message",
-	})
+	}).Once()
 
 	command := user_command.CreateFetchAuthenticatedUserCommand(&http_wrapper.Context{
 		Reader: nil,
@@ -55,7 +55,7 @@ func TestFetchUserCommand_Run_OnBadRead_Halts_NoErrorReturned(t *testing.T) {
 	err := command.Run()
 
 	assert.NotNil(t, err)
-	assert.Equal(t, "malformed body", err.Error())
+	assert.Equal(t, http_wrapper.CreateBadRequestError("malformed body"), err)
 	assert.Zero(t, len(command.OutputStream))
 	reader.AssertExpectations(t)
 }

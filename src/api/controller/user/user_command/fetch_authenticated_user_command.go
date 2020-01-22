@@ -4,8 +4,6 @@ import (
 	"github.com/arpb2/C-3PO/src/api/controller"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/arpb2/C-3PO/src/api/model"
-	"golang.org/x/xerrors"
-	"net/http"
 )
 
 type FetchAuthenticatedUserCommand struct {
@@ -29,17 +27,7 @@ func (c *FetchAuthenticatedUserCommand) Run() error {
 }
 
 func (c *FetchAuthenticatedUserCommand) Fallback(err error) error {
-	var httpError http_wrapper.HttpError
-	if xerrors.As(err, &httpError) {
-		if httpError.Code == http.StatusInternalServerError {
-			return err
-		} else {
-			controller.Halt(c.Context, httpError.Code, httpError.Error())
-			return nil
-		}
-	}
-
-	return err
+	return controller.HaltError(c.Context, err)
 }
 
 func CreateFetchAuthenticatedUserCommand(ctx *http_wrapper.Context) *FetchAuthenticatedUserCommand {

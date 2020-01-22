@@ -1,4 +1,4 @@
-package session_validation_test
+package user_validation_test
 
 import (
 	"github.com/arpb2/C-3PO/src/api/controller/user/user_validation"
@@ -8,7 +8,7 @@ import (
 )
 
 func TestEmptySurnameValidation_Error(t *testing.T) {
-	err := session_validation.EmptySurnameValidation(&model.AuthenticatedUser{
+	err := user_validation.EmptySurnameValidation(&model.AuthenticatedUser{
 		User:     &model.User{},
 		Password: "",
 	})
@@ -19,7 +19,7 @@ func TestEmptySurnameValidation_Error(t *testing.T) {
 
 
 func TestEmptySurnameValidation_Success(t *testing.T) {
-	err := session_validation.EmptySurnameValidation(&model.AuthenticatedUser{
+	err := user_validation.EmptySurnameValidation(&model.AuthenticatedUser{
 		User:     &model.User{
 			Surname: "TestSurname",
 		},

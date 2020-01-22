@@ -6,11 +6,14 @@ import (
 	"github.com/arpb2/C-3PO/src/api/auth/jwt"
 	"github.com/arpb2/C-3PO/src/api/controller"
 	"github.com/arpb2/C-3PO/src/api/controller/user"
+	"github.com/arpb2/C-3PO/src/api/controller/user/user_validation"
+	"github.com/arpb2/C-3PO/src/api/executor/blocking"
 	"github.com/arpb2/C-3PO/src/api/golden"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper/gin_wrapper"
 	"github.com/arpb2/C-3PO/src/api/middleware/auth/single_auth"
 	"github.com/arpb2/C-3PO/src/api/model"
+	"github.com/arpb2/C-3PO/src/api/service"
 	"github.com/arpb2/C-3PO/src/api/service/user_service"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -20,6 +23,8 @@ import (
 
 func createPutController() controller.Controller {
 	return user.CreatePutController(
+		blocking.Executor{},
+		[]user_validation.Validation{},
 		single_auth.CreateMiddleware(
 			jwt.CreateTokenHandler(),
 		),
@@ -87,7 +92,7 @@ func TestUserPutControllerBody_400OnEmptyOrMalformedUser(t *testing.T) {
 }
 
 func TestUserPutControllerBody_500OnServiceCreateError(t *testing.T) {
-	service := new(MockUserService)
+	service := new(service.MockUserService)
 	service.On("UpdateUser", mock.MatchedBy(func(obj interface{}) bool {
 		return true
 	})).Return(&model.User{
@@ -97,7 +102,7 @@ func TestUserPutControllerBody_500OnServiceCreateError(t *testing.T) {
 		Surname: "test surname",
 	}, errors.New("whoops error")).Once()
 
-	body := user.CreatePutBody(service)
+	body := user.CreatePutBody(blocking.Executor{}, []user_validation.Validation{}, service)
 
 	reader := new(http_wrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("1000").Once()
@@ -127,12 +132,12 @@ func TestUserPutControllerBody_500OnServiceCreateError(t *testing.T) {
 }
 
 func TestUserPutControllerBody_500OnNoUserStoredInService(t *testing.T) {
-	service := new(MockUserService)
+	service := new(service.MockUserService)
 	service.On("UpdateUser", mock.MatchedBy(func(obj interface{}) bool {
 		return true
 	})).Return(nil, nil).Once()
 
-	body := user.CreatePutBody(service)
+	body := user.CreatePutBody(blocking.Executor{}, []user_validation.Validation{}, service)
 
 	reader := new(http_wrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("1000").Once()
@@ -162,18 +167,20 @@ func TestUserPutControllerBody_500OnNoUserStoredInService(t *testing.T) {
 }
 
 func TestUserPutControllerBody_400OnIdSpecified(t *testing.T) {
-	service := new(MockUserService)
-	body := user.CreatePutBody(service)
+	service := new(service.MockUserService)
+
+	body := user.CreatePutBody(blocking.Executor{}, []user_validation.Validation{
+		user_validation.IdProvidedValidation,
+	}, service)
 
 	reader := new(http_wrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("1000").Once()
 	reader.On("ReadBody", mock.MatchedBy(func(obj *model.AuthenticatedUser) bool {
-		return true
-	})).Run(func(args mock.Arguments) {
-		args.Get(0).(*model.AuthenticatedUser).User = &model.User{
+		obj.User = &model.User{
 			Id: 1000,
 		}
-	}).Return(nil).Once()
+		return true
+	})).Return(nil).Once()
 
 	c, w := gin_wrapper.CreateTestContext()
 	c.Reader = reader
@@ -196,12 +203,12 @@ func TestUserPutControllerBody_200OnUserStoredOnService(t *testing.T) {
 		Name:    "TestName",
 		Surname: "TestSurname",
 	}
-	service := new(MockUserService)
+	service := new(service.MockUserService)
 	service.On("UpdateUser", mock.MatchedBy(func(obj interface{}) bool {
 		return true
 	})).Return(expectedUser, nil).Once()
 
-	body := user.CreatePutBody(service)
+	body := user.CreatePutBody(blocking.Executor{}, []user_validation.Validation{}, service)
 
 	reader := new(http_wrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("1000").Once()

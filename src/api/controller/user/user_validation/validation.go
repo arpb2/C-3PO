@@ -1,4 +1,4 @@
-package session_validation
+package user_validation
 
 import "github.com/arpb2/C-3PO/src/api/model"
 

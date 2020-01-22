@@ -1,8 +1,8 @@
-package session_command
+package user_command
 
 import (
 	"github.com/arpb2/C-3PO/src/api/controller"
-	"github.com/arpb2/C-3PO/src/api/controller/session/session_validation"
+	"github.com/arpb2/C-3PO/src/api/controller/user/user_validation"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/arpb2/C-3PO/src/api/model"
 )
@@ -10,11 +10,11 @@ import (
 type ValidateParametersCommand struct {
 	Context      *http_wrapper.Context
 	Stream       chan *model.AuthenticatedUser
-	Validations  []session_validation.Validation
+	Validations  []user_validation.Validation
 }
 
 func (c *ValidateParametersCommand) Name() string {
-	return "validate_session_parameters_command"
+	return "validate_user_parameters_command"
 }
 
 func (c *ValidateParametersCommand) Run() error {
@@ -35,7 +35,7 @@ func (c *ValidateParametersCommand) Fallback(err error) error {
 
 func CreateValidateParametersCommand(ctx *http_wrapper.Context,
 									 userInput chan *model.AuthenticatedUser,
-									 validations []session_validation.Validation) *ValidateParametersCommand {
+									 validations []user_validation.Validation) *ValidateParametersCommand {
 	return &ValidateParametersCommand{
 		Context:      ctx,
 		Stream:       userInput,

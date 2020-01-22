@@ -18,7 +18,7 @@ func FetchUserId(ctx *http_wrapper.Context) (uint, bool) {
 	userIdUint, err := strconv.ParseUint(userId, 10, 64)
 
 	if err != nil {
-		controller.Halt(ctx, http.StatusBadRequest, "'user_id' malformed. Expecting a positive number.")
+		controller.Halt(ctx, http.StatusBadRequest, "'user_id' malformed, expecting a positive number")
 		return 0, true
 	}
 
@@ -36,7 +36,7 @@ func FetchCodeId(ctx *http_wrapper.Context) (uint, bool) {
 	codeIdUint, err := strconv.ParseUint(codeId, 10, 64)
 
 	if err != nil {
-		controller.Halt(ctx, http.StatusBadRequest, "'code_id' malformed. Expecting a positive number.")
+		controller.Halt(ctx, http.StatusBadRequest, "'code_id' malformed, expecting a positive number")
 		return 0, true
 	}
 

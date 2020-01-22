@@ -122,7 +122,8 @@ func TestFetchUserIdTaskImpl_FailsOnTokenFailure(t *testing.T) {
 	middleware.On("AbortTransactionWithStatus", http.StatusInternalServerError, http_wrapper.Json{
 		"error": "internal error",
 	}).Once()
-	middleware.On("IsAborted").Return(false).Times(4)
+	middleware.On("IsAborted").Return(false).Times(3)
+	middleware.On("IsAborted").Return(true).Once()
 
 	reader := new (http_wrapper.MockReader)
 	reader.On("ReadBody", mock.MatchedBy(func(obj *model.AuthenticatedUser) bool {

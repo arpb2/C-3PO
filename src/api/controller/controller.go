@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
+	"golang.org/x/xerrors"
 )
 
 type Controller struct {
@@ -13,6 +14,16 @@ type Controller struct {
 	Middleware []http_wrapper.Handler
 
 	Body http_wrapper.Handler
+}
+
+func HaltError(ctx *http_wrapper.Context, err error) error {
+	var httpError http_wrapper.HttpError
+	if xerrors.As(err, &httpError) {
+		Halt(ctx, httpError.Code, httpError.Error())
+		return nil
+	}
+
+	return err
 }
 
 func Halt(ctx *http_wrapper.Context, code int, errMessage string) {

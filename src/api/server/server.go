@@ -43,7 +43,7 @@ func CreateBinders() []engine.ControllerBinder {
 	return []engine.ControllerBinder{
 		health_binder.CreateBinder(),
 		code_binder.CreateBinder(teacherAuthMiddleware, codeService),
-		user_binder.CreateBinder(singleAuthMiddleware, userService),
+		user_binder.CreateBinder(executor, singleAuthMiddleware, userService),
 		session_binder.CreateBinder(executor, tokenHandler, credentialService),
 	}
 }

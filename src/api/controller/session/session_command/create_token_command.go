@@ -5,14 +5,12 @@ import (
 	"github.com/arpb2/C-3PO/src/api/controller"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/arpb2/C-3PO/src/api/model"
-	"golang.org/x/xerrors"
-	"net/http"
 )
 
 type CreateTokenCommand struct {
 	Context      *http_wrapper.Context
 	TokenHandler auth.TokenHandler
-	InputStream  chan *model.AuthenticatedUser
+	InputStream  <-chan *model.AuthenticatedUser
 	OutputStream chan string
 }
 
@@ -36,22 +34,12 @@ func (c *CreateTokenCommand) Run() error {
 }
 
 func (c *CreateTokenCommand) Fallback(err error) error {
-	var httpError http_wrapper.HttpError
-	if xerrors.As(err, &httpError) {
-		if httpError.Code == http.StatusInternalServerError {
-			return err
-		} else {
-			controller.Halt(c.Context, httpError.Code, httpError.Error())
-			return nil
-		}
-	}
-
-	return err
+	return controller.HaltError(c.Context, err)
 }
 
 func CreateCreateTokenCommand(ctx *http_wrapper.Context,
 						tokenHandler auth.TokenHandler,
-						inputStream chan *model.AuthenticatedUser) *CreateTokenCommand {
+						inputStream <-chan *model.AuthenticatedUser) *CreateTokenCommand {
 	return &CreateTokenCommand{
 		Context:      ctx,
 		TokenHandler: tokenHandler,

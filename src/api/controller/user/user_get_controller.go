@@ -3,41 +3,51 @@ package user
 import (
 	"fmt"
 	"github.com/arpb2/C-3PO/src/api/controller"
+	"github.com/arpb2/C-3PO/src/api/controller/user/user_command"
+	"github.com/arpb2/C-3PO/src/api/executor"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/arpb2/C-3PO/src/api/service"
 	"net/http"
 )
 
-func CreateGetController(authMiddleware http_wrapper.Handler, userService service.UserService) controller.Controller {
+func CreateGetController(executor executor.Executor,
+						 authMiddleware http_wrapper.Handler,
+						 userService service.UserService) controller.Controller {
 	return controller.Controller{
 		Method: "GET",
 		Path:   "/users/:user_id",
 		Middleware: []http_wrapper.Handler{
 			authMiddleware,
 		},
-		Body:   CreateGetBody(userService),
+		Body:   CreateGetBody(executor, userService),
 	}
 }
 
-func CreateGetBody(userService service.UserService) http_wrapper.Handler {
+func CreateGetBody(exec executor.Executor, userService service.UserService) http_wrapper.Handler {
 	return func(ctx *http_wrapper.Context) {
-		userId, halt := FetchUserId(ctx)
-		if halt {
-			return
+		fetchUserIdCommand := user_command.CreateFetchUserIdCommand(ctx)
+		serviceCommand := user_command.CreateGetUserCommand(ctx, userService, fetchUserIdCommand.OutputStream)
+
+		commands := []executor.Command{
+			fetchUserIdCommand,
+			serviceCommand,
 		}
 
-		user, err := userService.GetUser(userId)
+		for _, command := range commands {
+			err := exec.Do(command)
 
-		if err != nil {
-			controller.Halt(ctx, http.StatusInternalServerError, "internal error")
-			return
+			if ctx.IsAborted() {
+				return
+			}
+
+			if err != nil {
+				fmt.Print(err.Error())
+				controller.Halt(ctx, http.StatusInternalServerError, "internal error")
+				return
+			}
 		}
 
-		if user == nil {
-			controller.Halt(ctx, http.StatusNotFound, fmt.Sprintf("no user associated to the user_id '%d' found", userId))
-			return
-		}
-
+		user := <-serviceCommand.OutputStream
 		ctx.WriteJson(http.StatusOK, user)
 	}
 }

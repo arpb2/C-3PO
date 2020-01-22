@@ -1,4 +1,4 @@
-package session_validation_test
+package user_validation_test
 
 import (
 	"github.com/arpb2/C-3PO/src/api/controller/user/user_validation"
@@ -8,7 +8,7 @@ import (
 )
 
 func TestIdProvidedValidation_Error(t *testing.T) {
-	err := session_validation.IdProvidedValidation(&model.AuthenticatedUser{
+	err := user_validation.IdProvidedValidation(&model.AuthenticatedUser{
 		User:     &model.User{
 			Id: 1000,
 		},
@@ -21,7 +21,7 @@ func TestIdProvidedValidation_Error(t *testing.T) {
 
 
 func TestIdProvidedValidation_Success(t *testing.T) {
-	err := session_validation.IdProvidedValidation(&model.AuthenticatedUser{
+	err := user_validation.IdProvidedValidation(&model.AuthenticatedUser{
 		User:     &model.User{},
 		Password: "",
 	})

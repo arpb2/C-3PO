@@ -1,4 +1,4 @@
-package session_validation_test
+package user_validation_test
 
 import (
 	"github.com/arpb2/C-3PO/src/api/controller/user/user_validation"
@@ -8,7 +8,7 @@ import (
 )
 
 func TestSecurePasswordValidation_Error(t *testing.T) {
-	err := session_validation.SecurePasswordValidation(&model.AuthenticatedUser{
+	err := user_validation.SecurePasswordValidation(&model.AuthenticatedUser{
 		User:     &model.User{},
 		Password: "1234567",
 	})
@@ -19,7 +19,7 @@ func TestSecurePasswordValidation_Error(t *testing.T) {
 
 
 func TestSecurePasswordValidation_Success(t *testing.T) {
-	err := session_validation.SecurePasswordValidation(&model.AuthenticatedUser{
+	err := user_validation.SecurePasswordValidation(&model.AuthenticatedUser{
 		User:     &model.User{},
 		Password: "12345678",
 	})

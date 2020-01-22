@@ -16,10 +16,21 @@ func TestTokenCommand_Name(t *testing.T) {
 }
 
 func TestTokenCommand_Fallback_DoesNothing_OnInternalError(t *testing.T) {
-	command := session_command.CreateCreateTokenCommand(nil, nil, nil)
 	runErr := http_wrapper.CreateInternalError()
 
-	assert.Equal(t, runErr, command.Fallback(runErr))
+	middleware := new(http_wrapper.MockMiddleware)
+	middleware.On("AbortTransactionWithStatus", http.StatusInternalServerError, http_wrapper.Json{
+		"error": runErr.Error(),
+	})
+
+	command := session_command.CreateCreateTokenCommand(&http_wrapper.Context{
+		Reader: nil,
+		Writer: nil,
+		Middleware: middleware,
+	}, nil, nil)
+
+	assert.Nil(t, command.Fallback(runErr))
+	middleware.AssertExpectations(t)
 }
 
 func TestTokenCommand_Fallback_DoesNothing_OnNonHttpError(t *testing.T) {
