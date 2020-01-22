@@ -1,6 +1,7 @@
 package user_command
 
 import (
+	"github.com/arpb2/C-3PO/src/api/controller"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/arpb2/C-3PO/src/api/service"
 )
@@ -9,6 +10,7 @@ type DeleteUserCommand struct {
 	Context      *http_wrapper.Context
 	Service      service.UserService
 	InputStream  <-chan uint
+	OutputStream chan bool
 }
 
 func (c *DeleteUserCommand) Name() string {
@@ -16,12 +18,20 @@ func (c *DeleteUserCommand) Name() string {
 }
 
 func (c *DeleteUserCommand) Run() error {
-	err := c.Service.DeleteUser(<-c.InputStream)
+	defer close(c.OutputStream)
+	userId, openChan := <-c.InputStream
 
-	if err != nil {
-		return err
+	if !openChan {
+		return nil
 	}
 
+	err := c.Service.DeleteUser(userId)
+
+	if err != nil {
+		return controller.HaltExternalError(c.Context, err)
+	}
+
+	c.OutputStream <- true
 	return nil
 }
 
@@ -36,5 +46,6 @@ func CreateDeleteUserCommand(ctx *http_wrapper.Context,
 		Context:      ctx,
 		Service:      service,
 		InputStream:  inputStream,
+		OutputStream: make(chan bool, 1),
 	}
 }

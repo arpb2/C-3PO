@@ -2,8 +2,10 @@ package controller
 
 import (
 	"fmt"
+	"github.com/arpb2/C-3PO/src/api/executor"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"golang.org/x/xerrors"
+	"net/http"
 )
 
 type Controller struct {
@@ -16,9 +18,9 @@ type Controller struct {
 	Body http_wrapper.Handler
 }
 
-func HaltError(ctx *http_wrapper.Context, err error) error {
+func HaltExternalError(ctx *http_wrapper.Context, err error) error {
 	var httpError http_wrapper.HttpError
-	if xerrors.As(err, &httpError) {
+	if xerrors.As(err, &httpError) && httpError.Code != http.StatusInternalServerError {
 		Halt(ctx, httpError.Code, httpError.Error())
 		return nil
 	}
@@ -39,4 +41,22 @@ func Halt(ctx *http_wrapper.Context, code int, errMessage string) {
 			"error": errMessage,
 		})
 	}
+}
+
+func BatchRun(exec executor.Executor, commands []executor.Command, ctx *http_wrapper.Context) error {
+	var channels []<-chan error
+	for _, command := range commands {
+		errChan := exec.Go(command)
+
+		channels = append(channels, errChan)
+	}
+
+	singleErrorChannel := executor.Merge(channels...)
+
+	if err, open := <-singleErrorChannel; open {
+		fmt.Print(err.Error())
+		Halt(ctx, http.StatusInternalServerError, "internal error")
+		return err
+	}
+	return nil
 }

@@ -2,50 +2,61 @@ package code
 
 import (
 	"github.com/arpb2/C-3PO/src/api/controller"
+	"github.com/arpb2/C-3PO/src/api/controller/code/code_command"
+	"github.com/arpb2/C-3PO/src/api/controller/user/user_command"
+	"github.com/arpb2/C-3PO/src/api/executor"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
+	"github.com/arpb2/C-3PO/src/api/model"
 	"github.com/arpb2/C-3PO/src/api/service"
 	"net/http"
 )
 
-func CreatePutController(authMiddleware http_wrapper.Handler, codeService service.CodeService) controller.Controller {
+func CreatePutController(exec executor.Executor, authMiddleware http_wrapper.Handler, codeService service.CodeService) controller.Controller {
 	return controller.Controller{
 		Method: "PUT",
 		Path:   "/users/:user_id/codes/:code_id",
 		Middleware: []http_wrapper.Handler{
 			authMiddleware,
 		},
-		Body:   CreatePutBody(codeService),
+		Body:   CreatePutBody(exec, codeService),
 	}
 }
 
-func CreatePutBody(codeService service.CodeService) http_wrapper.Handler {
+func CreatePutBody(exec executor.Executor, codeService service.CodeService) http_wrapper.Handler {
 	return func(ctx *http_wrapper.Context) {
-		userId, halt := FetchUserId(ctx)
-		if halt {
-			return
+		fetchUserIdCommand := user_command.CreateFetchUserIdCommand(ctx)
+		fetchCodeCommand := code_command.CreateFetchCodeCommand(ctx)
+		fetchCodeIdCommand := code_command.CreateFetchCodeIdCommand(ctx)
+
+		codeChan := make(chan *model.Code, 1)
+		go func() {
+			defer close(codeChan)
+			userId, openUserIdChan := <-fetchUserIdCommand.OutputStream
+			codeId, openCodeIdChan := <-fetchCodeIdCommand.OutputStream
+			code, openCodeChan := <-fetchCodeCommand.OutputStream
+
+			if !openUserIdChan && !openCodeIdChan && !openCodeChan {
+				return
+			}
+
+			codeChan <- &model.Code{
+				Id:     codeId,
+				UserId: userId,
+				Code:   code,
+			}
+		}()
+
+		serviceCommand := code_command.CreateReplaceCodeCommand(ctx, codeService, codeChan)
+
+		commands := []executor.Command{
+			fetchUserIdCommand,
+			fetchCodeCommand,
+			serviceCommand,
 		}
 
-		codeId, halt := FetchCodeId(ctx)
-		if halt {
-			return
+		if err := controller.BatchRun(exec, commands, ctx); err == nil {
+			code := <-serviceCommand.OutputStream
+			ctx.WriteJson(http.StatusOK, *code)
 		}
-
-		code, halt := FetchCode(ctx)
-		if halt {
-			return
-		}
-
-		err := codeService.ReplaceCode(userId, codeId, code)
-
-		if err != nil {
-			controller.Halt(ctx, http.StatusInternalServerError, "internal error")
-			return
-		}
-
-		ctx.WriteJson(http.StatusOK, http_wrapper.Json{
-			"code":    *code,
-			"user_id": userId,
-			"code_id": codeId,
-		})
 	}
 }

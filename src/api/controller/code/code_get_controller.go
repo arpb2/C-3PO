@@ -1,52 +1,41 @@
 package code
 
 import (
-	"fmt"
 	"github.com/arpb2/C-3PO/src/api/controller"
+	"github.com/arpb2/C-3PO/src/api/controller/code/code_command"
+	"github.com/arpb2/C-3PO/src/api/controller/user/user_command"
+	"github.com/arpb2/C-3PO/src/api/executor"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/arpb2/C-3PO/src/api/service"
 	"net/http"
 )
 
-func CreateGetController(authMiddleware http_wrapper.Handler, codeService service.CodeService) controller.Controller {
+func CreateGetController(exec executor.Executor, authMiddleware http_wrapper.Handler, codeService service.CodeService) controller.Controller {
 	return controller.Controller{
 		Method:     	"GET",
 		Path:       	"/users/:user_id/codes/:code_id",
 		Middleware: 	[]http_wrapper.Handler{
 			authMiddleware,
 		},
-		Body:			CreateGetBody(codeService),
+		Body:			CreateGetBody(exec, codeService),
 	}
 }
 
-func CreateGetBody(codeService service.CodeService) http_wrapper.Handler {
+func CreateGetBody(exec executor.Executor, codeService service.CodeService) http_wrapper.Handler {
 	return func(ctx *http_wrapper.Context) {
-		userId, halt := FetchUserId(ctx)
-		if halt {
-			return
+		fetchUserIdCommand := user_command.CreateFetchUserIdCommand(ctx)
+		fetchCodeIdCommand := code_command.CreateFetchCodeIdCommand(ctx)
+		serviceCommand := code_command.CreateGetCodeCommand(ctx, codeService, fetchUserIdCommand.OutputStream, fetchCodeIdCommand.OutputStream)
+
+		commands := []executor.Command{
+			fetchUserIdCommand,
+			fetchCodeIdCommand,
+			serviceCommand,
 		}
 
-		codeId, halt := FetchCodeId(ctx)
-		if halt {
-			return
+		if err := controller.BatchRun(exec, commands, ctx); err == nil {
+			code := <-serviceCommand.OutputStream
+			ctx.WriteJson(http.StatusOK, *code)
 		}
-
-		code, err := codeService.GetCode(userId, codeId)
-
-		if err != nil {
-			controller.Halt(ctx, http.StatusInternalServerError, "internal error")
-			return
-		}
-
-		if code == nil {
-			controller.Halt(ctx, http.StatusNotFound, fmt.Sprintf("no code associated to the user_id '%d' and code_id '%d'", userId, codeId))
-			return
-		}
-
-		ctx.WriteJson(http.StatusOK, http_wrapper.Json{
-			"code": *code,
-			"user_id": userId,
-			"code_id": codeId,
-		})
 	}
 }

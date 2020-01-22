@@ -9,7 +9,8 @@ import (
 
 type ValidateParametersCommand struct {
 	Context      *http_wrapper.Context
-	Stream       chan *model.AuthenticatedUser
+	InputStream  chan *model.AuthenticatedUser
+	OutputStream chan *model.AuthenticatedUser
 	Validations  []user_validation.Validation
 }
 
@@ -18,19 +19,25 @@ func (c *ValidateParametersCommand) Name() string {
 }
 
 func (c *ValidateParametersCommand) Run() error {
-	user := <-c.Stream
+	defer close(c.OutputStream)
+	user, openChan := <-c.InputStream
+
+	if !openChan {
+		return nil
+	}
+
 	for _, requirement := range c.Validations {
 		if err := requirement(user); err != nil {
-			return http_wrapper.CreateBadRequestError(err.Error())
+			return controller.HaltExternalError(c.Context, http_wrapper.CreateBadRequestError(err.Error()))
 		}
 	}
 
-	c.Stream <- user
+	c.OutputStream <- user
 	return nil
 }
 
 func (c *ValidateParametersCommand) Fallback(err error) error {
-	return controller.HaltError(c.Context, err)
+	return err
 }
 
 func CreateValidateParametersCommand(ctx *http_wrapper.Context,
@@ -38,7 +45,8 @@ func CreateValidateParametersCommand(ctx *http_wrapper.Context,
 									 validations []user_validation.Validation) *ValidateParametersCommand {
 	return &ValidateParametersCommand{
 		Context:      ctx,
-		Stream:       userInput,
+		InputStream:  userInput,
+		OutputStream: make(chan *model.AuthenticatedUser, 1),
 		Validations:  validations,
 	}
 }

@@ -1,13 +1,12 @@
 package session
 
 import (
-	"fmt"
 	"github.com/arpb2/C-3PO/src/api/auth"
-	"github.com/arpb2/C-3PO/src/api/controller/user/user_command"
-	"github.com/arpb2/C-3PO/src/api/executor"
 	"github.com/arpb2/C-3PO/src/api/controller"
 	"github.com/arpb2/C-3PO/src/api/controller/session/session_command"
 	"github.com/arpb2/C-3PO/src/api/controller/session/session_validation"
+	"github.com/arpb2/C-3PO/src/api/controller/user/user_command"
+	"github.com/arpb2/C-3PO/src/api/executor"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/arpb2/C-3PO/src/api/service"
 	"net/http"
@@ -40,8 +39,8 @@ type PostBody struct {
 func (b PostBody) Method(ctx *http_wrapper.Context) {
 	fetchUserCommand := user_command.CreateFetchAuthenticatedUserCommand(ctx)
 	validateParamsCommand := session_command.CreateValidateParametersCommand(ctx, fetchUserCommand.OutputStream, b.Validations)
-	authenticateCommand := session_command.CreateAuthenticateCommand(ctx, b.Service, validateParamsCommand.Stream)
-	createTokenCommand := session_command.CreateCreateTokenCommand(ctx, b.TokenHandler, authenticateCommand.Stream)
+	authenticateCommand := session_command.CreateAuthenticateCommand(ctx, b.Service, validateParamsCommand.OutputStream)
+	createTokenCommand := session_command.CreateCreateTokenCommand(ctx, b.TokenHandler, authenticateCommand.OutputStream)
 
 	commands := []executor.Command{
 		fetchUserCommand,
@@ -50,22 +49,9 @@ func (b PostBody) Method(ctx *http_wrapper.Context) {
 		createTokenCommand,
 	}
 
-	for _, command := range commands {
-		err := b.Executor.Do(command)
-
-		if ctx.IsAborted() {
-			return
-		}
-
-		if err != nil {
-			fmt.Print(err.Error())
-			controller.Halt(ctx, http.StatusInternalServerError, "internal error")
-			return
-		}
+	if err := controller.BatchRun(b.Executor, commands, ctx); err == nil {
+		ctx.WriteJson(http.StatusOK, http_wrapper.Json{
+			"token": <-createTokenCommand.OutputStream,
+		})
 	}
-
-	token := <-createTokenCommand.OutputStream
-	ctx.WriteJson(http.StatusOK, http_wrapper.Json{
-		"token": token,
-	})
 }

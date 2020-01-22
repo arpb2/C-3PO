@@ -1,7 +1,6 @@
 package user
 
 import (
-	"fmt"
 	"github.com/arpb2/C-3PO/src/api/controller"
 	"github.com/arpb2/C-3PO/src/api/controller/user/user_command"
 	"github.com/arpb2/C-3PO/src/api/controller/user/user_validation"
@@ -31,21 +30,8 @@ func CreatePostBody(exec executor.Executor, validations []user_validation.Valida
 			serviceCommand,
 		}
 
-		for _, command := range commands {
-			err := exec.Do(command)
-
-			if ctx.IsAborted() {
-				return
-			}
-
-			if err != nil {
-				fmt.Print(err.Error())
-				controller.Halt(ctx, http.StatusInternalServerError, "internal error")
-				return
-			}
+		if err := controller.BatchRun(exec, commands, ctx); err == nil {
+			ctx.WriteJson(http.StatusOK, <-serviceCommand.OutputStream)
 		}
-
-		user := <-serviceCommand.OutputStream
-		ctx.WriteJson(http.StatusOK, user)
 	}
 }

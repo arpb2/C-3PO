@@ -16,16 +16,17 @@ func (c *FetchUserIdCommand) Name() string {
 }
 
 func (c *FetchUserIdCommand) Run() error {
+	defer close(c.OutputStream)
 	userId := c.Context.GetParameter("user_id")
 
 	if userId == "" {
-		return http_wrapper.CreateBadRequestError("'user_id' empty")
+		return controller.HaltExternalError(c.Context, http_wrapper.CreateBadRequestError("'user_id' empty"))
 	}
 
 	userIdUint, err := strconv.ParseUint(userId, 10, 64)
 
 	if err != nil {
-		return http_wrapper.CreateBadRequestError("'user_id' malformed, expecting a positive number")
+		return controller.HaltExternalError(c.Context, http_wrapper.CreateBadRequestError("'user_id' malformed, expecting a positive number"))
 	}
 
 	c.OutputStream <- uint(userIdUint)
@@ -33,7 +34,7 @@ func (c *FetchUserIdCommand) Run() error {
 }
 
 func (c *FetchUserIdCommand) Fallback(err error) error {
-	return controller.HaltError(c.Context, err)
+	return err
 }
 
 func CreateFetchUserIdCommand(ctx *http_wrapper.Context) *FetchUserIdCommand {

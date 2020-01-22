@@ -1,7 +1,6 @@
 package user
 
 import (
-	"fmt"
 	"github.com/arpb2/C-3PO/src/api/controller"
 	"github.com/arpb2/C-3PO/src/api/controller/user/user_command"
 	"github.com/arpb2/C-3PO/src/api/executor"
@@ -31,20 +30,8 @@ func CreateDeleteBody(exec executor.Executor, userService service.UserService) h
 			serviceCommand,
 		}
 
-		for _, command := range commands {
-			err := exec.Do(command)
-
-			if ctx.IsAborted() {
-				return
-			}
-
-			if err != nil {
-				fmt.Print(err.Error())
-				controller.Halt(ctx, http.StatusInternalServerError, "internal error")
-				return
-			}
+		if err := controller.BatchRun(exec, commands, ctx); err == nil {
+			ctx.WriteStatus(http.StatusOK)
 		}
-
-		ctx.WriteStatus(http.StatusOK)
 	}
 }

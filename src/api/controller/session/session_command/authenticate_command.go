@@ -1,6 +1,7 @@
 package session_command
 
 import (
+	"github.com/arpb2/C-3PO/src/api/controller"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/arpb2/C-3PO/src/api/model"
 	"github.com/arpb2/C-3PO/src/api/service"
@@ -9,7 +10,8 @@ import (
 type AuthenticateCommand struct {
 	Context      *http_wrapper.Context
 	Service      service.CredentialService
-	Stream       chan *model.AuthenticatedUser
+	InputStream  chan *model.AuthenticatedUser
+	OutputStream  chan *model.AuthenticatedUser
 }
 
 func (c *AuthenticateCommand) Name() string {
@@ -17,15 +19,16 @@ func (c *AuthenticateCommand) Name() string {
 }
 
 func (c *AuthenticateCommand) Run() error {
-	user := <-c.Stream
+	defer close(c.OutputStream)
+	user := <-c.InputStream
 	userId, err := c.Service.Retrieve(user.Email, user.Password)
 
 	if err != nil {
-		return err
+		return controller.HaltExternalError(c.Context, err)
 	}
 
 	user.Id = userId
-	c.Stream <- user
+	c.OutputStream <- user
 	return nil
 }
 
@@ -39,6 +42,7 @@ func CreateAuthenticateCommand(ctx *http_wrapper.Context,
 	return &AuthenticateCommand{
 		Context:      ctx,
 		Service:      service,
-		Stream:       inputStream,
+		InputStream:  inputStream,
+		OutputStream: make(chan *model.AuthenticatedUser, 1),
 	}
 }

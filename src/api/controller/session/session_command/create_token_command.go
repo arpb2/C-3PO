@@ -19,14 +19,19 @@ func (c *CreateTokenCommand) Name() string {
 }
 
 func (c *CreateTokenCommand) Run() error {
-	user := <-c.InputStream
+	defer close(c.OutputStream)
+	user, openChan := <-c.InputStream
+
+	if !openChan {
+		return nil
+	}
 
 	token, err := c.TokenHandler.Create(&auth.Token{
 		UserId: user.Id,
 	})
 
 	if err != nil {
-		return err
+		return controller.HaltExternalError(c.Context, err)
 	}
 
 	c.OutputStream <- token
@@ -34,7 +39,7 @@ func (c *CreateTokenCommand) Run() error {
 }
 
 func (c *CreateTokenCommand) Fallback(err error) error {
-	return controller.HaltError(c.Context, err)
+	return err
 }
 
 func CreateCreateTokenCommand(ctx *http_wrapper.Context,

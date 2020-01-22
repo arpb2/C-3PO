@@ -1,26 +1,33 @@
 package code_service
 
-import "github.com/arpb2/C-3PO/src/api/service"
+import (
+	"github.com/arpb2/C-3PO/src/api/model"
+	"github.com/arpb2/C-3PO/src/api/service"
+)
 
 func CreateService() service.CodeService {
 	return &codeService{}
 }
 
-var inMemory = map[uint]map[uint]*string{} // TODO: For the moment (for testing) is a super simple single in-memory holder without err handling as userId:codeId:code
+var inMemory = map[uint]map[uint]*model.Code{} // TODO: For the moment (for testing) is a super simple single in-memory holder without err handling as userId:codeId:code
 
 type codeService struct{}
-func (c *codeService) GetCode(userId uint, codeId uint) (code *string, err error) {
+func (c *codeService) GetCode(userId uint, codeId uint) (code *model.Code, err error) {
 	return inMemory[userId][codeId], nil
 }
 
-func (c *codeService) CreateCode(userId uint, code *string) (codeId uint, err error) {
-	inMemory[userId] = map[uint]*string{}
-	inMemory[userId][1] = code
-	return 1, nil
+func (c *codeService) CreateCode(userId uint, code string) (codeModel *model.Code, err error) {
+	inMemory[userId] = map[uint]*model.Code{}
+	inMemory[userId][1] = &model.Code{
+		UserId: userId,
+		Id:     1,
+		Code:   code,
+	}
+	return inMemory[userId][1], nil
 }
 
-func (c *codeService) ReplaceCode(userId uint, codeId uint, code *string) error {
-	inMemory[userId] = map[uint]*string{}
-	inMemory[userId][1] = code
+func (c *codeService) ReplaceCode(code *model.Code) error {
+	inMemory[code.UserId] = map[uint]*model.Code{}
+	inMemory[code.UserId][1] = code
 	return nil
 }

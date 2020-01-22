@@ -16,10 +16,11 @@ func (c *FetchAuthenticatedUserCommand) Name() string {
 }
 
 func (c *FetchAuthenticatedUserCommand) Run() error {
+	defer close(c.OutputStream)
 	var authenticatedUser model.AuthenticatedUser
 
 	if err := c.Context.ReadBody(&authenticatedUser); err != nil {
-		return http_wrapper.CreateBadRequestError("malformed body")
+		return controller.HaltExternalError(c.Context, http_wrapper.CreateBadRequestError("malformed body"))
 	}
 
 	c.OutputStream <- &authenticatedUser
@@ -27,7 +28,7 @@ func (c *FetchAuthenticatedUserCommand) Run() error {
 }
 
 func (c *FetchAuthenticatedUserCommand) Fallback(err error) error {
-	return controller.HaltError(c.Context, err)
+	return err
 }
 
 func CreateFetchAuthenticatedUserCommand(ctx *http_wrapper.Context) *FetchAuthenticatedUserCommand {

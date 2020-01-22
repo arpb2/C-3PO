@@ -28,7 +28,7 @@ func StartApplication(engine engine.ServerEngine) error {
 }
 
 func CreateBinders() []engine.ControllerBinder {
-	executor := hystrix.CreateExecutor()
+	executorImpl := hystrix.CreateExecutor()
 
 	tokenHandler := jwt.CreateTokenHandler()
 
@@ -42,9 +42,9 @@ func CreateBinders() []engine.ControllerBinder {
 
 	return []engine.ControllerBinder{
 		health_binder.CreateBinder(),
-		code_binder.CreateBinder(teacherAuthMiddleware, codeService),
-		user_binder.CreateBinder(executor, singleAuthMiddleware, userService),
-		session_binder.CreateBinder(executor, tokenHandler, credentialService),
+		code_binder.CreateBinder(executorImpl, teacherAuthMiddleware, codeService),
+		user_binder.CreateBinder(executorImpl, singleAuthMiddleware, userService),
+		session_binder.CreateBinder(executorImpl, tokenHandler, credentialService),
 	}
 }
 

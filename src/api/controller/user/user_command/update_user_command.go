@@ -1,6 +1,5 @@
 package user_command
 
-
 import (
 	"github.com/arpb2/C-3PO/src/api/controller"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
@@ -21,19 +20,20 @@ func (c *UpdateUserCommand) Name() string {
 }
 
 func (c *UpdateUserCommand) Run() error {
-	userId := <-c.UserIdInputStream
-	authenticatedUser := <-c.UserInputStream
+	defer close(c.OutputStream)
+	userId, openUserIdChan := <-c.UserIdInputStream
+	authenticatedUser, openUserChan := <-c.UserInputStream
+
+	if !openUserIdChan && !openUserChan {
+		return nil
+	}
 
 	authenticatedUser.Id = userId
 
 	user, err := c.Service.UpdateUser(authenticatedUser)
 
-	if err != nil {
-		return err
-	}
-
-	if user == nil {
-		return http_wrapper.CreateInternalError()
+	if err != nil || user == nil {
+		return controller.HaltExternalError(c.Context, err)
 	}
 
 	c.OutputStream <- user
@@ -41,7 +41,7 @@ func (c *UpdateUserCommand) Run() error {
 }
 
 func (c *UpdateUserCommand) Fallback(err error) error {
-	return controller.HaltError(c.Context, err)
+	return err
 }
 
 func CreateUpdateUserCommand(ctx *http_wrapper.Context,

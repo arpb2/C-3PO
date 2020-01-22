@@ -2,45 +2,40 @@ package code
 
 import (
 	"github.com/arpb2/C-3PO/src/api/controller"
+	"github.com/arpb2/C-3PO/src/api/controller/code/code_command"
+	"github.com/arpb2/C-3PO/src/api/controller/user/user_command"
+	"github.com/arpb2/C-3PO/src/api/executor"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/arpb2/C-3PO/src/api/service"
 	"net/http"
 )
 
-func CreatePostController(authMiddleware http_wrapper.Handler, codeService service.CodeService) controller.Controller {
+func CreatePostController(exec executor.Executor, authMiddleware http_wrapper.Handler, codeService service.CodeService) controller.Controller {
 	return controller.Controller{
 		Method: "POST",
 		Path:   "/users/:user_id/codes",
 		Middleware: []http_wrapper.Handler{
 			authMiddleware,
 		},
-		Body:   CreatePostBody(codeService),
+		Body:   CreatePostBody(exec, codeService),
 	}
 }
 
-func CreatePostBody(codeService service.CodeService) http_wrapper.Handler {
+func CreatePostBody(exec executor.Executor, codeService service.CodeService) http_wrapper.Handler {
 	return func(ctx *http_wrapper.Context) {
-		userId, halt := FetchUserId(ctx)
-		if halt {
-			return
+		fetchUserIdCommand := user_command.CreateFetchUserIdCommand(ctx)
+		fetchCodeCommand := code_command.CreateFetchCodeCommand(ctx)
+		serviceCommand := code_command.CreateCreateCodeCommand(ctx, codeService, fetchUserIdCommand.OutputStream, fetchCodeCommand.OutputStream)
+
+		commands := []executor.Command{
+			fetchUserIdCommand,
+			fetchCodeCommand,
+			serviceCommand,
 		}
 
-		code, halt := FetchCode(ctx)
-		if halt {
-			return
+		if err := controller.BatchRun(exec, commands, ctx); err == nil {
+			code := <-serviceCommand.OutputStream
+			ctx.WriteJson(http.StatusOK, *code)
 		}
-
-		codeId, err := codeService.CreateCode(userId, code)
-
-		if err != nil {
-			controller.Halt(ctx, http.StatusInternalServerError, "internal error")
-			return
-		}
-
-		ctx.WriteJson(http.StatusOK, http_wrapper.Json{
-			"code": *code,
-			"user_id": userId,
-			"code_id": codeId,
-		})
 	}
 }

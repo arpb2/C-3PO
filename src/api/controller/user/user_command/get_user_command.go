@@ -1,6 +1,5 @@
 package user_command
 
-
 import (
 	"github.com/arpb2/C-3PO/src/api/controller"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
@@ -20,16 +19,21 @@ func (c *GetUserCommand) Name() string {
 }
 
 func (c *GetUserCommand) Run() error {
-	userId := <-c.InputStream
+	defer close(c.OutputStream)
+	userId, openChan := <-c.InputStream
+
+	if !openChan {
+		return nil
+	}
 
 	user, err := c.Service.GetUser(userId)
 
 	if err != nil {
-		return err
+		return controller.HaltExternalError(c.Context, err)
 	}
 
 	if user == nil {
-		return http_wrapper.CreateNotFoundError()
+		return controller.HaltExternalError(c.Context, http_wrapper.CreateNotFoundError())
 	}
 
 	c.OutputStream <- user
@@ -37,7 +41,7 @@ func (c *GetUserCommand) Run() error {
 }
 
 func (c *GetUserCommand) Fallback(err error) error {
-	return controller.HaltError(c.Context, err)
+	return err
 }
 
 func CreateGetUserCommand(ctx *http_wrapper.Context,
