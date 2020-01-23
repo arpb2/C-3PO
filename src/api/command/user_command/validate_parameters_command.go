@@ -36,7 +36,7 @@ func (c *validateParametersCommand) Run() error {
 
 	for _, requirement := range c.validations {
 		if err := requirement(c.user); err != nil {
-			return command.HaltExternalError(c.context, http_wrapper.CreateBadRequestError(err.Error()))
+			return command.HaltClientHttpError(c.context, http_wrapper.CreateBadRequestError(err.Error()))
 		}
 	}
 

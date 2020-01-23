@@ -37,7 +37,7 @@ func (c *authenticateCommand) Run() error {
 	userId, err := c.service.Retrieve(c.user.Email, c.user.Password)
 
 	if err != nil {
-		return command.HaltExternalError(c.context, err)
+		return command.HaltClientHttpError(c.context, err)
 	}
 
 	c.user.Id = userId

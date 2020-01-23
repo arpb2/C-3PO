@@ -24,7 +24,7 @@ func (c *fetchCodeCommand) Run() error {
 	code, exists := c.context.GetFormData("code")
 
 	if !exists {
-		return command.HaltExternalError(c.context, http_wrapper.CreateBadRequestError("'code' part not found"))
+		return command.HaltClientHttpError(c.context, http_wrapper.CreateBadRequestError("'code' part not found"))
 	}
 
 	c.OutputStream <- code

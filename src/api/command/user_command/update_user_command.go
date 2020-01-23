@@ -42,11 +42,11 @@ func (c *updateUserCommand) Run() error {
 	user, err := c.service.UpdateUser(c.authenticatedUser)
 
 	if err != nil {
-		return command.HaltExternalError(c.context, err)
+		return command.HaltClientHttpError(c.context, err)
 	}
 
 	if user == nil {
-		return command.HaltExternalError(c.context, http_wrapper.CreateInternalError())
+		return command.HaltClientHttpError(c.context, http_wrapper.CreateInternalError())
 	}
 
 	c.OutputStream <- user

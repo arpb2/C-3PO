@@ -6,9 +6,9 @@ import (
 	"net/http"
 )
 
-func HaltExternalError(ctx *http_wrapper.Context, err error) error {
+func HaltClientHttpError(ctx *http_wrapper.Context, err error) error {
 	var httpError http_wrapper.HttpError
-	if xerrors.As(err, &httpError) && httpError.Code != http.StatusInternalServerError {
+	if xerrors.As(err, &httpError) && httpError.Code < http.StatusInternalServerError {
 		ctx.AbortTransactionWithError(httpError)
 		return nil
 	}

@@ -43,11 +43,11 @@ func (c *getCodeCommand) Run() error {
 	code, err := c.service.GetCode(c.userId, c.codeId)
 
 	if err != nil {
-		return command.HaltExternalError(c.context, err)
+		return command.HaltClientHttpError(c.context, err)
 	}
 
 	if code == nil {
-		return command.HaltExternalError(c.context, http_wrapper.CreateNotFoundError())
+		return command.HaltClientHttpError(c.context, http_wrapper.CreateNotFoundError())
 	}
 
 	c.OutputStream <- code

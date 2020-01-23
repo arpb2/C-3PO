@@ -43,7 +43,7 @@ func (c *createCodeCommand) Run() error {
 	code, err := c.service.CreateCode(c.userId, c.code)
 
 	if err != nil {
-		return command.HaltExternalError(c.context, err)
+		return command.HaltClientHttpError(c.context, err)
 	}
 
 	c.OutputStream <- code

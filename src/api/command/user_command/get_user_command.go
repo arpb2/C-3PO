@@ -39,11 +39,11 @@ func (c *getUserCommand) Run() error {
 	user, err := c.service.GetUser(c.userId)
 
 	if err != nil {
-		return command.HaltExternalError(c.context, err)
+		return command.HaltClientHttpError(c.context, err)
 	}
 
 	if user == nil {
-		return command.HaltExternalError(c.context, http_wrapper.CreateNotFoundError())
+		return command.HaltClientHttpError(c.context, http_wrapper.CreateNotFoundError())
 	}
 
 	c.OutputStream <- user

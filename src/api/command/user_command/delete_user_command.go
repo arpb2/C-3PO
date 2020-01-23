@@ -38,7 +38,7 @@ func (c *deleteUserCommand) Run() error {
 	err := c.service.DeleteUser(c.userId)
 
 	if err != nil {
-		return command.HaltExternalError(c.context, err)
+		return command.HaltClientHttpError(c.context, err)
 	}
 
 	c.OutputStream <- true

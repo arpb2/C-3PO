@@ -24,13 +24,13 @@ func (c *fetchUserIdCommand) Run() error {
 	userId := c.context.GetParameter("user_id")
 
 	if userId == "" {
-		return command.HaltExternalError(c.context, http_wrapper.CreateBadRequestError("'user_id' empty"))
+		return command.HaltClientHttpError(c.context, http_wrapper.CreateBadRequestError("'user_id' empty"))
 	}
 
 	userIdUint, err := strconv.ParseUint(userId, 10, 64)
 
 	if err != nil {
-		return command.HaltExternalError(c.context, http_wrapper.CreateBadRequestError("'user_id' malformed, expecting a positive number"))
+		return command.HaltClientHttpError(c.context, http_wrapper.CreateBadRequestError("'user_id' malformed, expecting a positive number"))
 	}
 
 	c.OutputStream <- uint(userIdUint)

@@ -47,7 +47,7 @@ func (c *replaceCodeCommand) Run() error {
 	err := c.service.ReplaceCode(c.code)
 
 	if err != nil {
-		return command.HaltExternalError(c.context, err)
+		return command.HaltClientHttpError(c.context, err)
 	}
 
 	c.OutputStream <- c.code

@@ -25,7 +25,7 @@ func (c *fetchAuthenticatedUserCommand) Run() error {
 	var authenticatedUser model.AuthenticatedUser
 
 	if err := c.context.ReadBody(&authenticatedUser); err != nil {
-		return command.HaltExternalError(c.context, http_wrapper.CreateBadRequestError("malformed body"))
+		return command.HaltClientHttpError(c.context, http_wrapper.CreateBadRequestError("malformed body"))
 	}
 
 	c.OutputStream <- &authenticatedUser

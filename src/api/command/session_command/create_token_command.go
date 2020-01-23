@@ -39,7 +39,7 @@ func (c *createTokenCommand) Run() error {
 	})
 
 	if err != nil {
-		return command.HaltExternalError(c.context, err)
+		return command.HaltClientHttpError(c.context, err)
 	}
 
 	c.OutputStream <- token
