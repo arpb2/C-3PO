@@ -6,7 +6,6 @@ import (
 	"github.com/arpb2/C-3PO/src/api/controller"
 	"github.com/arpb2/C-3PO/src/api/executor"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
-	"github.com/arpb2/C-3PO/src/api/model"
 	"github.com/arpb2/C-3PO/src/api/service"
 )
 
@@ -26,26 +25,8 @@ func CreatePutBody(exec executor.HttpExecutor, codeService service.CodeService) 
 		fetchUserIdCommand := user_command.CreateFetchUserIdCommand(ctx)
 		fetchCodeCommand := code_command.CreateFetchCodeCommand(ctx)
 		fetchCodeIdCommand := code_command.CreateFetchCodeIdCommand(ctx)
-
-		codeChan := make(chan *model.Code, 1)
-		go func() {
-			defer close(codeChan)
-			userId, openUserIdChan := <-fetchUserIdCommand.OutputStream
-			codeId, openCodeIdChan := <-fetchCodeIdCommand.OutputStream
-			code, openCodeChan := <-fetchCodeCommand.OutputStream
-
-			if !openUserIdChan || !openCodeIdChan || !openCodeChan {
-				return
-			}
-
-			codeChan <- &model.Code{
-				Id:     codeId,
-				UserId: userId,
-				Code:   code,
-			}
-		}()
-
-		serviceCommand := code_command.CreateReplaceCodeCommand(ctx, codeService, codeChan)
+		serviceCommand := code_command.CreateReplaceCodeCommand(ctx, codeService,
+			fetchCodeIdCommand.OutputStream, fetchUserIdCommand.OutputStream, fetchCodeCommand.OutputStream)
 		renderCommand := code_command.CreateRenderCodeCommand(ctx, serviceCommand.OutputStream)
 
 		commands := []executor.Command{

@@ -10,7 +10,9 @@ import (
 type replaceCodeCommand struct {
 	context         *http_wrapper.Context
 	service         service.CodeService
-	codeInputStream <-chan *model.Code
+	codeIdInputStream <-chan uint
+	userIdInputStream <-chan uint
+	codeInputStream   <-chan string
 
 	OutputStream    chan *model.Code
 
@@ -22,13 +24,21 @@ func (c *replaceCodeCommand) Name() string {
 }
 
 func (c *replaceCodeCommand) Prepare() bool {
-	c.code = <-c.codeInputStream
+	userId, openUserIdChan := <-c.userIdInputStream
+	codeId, openCodeIdChan := <-c.codeIdInputStream
+	code, openCodeChan := <-c.codeInputStream
 
-	if c.code == nil {
+	if !openUserIdChan || !openCodeIdChan || !openCodeChan {
 		close(c.OutputStream)
+		return false
 	}
 
-	return c.code != nil
+	c.code = &model.Code{
+		Id:     codeId,
+		UserId: userId,
+		Code:   code,
+	}
+	return true
 }
 
 func (c *replaceCodeCommand) Run() error {
@@ -50,11 +60,15 @@ func (c *replaceCodeCommand) Fallback(err error) error {
 
 func CreateReplaceCodeCommand(ctx *http_wrapper.Context,
 							  service service.CodeService,
-							  codeInputStream <-chan *model.Code) *replaceCodeCommand {
+							  codeIdInputStream <-chan uint,
+							  userIdInputStream <-chan uint,
+							  codeInputStream   <-chan string) *replaceCodeCommand {
 	return &replaceCodeCommand{
-		context:         ctx,
-		service:         service,
-		codeInputStream: codeInputStream,
-		OutputStream:    make(chan *model.Code, 1),
+		context:           ctx,
+		service:           service,
+		codeInputStream:   codeInputStream,
+		userIdInputStream: userIdInputStream,
+		codeIdInputStream: codeIdInputStream,
+		OutputStream:      make(chan *model.Code, 1),
 	}
 }
