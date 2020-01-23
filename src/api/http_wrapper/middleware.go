@@ -10,4 +10,6 @@ type Middleware interface {
 
 	AbortTransactionWithStatus(code int, jsonObj interface{})
 
+	AbortTransactionWithError(err error)
+
 }

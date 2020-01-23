@@ -10,15 +10,21 @@ type ginWriter struct {
 }
 
 func (g ginWriter) WriteJson(code int, obj interface{}) {
-	g.JSON(code, obj)
+	if !g.IsAborted() {
+		g.JSON(code, obj)
+	}
 }
 
 func (g ginWriter) WriteString(code int, format string, values ...interface{}) {
-	g.String(code, format, values...)
+	if !g.IsAborted() {
+		g.String(code, format, values...)
+	}
 }
 
 func (g ginWriter) WriteStatus(code int) {
-	g.Status(code)
+	if !g.IsAborted() {
+		g.Status(code)
+	}
 }
 
 func CreateWriter(ctx *gin.Context) http_wrapper.Writer {

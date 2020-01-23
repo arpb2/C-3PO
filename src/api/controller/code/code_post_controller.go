@@ -1,16 +1,15 @@
 package code
 
 import (
+	"github.com/arpb2/C-3PO/src/api/command/code_command"
+	"github.com/arpb2/C-3PO/src/api/command/user_command"
 	"github.com/arpb2/C-3PO/src/api/controller"
-	"github.com/arpb2/C-3PO/src/api/controller/code/code_command"
-	"github.com/arpb2/C-3PO/src/api/controller/user/user_command"
 	"github.com/arpb2/C-3PO/src/api/executor"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/arpb2/C-3PO/src/api/service"
-	"net/http"
 )
 
-func CreatePostController(exec executor.Executor, authMiddleware http_wrapper.Handler, codeService service.CodeService) controller.Controller {
+func CreatePostController(exec executor.HttpExecutor, authMiddleware http_wrapper.Handler, codeService service.CodeService) controller.Controller {
 	return controller.Controller{
 		Method: "POST",
 		Path:   "/users/:user_id/codes",
@@ -21,21 +20,20 @@ func CreatePostController(exec executor.Executor, authMiddleware http_wrapper.Ha
 	}
 }
 
-func CreatePostBody(exec executor.Executor, codeService service.CodeService) http_wrapper.Handler {
+func CreatePostBody(exec executor.HttpExecutor, codeService service.CodeService) http_wrapper.Handler {
 	return func(ctx *http_wrapper.Context) {
 		fetchUserIdCommand := user_command.CreateFetchUserIdCommand(ctx)
 		fetchCodeCommand := code_command.CreateFetchCodeCommand(ctx)
 		serviceCommand := code_command.CreateCreateCodeCommand(ctx, codeService, fetchUserIdCommand.OutputStream, fetchCodeCommand.OutputStream)
+		renderCommand := code_command.CreateRenderCodeCommand(ctx, serviceCommand.OutputStream)
 
 		commands := []executor.Command{
 			fetchUserIdCommand,
 			fetchCodeCommand,
 			serviceCommand,
+			renderCommand,
 		}
 
-		if err := controller.BatchRun(exec, commands, ctx); err == nil {
-			code := <-serviceCommand.OutputStream
-			ctx.WriteJson(http.StatusOK, *code)
-		}
+		exec.BatchRun(ctx, commands)
 	}
 }

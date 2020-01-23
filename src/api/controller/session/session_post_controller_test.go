@@ -3,10 +3,11 @@ package session_test
 import (
 	"errors"
 	"github.com/arpb2/C-3PO/src/api/auth"
-	"github.com/arpb2/C-3PO/src/api/executor/blocking"
 	"github.com/arpb2/C-3PO/src/api/controller"
 	"github.com/arpb2/C-3PO/src/api/controller/session"
 	"github.com/arpb2/C-3PO/src/api/controller/session/session_validation"
+	"github.com/arpb2/C-3PO/src/api/executor/http_executor"
+	"github.com/arpb2/C-3PO/src/api/executor/hystrixdebug"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/arpb2/C-3PO/src/api/model"
 	service2 "github.com/arpb2/C-3PO/src/api/service"
@@ -46,11 +47,7 @@ func TestPostController_FetchUserIdTask_FailsOnValidationFail(t *testing.T) {
 	})).Return(nil).Once()
 
 	middleware := new(http_wrapper.MockMiddleware)
-	middleware.On("AbortTransactionWithStatus", http.StatusBadRequest, http_wrapper.Json{
-		"error": err.Error(),
-	}).Once()
-	middleware.On("IsAborted").Return(false).Once()
-	middleware.On("IsAborted").Return(true).Once()
+	middleware.On("AbortTransactionWithError", http_wrapper.CreateBadRequestError(err.Error())).Once()
 
 	validations := []session_validation.Validation{
 		func(user *model.AuthenticatedUser) error {
@@ -62,7 +59,7 @@ func TestPostController_FetchUserIdTask_FailsOnValidationFail(t *testing.T) {
 	}
 
 	postController := session.CreatePostController(
-		blocking.CreateExecutor(),
+		http_executor.CreateHttpExecutor(&hystrix.Executor{}),
 		nil,
 		nil,
 		validations,
@@ -80,10 +77,7 @@ func TestPostController_FetchUserIdTask_FailsOnValidationFail(t *testing.T) {
 
 func TestFetchUserIdTaskImpl_FailsOnServiceFailure(t *testing.T) {
 	middleware := new(http_wrapper.MockMiddleware)
-	middleware.On("IsAborted").Return(false).Times(3)
-	middleware.On("AbortTransactionWithStatus", http.StatusInternalServerError, http_wrapper.Json{
-		"error": "internal error",
-	}).Once()
+	middleware.On("AbortTransactionWithError", http_wrapper.CreateInternalError()).Once()
 
 	reader := new (http_wrapper.MockReader)
 	reader.On("ReadBody", mock.MatchedBy(func(obj *model.AuthenticatedUser) bool {
@@ -100,7 +94,7 @@ func TestFetchUserIdTaskImpl_FailsOnServiceFailure(t *testing.T) {
 	var validations []session_validation.Validation
 
 	postController := session.CreatePostController(
-		blocking.CreateExecutor(),
+		http_executor.CreateHttpExecutor(&hystrix.Executor{}),
 		nil,
 		service,
 		validations,
@@ -119,11 +113,7 @@ func TestFetchUserIdTaskImpl_FailsOnServiceFailure(t *testing.T) {
 
 func TestFetchUserIdTaskImpl_FailsOnTokenFailure(t *testing.T) {
 	middleware := new(http_wrapper.MockMiddleware)
-	middleware.On("AbortTransactionWithStatus", http.StatusInternalServerError, http_wrapper.Json{
-		"error": "internal error",
-	}).Once()
-	middleware.On("IsAborted").Return(false).Times(3)
-	middleware.On("IsAborted").Return(true).Once()
+	middleware.On("AbortTransactionWithError", http_wrapper.CreateInternalError()).Once()
 
 	reader := new (http_wrapper.MockReader)
 	reader.On("ReadBody", mock.MatchedBy(func(obj *model.AuthenticatedUser) bool {
@@ -145,7 +135,7 @@ func TestFetchUserIdTaskImpl_FailsOnTokenFailure(t *testing.T) {
 	})).Return("", http_wrapper.CreateInternalError())
 
 	postController := session.CreatePostController(
-		blocking.CreateExecutor(),
+		http_executor.CreateHttpExecutor(&hystrix.Executor{}),
 		tokenHandler,
 		credentialService,
 		validations,
@@ -170,7 +160,6 @@ func TestFetchUserIdTaskImpl_SuccessReturnsToken(t *testing.T) {
 	}).Once()
 
 	middleware := new(http_wrapper.MockMiddleware)
-	middleware.On("IsAborted").Return(false).Times(4)
 
 	reader := new (http_wrapper.MockReader)
 	reader.On("ReadBody", mock.MatchedBy(func(obj *model.AuthenticatedUser) bool {
@@ -192,7 +181,7 @@ func TestFetchUserIdTaskImpl_SuccessReturnsToken(t *testing.T) {
 	})).Return("test token", nil)
 
 	postController := session.CreatePostController(
-		blocking.CreateExecutor(),
+		http_executor.CreateHttpExecutor(&hystrix.Executor{}),
 		tokenHandler,
 		credentialService,
 		validations,

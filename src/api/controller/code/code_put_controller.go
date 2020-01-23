@@ -1,17 +1,16 @@
 package code
 
 import (
+	"github.com/arpb2/C-3PO/src/api/command/code_command"
+	"github.com/arpb2/C-3PO/src/api/command/user_command"
 	"github.com/arpb2/C-3PO/src/api/controller"
-	"github.com/arpb2/C-3PO/src/api/controller/code/code_command"
-	"github.com/arpb2/C-3PO/src/api/controller/user/user_command"
 	"github.com/arpb2/C-3PO/src/api/executor"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/arpb2/C-3PO/src/api/model"
 	"github.com/arpb2/C-3PO/src/api/service"
-	"net/http"
 )
 
-func CreatePutController(exec executor.Executor, authMiddleware http_wrapper.Handler, codeService service.CodeService) controller.Controller {
+func CreatePutController(exec executor.HttpExecutor, authMiddleware http_wrapper.Handler, codeService service.CodeService) controller.Controller {
 	return controller.Controller{
 		Method: "PUT",
 		Path:   "/users/:user_id/codes/:code_id",
@@ -22,7 +21,7 @@ func CreatePutController(exec executor.Executor, authMiddleware http_wrapper.Han
 	}
 }
 
-func CreatePutBody(exec executor.Executor, codeService service.CodeService) http_wrapper.Handler {
+func CreatePutBody(exec executor.HttpExecutor, codeService service.CodeService) http_wrapper.Handler {
 	return func(ctx *http_wrapper.Context) {
 		fetchUserIdCommand := user_command.CreateFetchUserIdCommand(ctx)
 		fetchCodeCommand := code_command.CreateFetchCodeCommand(ctx)
@@ -35,7 +34,7 @@ func CreatePutBody(exec executor.Executor, codeService service.CodeService) http
 			codeId, openCodeIdChan := <-fetchCodeIdCommand.OutputStream
 			code, openCodeChan := <-fetchCodeCommand.OutputStream
 
-			if !openUserIdChan && !openCodeIdChan && !openCodeChan {
+			if !openUserIdChan || !openCodeIdChan || !openCodeChan {
 				return
 			}
 
@@ -47,16 +46,16 @@ func CreatePutBody(exec executor.Executor, codeService service.CodeService) http
 		}()
 
 		serviceCommand := code_command.CreateReplaceCodeCommand(ctx, codeService, codeChan)
+		renderCommand := code_command.CreateRenderCodeCommand(ctx, serviceCommand.OutputStream)
 
 		commands := []executor.Command{
 			fetchUserIdCommand,
+			fetchCodeIdCommand,
 			fetchCodeCommand,
 			serviceCommand,
+			renderCommand,
 		}
 
-		if err := controller.BatchRun(exec, commands, ctx); err == nil {
-			code := <-serviceCommand.OutputStream
-			ctx.WriteJson(http.StatusOK, *code)
-		}
+		exec.BatchRun(ctx, commands)
 	}
 }

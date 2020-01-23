@@ -10,7 +10,7 @@ import (
 )
 
 type binder struct {
-	Executor          executor.Executor
+	Executor          executor.HttpExecutor
 	AuthMiddleware http_wrapper.Handler
 	UserService service.UserService
 }
@@ -52,7 +52,7 @@ func (b binder) BindControllers(controllerRegistrable engine.ControllerRegistrab
 		b.UserService))
 }
 
-func CreateBinder(exec executor.Executor, authMiddleware http_wrapper.Handler, userService service.UserService) engine.ControllerBinder {
+func CreateBinder(exec executor.HttpExecutor, authMiddleware http_wrapper.Handler, userService service.UserService) engine.ControllerBinder {
 	return &binder{
 		Executor:       exec,
 		AuthMiddleware: authMiddleware,

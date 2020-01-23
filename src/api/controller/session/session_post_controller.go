@@ -2,17 +2,16 @@ package session
 
 import (
 	"github.com/arpb2/C-3PO/src/api/auth"
+	"github.com/arpb2/C-3PO/src/api/command/session_command"
+	"github.com/arpb2/C-3PO/src/api/command/user_command"
 	"github.com/arpb2/C-3PO/src/api/controller"
-	"github.com/arpb2/C-3PO/src/api/controller/session/session_command"
 	"github.com/arpb2/C-3PO/src/api/controller/session/session_validation"
-	"github.com/arpb2/C-3PO/src/api/controller/user/user_command"
 	"github.com/arpb2/C-3PO/src/api/executor"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/arpb2/C-3PO/src/api/service"
-	"net/http"
 )
 
-func CreatePostController(executor executor.Executor,
+func CreatePostController(executor executor.HttpExecutor,
 						  tokenHandler auth.TokenHandler,
 	                      service service.CredentialService,
 	                      validations []session_validation.Validation) controller.Controller {
@@ -29,7 +28,7 @@ func CreatePostController(executor executor.Executor,
 }
 
 type PostBody struct {
-	Executor     executor.Executor
+	Executor     executor.HttpExecutor
 	TokenHandler auth.TokenHandler
 	Service      service.CredentialService
 
@@ -41,17 +40,15 @@ func (b PostBody) Method(ctx *http_wrapper.Context) {
 	validateParamsCommand := session_command.CreateValidateParametersCommand(ctx, fetchUserCommand.OutputStream, b.Validations)
 	authenticateCommand := session_command.CreateAuthenticateCommand(ctx, b.Service, validateParamsCommand.OutputStream)
 	createTokenCommand := session_command.CreateCreateTokenCommand(ctx, b.TokenHandler, authenticateCommand.OutputStream)
+	renderCommand := session_command.CreateRenderSessionCommand(ctx, createTokenCommand.OutputStream)
 
 	commands := []executor.Command{
 		fetchUserCommand,
 		validateParamsCommand,
 		authenticateCommand,
 		createTokenCommand,
+		renderCommand,
 	}
 
-	if err := controller.BatchRun(b.Executor, commands, ctx); err == nil {
-		ctx.WriteJson(http.StatusOK, http_wrapper.Json{
-			"token": <-createTokenCommand.OutputStream,
-		})
-	}
+	b.Executor.BatchRun(ctx, commands)
 }

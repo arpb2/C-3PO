@@ -12,9 +12,23 @@ func CreateExecutor() executor.Executor {
 type Executor struct {}
 
 func (cb Executor) Go(command executor.Command) chan error {
-	return hystrix.Go(command.Name(), command.Run, command.Fallback)
+	errChan := make(chan error, 1)
+	go func(errChan chan<- error) {
+		err := cb.Do(command)
+
+		if err != nil {
+			errChan <- err
+		}
+
+		close(errChan)
+	}(errChan)
+
+	return errChan
 }
 
 func (cb Executor) Do(command executor.Command) error {
-	return hystrix.Do(command.Name(), command.Run, command.Fallback)
+	if command.Prepare() {
+		return hystrix.Do(command.Name(), command.Run, command.Fallback)
+	}
+	return nil
 }

@@ -3,12 +3,13 @@ package server
 import (
 	"fmt"
 	"github.com/arpb2/C-3PO/src/api/auth/jwt"
-	"github.com/arpb2/C-3PO/src/api/executor/hystrix"
 	"github.com/arpb2/C-3PO/src/api/controller/code/code_binder"
 	"github.com/arpb2/C-3PO/src/api/controller/health/health_binder"
 	"github.com/arpb2/C-3PO/src/api/controller/session/session_binder"
 	"github.com/arpb2/C-3PO/src/api/controller/user/user_binder"
 	"github.com/arpb2/C-3PO/src/api/engine"
+	"github.com/arpb2/C-3PO/src/api/executor/http_executor"
+	"github.com/arpb2/C-3PO/src/api/executor/hystrix"
 	"github.com/arpb2/C-3PO/src/api/middleware/auth/single_auth"
 	"github.com/arpb2/C-3PO/src/api/middleware/auth/teacher_auth"
 	"github.com/arpb2/C-3PO/src/api/service/code_service"
@@ -28,7 +29,7 @@ func StartApplication(engine engine.ServerEngine) error {
 }
 
 func CreateBinders() []engine.ControllerBinder {
-	executorImpl := hystrix.CreateExecutor()
+	httpExecutor := http_executor.CreateHttpExecutor(hystrix.CreateExecutor())
 
 	tokenHandler := jwt.CreateTokenHandler()
 
@@ -42,9 +43,9 @@ func CreateBinders() []engine.ControllerBinder {
 
 	return []engine.ControllerBinder{
 		health_binder.CreateBinder(),
-		code_binder.CreateBinder(executorImpl, teacherAuthMiddleware, codeService),
-		user_binder.CreateBinder(executorImpl, singleAuthMiddleware, userService),
-		session_binder.CreateBinder(executorImpl, tokenHandler, credentialService),
+		code_binder.CreateBinder(httpExecutor, teacherAuthMiddleware, codeService),
+		user_binder.CreateBinder(httpExecutor, singleAuthMiddleware, userService),
+		session_binder.CreateBinder(httpExecutor, tokenHandler, credentialService),
 	}
 }
 

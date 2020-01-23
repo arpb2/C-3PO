@@ -16,7 +16,7 @@ func (m *MockControllerRegistrable) Register(controller controller.Controller) {
 }
 
 func bindControllers() *MockControllerRegistrable {
-	binder := code_binder.CreateBinder(nil, nil)
+	binder := code_binder.CreateBinder(nil, nil, nil)
 	registrable := &MockControllerRegistrable{}
 
 	binder.BindControllers(registrable)

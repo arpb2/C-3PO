@@ -51,7 +51,7 @@ func Test_HandlingOfAuthentication_NoHeader(t *testing.T) {
 	recorder := performRequest(e, "GET", "/test", "", map[string][]string{})
 
 	assert.Equal(t, http.StatusUnauthorized, recorder.Code)
-	assert.Equal(t, "{\"error\":\"no 'Authorization' header provided\"}\n", recorder.Body.String())
+	assert.Equal(t, "{\"error\":\"unauthorized\"}\n", recorder.Body.String())
 }
 
 func Test_HandlingOfAuthentication_BadHeader(t *testing.T) {

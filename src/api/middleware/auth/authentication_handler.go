@@ -3,10 +3,7 @@ package auth
 import (
 	"fmt"
 	"github.com/arpb2/C-3PO/src/api/auth"
-	"github.com/arpb2/C-3PO/src/api/controller"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
-	"golang.org/x/xerrors"
-	"net/http"
 	"strconv"
 )
 
@@ -18,19 +15,14 @@ func HandleAuthentication(ctx *http_wrapper.Context, tokenHandler auth.TokenHand
 	authToken := ctx.GetHeader("Authorization")
 
 	if authToken == "" {
-		controller.Halt(ctx, http.StatusUnauthorized, "no 'Authorization' header provided")
+		ctx.AbortTransactionWithError(http_wrapper.CreateUnauthorizedError())
 		return
 	}
 
 	token, err := tokenHandler.Retrieve(authToken)
 
 	if err != nil {
-		var httpError http_wrapper.HttpError
-		if xerrors.As(err, &httpError) {
-			controller.Halt(ctx, httpError.Code, httpError.Error())
-		} else {
-			controller.Halt(ctx, http.StatusInternalServerError, err.Error())
-		}
+		ctx.AbortTransactionWithError(err)
 		return
 	}
 
@@ -47,7 +39,7 @@ func HandleAuthentication(ctx *http_wrapper.Context, tokenHandler auth.TokenHand
 		// If any of our strategies has an error we will instantly fail the authentication process.
 		// TODO: In a future consider silently dismissing this, logging it somewhere but giving the user a 401.
 		if err != nil {
-			controller.Halt(ctx, http.StatusInternalServerError, "internal error")
+			ctx.AbortTransactionWithError(err)
 			return
 		}
 
@@ -65,5 +57,5 @@ func HandleAuthentication(ctx *http_wrapper.Context, tokenHandler auth.TokenHand
 		}
 	}(requestedUserId, ctx.GetUrl())
 
-	controller.Halt(ctx, http.StatusUnauthorized, "unauthorized")
+	ctx.AbortTransactionWithError(http_wrapper.CreateUnauthorizedError())
 }

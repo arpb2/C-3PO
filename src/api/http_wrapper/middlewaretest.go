@@ -19,6 +19,10 @@ func (t MockMiddleware) AbortTransaction() {
 	_ = t.Called()
 }
 
+func (t MockMiddleware) AbortTransactionWithError(err error) {
+	_ = t.Called(err)
+}
+
 func (t MockMiddleware) AbortTransactionWithStatus(code int, jsonObj interface{}) {
 	_ = t.Called(code, jsonObj)
 }

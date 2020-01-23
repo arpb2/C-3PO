@@ -7,7 +7,8 @@ import (
 	"github.com/arpb2/C-3PO/src/api/controller"
 	"github.com/arpb2/C-3PO/src/api/controller/user"
 	"github.com/arpb2/C-3PO/src/api/controller/user/user_validation"
-	"github.com/arpb2/C-3PO/src/api/executor/blocking"
+	"github.com/arpb2/C-3PO/src/api/executor/http_executor"
+	"github.com/arpb2/C-3PO/src/api/executor/hystrixdebug"
 	"github.com/arpb2/C-3PO/src/api/golden"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper/gin_wrapper"
@@ -23,7 +24,7 @@ import (
 
 func createPutController() controller.Controller {
 	return user.CreatePutController(
-		blocking.Executor{},
+		http_executor.CreateHttpExecutor(&hystrix.Executor{}),
 		[]user_validation.Validation{},
 		single_auth.CreateMiddleware(
 			jwt.CreateTokenHandler(),
@@ -42,6 +43,9 @@ func TestUserPutControllerPathIsAsExpected(t *testing.T) {
 
 func TestUserPutControllerBody_400OnNoUserId(t *testing.T) {
 	reader := new(http_wrapper.MockReader)
+	reader.On("ReadBody", mock.MatchedBy(func(obj interface{}) bool {
+		return true
+	})).Return(nil).Maybe()
 	reader.On("GetParameter", "user_id").Return("").Once()
 
 	c, w := gin_wrapper.CreateTestContext()
@@ -58,6 +62,9 @@ func TestUserPutControllerBody_400OnNoUserId(t *testing.T) {
 
 func TestUserPutControllerBody_400OnMalformedUserId(t *testing.T) {
 	reader := new(http_wrapper.MockReader)
+	reader.On("ReadBody", mock.MatchedBy(func(obj interface{}) bool {
+		return true
+	})).Return(nil).Maybe()
 	reader.On("GetParameter", "user_id").Return("not a number").Once()
 
 	c, w := gin_wrapper.CreateTestContext()
@@ -102,7 +109,7 @@ func TestUserPutControllerBody_500OnServiceCreateError(t *testing.T) {
 		Surname: "test surname",
 	}, errors.New("whoops error")).Once()
 
-	body := user.CreatePutBody(blocking.Executor{}, []user_validation.Validation{}, service)
+	body := user.CreatePutBody(http_executor.CreateHttpExecutor(&hystrix.Executor{}), []user_validation.Validation{}, service)
 
 	reader := new(http_wrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("1000").Once()
@@ -137,7 +144,7 @@ func TestUserPutControllerBody_500OnNoUserStoredInService(t *testing.T) {
 		return true
 	})).Return(nil, nil).Once()
 
-	body := user.CreatePutBody(blocking.Executor{}, []user_validation.Validation{}, service)
+	body := user.CreatePutBody(http_executor.CreateHttpExecutor(&hystrix.Executor{}), []user_validation.Validation{}, service)
 
 	reader := new(http_wrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("1000").Once()
@@ -169,7 +176,7 @@ func TestUserPutControllerBody_500OnNoUserStoredInService(t *testing.T) {
 func TestUserPutControllerBody_400OnIdSpecified(t *testing.T) {
 	service := new(service.MockUserService)
 
-	body := user.CreatePutBody(blocking.Executor{}, []user_validation.Validation{
+	body := user.CreatePutBody(http_executor.CreateHttpExecutor(&hystrix.Executor{}), []user_validation.Validation{
 		user_validation.IdProvidedValidation,
 	}, service)
 
@@ -208,7 +215,7 @@ func TestUserPutControllerBody_200OnUserStoredOnService(t *testing.T) {
 		return true
 	})).Return(expectedUser, nil).Once()
 
-	body := user.CreatePutBody(blocking.Executor{}, []user_validation.Validation{}, service)
+	body := user.CreatePutBody(http_executor.CreateHttpExecutor(&hystrix.Executor{}), []user_validation.Validation{}, service)
 
 	reader := new(http_wrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("1000").Once()

@@ -42,12 +42,12 @@ func Test_Get(t *testing.T) {
 
 	// Add code to retrieve
 	code := "expected code"
-	codeId, err := code_service.CreateService().CreateCode(uint(1000), &code)
+	createdCode, err := code_service.CreateService().CreateCode(uint(1000), code)
 
 	assert.Nil(t, err)
 
 	// Create request to perform
-	req, err := http.NewRequest("GET", "http://localhost:8080/users/1000/codes/" + strconv.FormatUint(uint64(codeId), 10), strings.NewReader(""))
+	req, err := http.NewRequest("GET", "http://localhost:8080/users/1000/codes/" + strconv.FormatUint(uint64(createdCode.Id), 10), strings.NewReader(""))
 	assert.Nil(t, err)
 
 	req.Header.Set("Authorization", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEwMDB9.GVS-KC5nOCHybzzFIIH864u4KcGu-ZSd-96krqTUGWo")
@@ -119,14 +119,14 @@ func Test_Put(t *testing.T) {
 
 	// Add code to replace
 	code := "test code"
-	codeId, err := code_service.CreateService().CreateCode(uint(1000), &code)
+	codeModel, err := code_service.CreateService().CreateCode(uint(1000), code)
 
 	assert.Nil(t, err)
 
 	// Create request to perform
 	data := url.Values{}
 	data["code"] = []string{"some code i'm replacing"}
-	req, err := http.NewRequest("PUT", "http://localhost:8080/users/1000/codes/" + strconv.FormatUint(uint64(codeId), 10), strings.NewReader(data.Encode()))
+	req, err := http.NewRequest("PUT", "http://localhost:8080/users/1000/codes/" + strconv.FormatUint(uint64(codeModel.Id), 10), strings.NewReader(data.Encode()))
 	assert.Nil(t, err)
 
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
