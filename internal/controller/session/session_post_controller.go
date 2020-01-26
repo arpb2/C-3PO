@@ -19,14 +19,11 @@ func CreatePostController(executor pipeline.HttpPipeline,
 	return controller.Controller{
 		Method: "POST",
 		Path:   "/session",
-		Body: CreatePostBody(executor, tokenHandler, service, validations),
+		Body:   CreatePostBody(executor, tokenHandler, service, validations),
 	}
 }
 
-func CreatePostBody(executor pipeline.HttpPipeline,
-					tokenHandler auth.TokenHandler,
-					service credential_service.Service,
-					validations []user_validation.Validation) http_wrapper.Handler {
+func CreatePostBody(executor pipeline.HttpPipeline, tokenHandler auth.TokenHandler, service credential_service.Service, validations []user_validation.Validation) http_wrapper.Handler {
 	return func(ctx *http_wrapper.Context) {
 		fetchUserCommand := user_command.CreateFetchAuthenticatedUserCommand(ctx)
 		validateParamsCommand := user_command.CreateValidateParametersCommand(ctx, fetchUserCommand.OutputStream, validations)

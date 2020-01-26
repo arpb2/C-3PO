@@ -15,6 +15,9 @@ ENV IGNORE_GO_GET="false"
 WORKDIR /go/src/github.com/arpb2/C-3PO
 COPY . ./
 
+RUN echo "Checking go fmt formatting" && \
+  gofmt -l api/ build/ cmd/ internal/ test/
+
 RUN echo "Running go build" && \
   go build ./...
 
