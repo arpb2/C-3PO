@@ -12,8 +12,11 @@ ENV PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
 ENV IGNORE_GO_GET="false"
 
-WORKDIR /go/src/github.com/arpb2/C-3PO/src/api
-COPY src/api .
+WORKDIR /go/src/github.com/arpb2/C-3PO
+COPY . ./
+
+RUN echo "Checking go fmt formatting" && \
+  gofmt -l api/ build/ cmd/ internal/ test/  | if [ $(grep -c -o -E ".*") -gt 0 ]; then exit 1; fi
 
 RUN echo "Running go build" && \
   go build ./...
@@ -21,4 +24,4 @@ RUN echo "Running go build" && \
 RUN echo "Running go test" && \
   go test ./...
 
-CMD [ "go", "run", "main.go" ]
+CMD [ "go", "run", "cmd/main.go" ]

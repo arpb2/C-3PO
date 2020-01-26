@@ -35,7 +35,7 @@ services:
             - "/var/run:/var/run:rw"
             - "/sys:/sys:ro"
             - "/var/lib/docker/:/var/lib/docker:ro"
-        
+
     go:
         build:
             context: .
@@ -44,7 +44,7 @@ services:
             - .:/app/go
         ports:
             - "5555:8080"
-        command: go run main.go
+        command: go run cmd/main.go
 
 volumes:
     grafana_config:

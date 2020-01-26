@@ -1,1 +1,0 @@
-{"code":"\npackage main\n\nimport (\n\t\"fmt\"\n)\n\nfunc main() {\n\tfmt.Print(\"Hello world!\")\n}\n\t\t\t","code_id":1000,"user_id":1000}
