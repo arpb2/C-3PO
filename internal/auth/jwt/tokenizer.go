@@ -17,8 +17,9 @@ func CreateTokenHandler() auth.TokenHandler {
 func FetchJwtSecret() []byte {
 	osValue := os.Getenv("JWT_SECRET")
 	if osValue == "" {
+		// TODO Remove this. As it's a serious security problem if we ever go to production.
 		osValue = "52bfd2de0a2e69dff4517518590ac32a46bd76606ec22a258f99584a6e70aca2" // "test_secret" SHA256
-		fmt.Printf("[WARN] Setting test secret '%s' for JWT as secret environment variable wasn't found", osValue)
+		fmt.Printf("[WARN] JWT Tokenizer - Setting test secret '%s' for JWT as secret environment variable wasn't found\n", osValue)
 	}
 	return []byte(osValue)
 }
