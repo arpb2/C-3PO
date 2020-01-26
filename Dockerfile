@@ -12,8 +12,8 @@ ENV PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
 ENV IGNORE_GO_GET="false"
 
-WORKDIR /go/src/github.com/arpb2/C-3PO/src/api
-COPY src/api .
+WORKDIR /go/src/github.com/arpb2/C-3PO
+COPY . ./
 
 RUN echo "Running go build" && \
   go build ./...
