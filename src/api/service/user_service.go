@@ -13,10 +13,3 @@ type UserService interface {
 	DeleteUser(userId uint) error
 
 }
-
-type TeacherService interface {
-	UserService
-
-	GetStudents(userId uint) (students *[]model.User, err error)
-
-}
