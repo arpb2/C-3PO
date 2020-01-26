@@ -4,14 +4,11 @@ import (
 	"fmt"
 	"github.com/arpb2/C-3PO/api/auth"
 	"github.com/arpb2/C-3PO/api/http_wrapper"
+	auth_middleware "github.com/arpb2/C-3PO/api/middleware/auth"
 	"strconv"
 )
 
-type AuthenticationStrategy interface {
-	Authenticate(token *auth.Token, userId string) (authorized bool, err error)
-}
-
-func HandleAuthentication(ctx *http_wrapper.Context, tokenHandler auth.TokenHandler, strategies ...AuthenticationStrategy) {
+func HandleAuthentication(ctx *http_wrapper.Context, tokenHandler auth.TokenHandler, strategies ...auth_middleware.AuthenticationStrategy) {
 	authToken := ctx.GetHeader("Authorization")
 
 	if authToken == "" {

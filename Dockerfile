@@ -21,4 +21,4 @@ RUN echo "Running go build" && \
 RUN echo "Running go test" && \
   go test ./...
 
-CMD [ "go", "run", "main.go" ]
+CMD [ "go", "run", "cmd/main.go" ]
