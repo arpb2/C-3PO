@@ -94,12 +94,12 @@
   version = "v1.2.0"
 
 [[projects]]
-  digest = "1:29895093e370d9da5fd1c9ab12a5855ccb568f28766e0c3ff159c4b0f09aa127"
+  digest = "1:0c58d31abe2a2ccb429c559b6292e7df89dcda675456fecc282fa90aa08273eb"
   name = "github.com/mattn/go-isatty"
   packages = ["."]
   pruneopts = "UT"
-  revision = "31745d66dd679ac0ac4f8d3ecff168fce6170c6a"
-  version = "v0.0.11"
+  revision = "7b513a986450394f7bbf1476909911b3aa3a55ce"
+  version = "v0.0.12"
 
 [[projects]]
   digest = "1:33422d238f147d247752996a26574ac48dcf472976eda7f5134015f06bf16563"
@@ -124,6 +124,20 @@
   pruneopts = "UT"
   revision = "792786c7400a136282c1664665ae0a8db921c6c2"
   version = "v1.0.0"
+
+[[projects]]
+  digest = "1:87cba2e9faf61f2c01ce7b12af83a1d76b59d9971ac70272fa270e1cd77fe650"
+  name = "github.com/saantiaguilera/go-pipeline"
+  packages = [
+    "pkg",
+    "pkg/pipeline",
+    "pkg/stage/concurrent",
+    "pkg/stage/sequential",
+    "pkg/step/trace",
+  ]
+  pruneopts = "UT"
+  revision = "1287caae072590b5ccca50ae3d45481290d5ab32"
+  version = "v0.1.4"
 
 [[projects]]
   digest = "1:ac83cf90d08b63ad5f7e020ef480d319ae890c208f8524622a2f3136e2686b02"
@@ -154,11 +168,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:c1b1f11d25f274813ed6642e8eb55237183a3456d4a809cfcb0395d0fc50a46c"
+  digest = "1:fea09edda033799f8e99ab9042bda910bf1e3bf088c03eaf2ba8aba3adbbc8bf"
   name = "golang.org/x/sys"
   packages = ["unix"]
   pruneopts = "UT"
-  revision = "b016eb3dc98ea7f69ed55e8216b87187067ae621"
+  revision = "9fbb57f87de9ccfe3a99d4e3270ce8a926ebba4f"
 
 [[projects]]
   branch = "master"
@@ -180,12 +194,12 @@
   version = "v9.31.0"
 
 [[projects]]
-  digest = "1:b75b3deb2bce8bc079e16bb2aecfe01eb80098f5650f9e93e5643ca8b7b73737"
+  digest = "1:55b110c99c5fdc4f14930747326acce56b52cfce60b24b1c03ef686ac0e46bb1"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
   pruneopts = "UT"
-  revision = "1f64d6156d11335c3f22d9330b0ad14fc1e789ce"
-  version = "v2.2.7"
+  revision = "53403b58ad1b561927d19068c655246f2db79d48"
+  version = "v2.2.8"
 
 [solve-meta]
   analyzer-name = "dep"
@@ -194,6 +208,11 @@
     "github.com/afex/hystrix-go/hystrix",
     "github.com/dgrijalva/jwt-go",
     "github.com/gin-gonic/gin",
+    "github.com/saantiaguilera/go-pipeline/pkg",
+    "github.com/saantiaguilera/go-pipeline/pkg/pipeline",
+    "github.com/saantiaguilera/go-pipeline/pkg/stage/concurrent",
+    "github.com/saantiaguilera/go-pipeline/pkg/stage/sequential",
+    "github.com/saantiaguilera/go-pipeline/pkg/step/trace",
     "github.com/stretchr/testify/assert",
     "github.com/stretchr/testify/mock",
     "golang.org/x/xerrors",

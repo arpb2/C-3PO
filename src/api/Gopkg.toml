@@ -36,3 +36,7 @@
 [[constraint]]
   branch = "master"
   name = "github.com/afex/hystrix-go"
+
+[[constraint]]
+  name = "github.com/saantiaguilera/go-pipeline"
+  version = "0.1.4"

@@ -10,7 +10,7 @@ import (
 )
 
 type binder struct{
-	Executor          executor.HttpExecutor
+	Executor          executor.HttpPipeline
 	TokenHandler      auth.TokenHandler
 	CredentialService service.CredentialService
 }
@@ -30,7 +30,7 @@ func (b binder) BindControllers(controllerRegistrable engine.ControllerRegistrab
 	))
 }
 
-func CreateBinder(executor executor.HttpExecutor,
+func CreateBinder(executor executor.HttpPipeline,
 	              tokenHandler auth.TokenHandler,
 	              credentialService service.CredentialService) engine.ControllerBinder {
 	return &binder{

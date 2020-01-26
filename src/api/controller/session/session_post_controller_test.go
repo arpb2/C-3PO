@@ -6,8 +6,8 @@ import (
 	"github.com/arpb2/C-3PO/src/api/controller"
 	"github.com/arpb2/C-3PO/src/api/controller/session"
 	"github.com/arpb2/C-3PO/src/api/controller/session/session_validation"
-	"github.com/arpb2/C-3PO/src/api/executor/http_executor"
-	"github.com/arpb2/C-3PO/src/api/executor/hystrixdebug"
+	"github.com/arpb2/C-3PO/src/api/executor"
+
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/arpb2/C-3PO/src/api/model"
 	service2 "github.com/arpb2/C-3PO/src/api/service"
@@ -59,7 +59,7 @@ func TestPostController_FetchUserIdTask_FailsOnValidationFail(t *testing.T) {
 	}
 
 	postController := session.CreatePostController(
-		http_executor.CreateHttpExecutor(&hystrix.Executor{}),
+		executor.CreatePipeline(executor.CreateDebugHttpExecutor()),
 		nil,
 		nil,
 		validations,
@@ -89,12 +89,12 @@ func TestFetchUserIdTaskImpl_FailsOnServiceFailure(t *testing.T) {
 	})).Return(nil).Once()
 
 	service := new(service2.MockCredentialService)
-	service.On("Retrieve", "test@email.com", "testpassword").Return(uint(0), errors.New("error")).Once()
+	service.On("Retrieve", "test@email.com", "testpassword").Return(uint(0), http_wrapper.CreateInternalError()).Once()
 
 	var validations []session_validation.Validation
 
 	postController := session.CreatePostController(
-		http_executor.CreateHttpExecutor(&hystrix.Executor{}),
+		executor.CreatePipeline(executor.CreateDebugHttpExecutor()),
 		nil,
 		service,
 		validations,
@@ -135,7 +135,7 @@ func TestFetchUserIdTaskImpl_FailsOnTokenFailure(t *testing.T) {
 	})).Return("", http_wrapper.CreateInternalError())
 
 	postController := session.CreatePostController(
-		http_executor.CreateHttpExecutor(&hystrix.Executor{}),
+		executor.CreatePipeline(executor.CreateDebugHttpExecutor()),
 		tokenHandler,
 		credentialService,
 		validations,
@@ -181,7 +181,7 @@ func TestFetchUserIdTaskImpl_SuccessReturnsToken(t *testing.T) {
 	})).Return("test token", nil)
 
 	postController := session.CreatePostController(
-		http_executor.CreateHttpExecutor(&hystrix.Executor{}),
+		executor.CreatePipeline(executor.CreateDebugHttpExecutor()),
 		tokenHandler,
 		credentialService,
 		validations,

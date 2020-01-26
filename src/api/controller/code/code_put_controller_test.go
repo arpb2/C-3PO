@@ -6,8 +6,8 @@ import (
 	"github.com/arpb2/C-3PO/src/api/auth/jwt"
 	"github.com/arpb2/C-3PO/src/api/controller"
 	"github.com/arpb2/C-3PO/src/api/controller/code"
-	"github.com/arpb2/C-3PO/src/api/executor/http_executor"
-	"github.com/arpb2/C-3PO/src/api/executor/hystrixdebug"
+	"github.com/arpb2/C-3PO/src/api/executor"
+
 	"github.com/arpb2/C-3PO/src/api/golden"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper/gin_wrapper"
@@ -24,7 +24,7 @@ import (
 
 func createPutController() controller.Controller {
 	return code.CreatePutController(
-		http_executor.CreateHttpExecutor(&hystrix.Executor{}),
+		executor.CreatePipeline(executor.CreateDebugHttpExecutor()),
 		teacher_auth.CreateMiddleware(
 			jwt.CreateTokenHandler(),
 			teacher_service.CreateService(user_service.CreateService()),
@@ -142,7 +142,7 @@ func TestCodePutControllerBody_500OnServiceWriteError(t *testing.T) {
 	c, w := gin_wrapper.CreateTestContext()
 	c.Reader = reader
 
-	code.CreateGetBody(http_executor.CreateHttpExecutor(&hystrix.Executor{}), codeService)(c)
+	code.CreateGetBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), codeService)(c)
 
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "internal_server_error.error_write.service.golden.json")
@@ -179,7 +179,7 @@ func main() {
 	c, w := gin_wrapper.CreateTestContext()
 	c.Reader = reader
 
-	code.CreateGetBody(http_executor.CreateHttpExecutor(&hystrix.Executor{}), codeService)(c)
+	code.CreateGetBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), codeService)(c)
 
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "ok.replace_code.golden.json")
@@ -206,7 +206,7 @@ func TestCodePutControllerBody_200OnEmptyCodeStoredOnService(t *testing.T) {
 	c, w := gin_wrapper.CreateTestContext()
 	c.Reader = reader
 
-	code.CreateGetBody(http_executor.CreateHttpExecutor(&hystrix.Executor{}), codeService)(c)
+	code.CreateGetBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), codeService)(c)
 
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "ok.replace_empty_code.golden.json")

@@ -7,9 +7,11 @@ import (
 	"github.com/arpb2/C-3PO/src/api/executor"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/arpb2/C-3PO/src/api/service"
+	"github.com/saantiaguilera/go-pipeline/pkg/stage/concurrent"
+	"github.com/saantiaguilera/go-pipeline/pkg/stage/sequential"
 )
 
-func CreatePostController(exec executor.HttpExecutor, authMiddleware http_wrapper.Handler, codeService service.CodeService) controller.Controller {
+func CreatePostController(exec executor.HttpPipeline, authMiddleware http_wrapper.Handler, codeService service.CodeService) controller.Controller {
 	return controller.Controller{
 		Method: "POST",
 		Path:   "/users/:user_id/codes",
@@ -20,20 +22,24 @@ func CreatePostController(exec executor.HttpExecutor, authMiddleware http_wrappe
 	}
 }
 
-func CreatePostBody(exec executor.HttpExecutor, codeService service.CodeService) http_wrapper.Handler {
+func CreatePostBody(exec executor.HttpPipeline, codeService service.CodeService) http_wrapper.Handler {
 	return func(ctx *http_wrapper.Context) {
 		fetchUserIdCommand := user_command.CreateFetchUserIdCommand(ctx)
 		fetchCodeCommand := code_command.CreateFetchCodeCommand(ctx)
 		serviceCommand := code_command.CreateCreateCodeCommand(ctx, codeService, fetchUserIdCommand.OutputStream, fetchCodeCommand.OutputStream)
 		renderCommand := code_command.CreateRenderCodeCommand(ctx, serviceCommand.OutputStream)
 
-		commands := []executor.Command{
-			fetchUserIdCommand,
-			fetchCodeCommand,
-			serviceCommand,
-			renderCommand,
-		}
+		graph := sequential.CreateSequentialGroup(
+			concurrent.CreateConcurrentStage(
+				fetchUserIdCommand,
+				fetchCodeCommand,
+			),
+			sequential.CreateSequentialStage(
+				serviceCommand,
+				renderCommand,
+			),
+		)
 
-		exec.BatchRun(ctx, commands)
+		exec.Run(ctx, graph)
 	}
 }

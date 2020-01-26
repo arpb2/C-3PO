@@ -6,9 +6,10 @@ import (
 	"github.com/arpb2/C-3PO/src/api/executor"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/arpb2/C-3PO/src/api/service"
+	"github.com/saantiaguilera/go-pipeline/pkg/stage/sequential"
 )
 
-func CreateGetController(executor executor.HttpExecutor,
+func CreateGetController(executor executor.HttpPipeline,
 						 authMiddleware http_wrapper.Handler,
 						 userService service.UserService) controller.Controller {
 	return controller.Controller{
@@ -21,18 +22,18 @@ func CreateGetController(executor executor.HttpExecutor,
 	}
 }
 
-func CreateGetBody(exec executor.HttpExecutor, userService service.UserService) http_wrapper.Handler {
+func CreateGetBody(exec executor.HttpPipeline, userService service.UserService) http_wrapper.Handler {
 	return func(ctx *http_wrapper.Context) {
 		fetchUserIdCommand := user_command.CreateFetchUserIdCommand(ctx)
 		serviceCommand := user_command.CreateGetUserCommand(ctx, userService, fetchUserIdCommand.OutputStream)
 		renderCommand := user_command.CreateRenderUserCommand(ctx, serviceCommand.OutputStream)
 
-		commands := []executor.Command{
+		graph := sequential.CreateSequentialStage(
 			fetchUserIdCommand,
 			serviceCommand,
 			renderCommand,
-		}
+		)
 
-		exec.BatchRun(ctx, commands)
+		exec.Run(ctx, graph)
 	}
 }

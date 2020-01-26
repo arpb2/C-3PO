@@ -1,7 +1,6 @@
 package code_command
 
 import (
-	"github.com/arpb2/C-3PO/src/api/command"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/arpb2/C-3PO/src/api/model"
 	"github.com/arpb2/C-3PO/src/api/service"
@@ -15,47 +14,29 @@ type replaceCodeCommand struct {
 	codeInputStream   <-chan string
 
 	OutputStream    chan *model.Code
-
-	code            *model.Code
 }
 
 func (c *replaceCodeCommand) Name() string {
 	return "replace_code_command"
 }
 
-func (c *replaceCodeCommand) Prepare() bool {
-	userId, openUserIdChan := <-c.userIdInputStream
-	codeId, openCodeIdChan := <-c.codeIdInputStream
-	code, openCodeChan := <-c.codeInputStream
-
-	if !openUserIdChan || !openCodeIdChan || !openCodeChan {
-		close(c.OutputStream)
-		return false
-	}
-
-	c.code = &model.Code{
-		Id:     codeId,
-		UserId: userId,
-		Code:   code,
-	}
-	return true
-}
-
 func (c *replaceCodeCommand) Run() error {
 	defer close(c.OutputStream)
 
-	err := c.service.ReplaceCode(c.code)
-
-	if err != nil {
-		return command.HaltClientHttpError(c.context, err)
+	code := &model.Code{
+		Id:     <-c.codeIdInputStream,
+		UserId: <-c.userIdInputStream,
+		Code:   <-c.codeInputStream,
 	}
 
-	c.OutputStream <- c.code
-	return nil
-}
+	err := c.service.ReplaceCode(code)
 
-func (c *replaceCodeCommand) Fallback(err error) error {
-	return err
+	if err != nil {
+		return err
+	}
+
+	c.OutputStream <- code
+	return nil
 }
 
 func CreateReplaceCodeCommand(ctx *http_wrapper.Context,

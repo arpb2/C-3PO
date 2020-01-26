@@ -6,8 +6,7 @@ import (
 	"github.com/arpb2/C-3PO/src/api/controller"
 	"github.com/arpb2/C-3PO/src/api/controller/user"
 	"github.com/arpb2/C-3PO/src/api/controller/user/user_validation"
-	"github.com/arpb2/C-3PO/src/api/executor/http_executor"
-	"github.com/arpb2/C-3PO/src/api/executor/hystrixdebug"
+	"github.com/arpb2/C-3PO/src/api/executor"
 	"github.com/arpb2/C-3PO/src/api/golden"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper/gin_wrapper"
@@ -21,7 +20,7 @@ import (
 )
 
 func createPostController() controller.Controller {
-	return user.CreatePostController(http_executor.CreateHttpExecutor(&hystrix.Executor{}), []user_validation.Validation{}, user_service.CreateService())
+	return user.CreatePostController(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), []user_validation.Validation{}, user_service.CreateService())
 }
 
 func TestUserPostControllerMethodIsPOST(t *testing.T) {
@@ -56,7 +55,7 @@ func TestUserPostControllerBody_500OnServiceCreateError(t *testing.T) {
 		return true
 	})).Return(&model.AuthenticatedUser{}, errors.New("whoops error")).Once()
 
-	body := user.CreatePostBody(http_executor.CreateHttpExecutor(&hystrix.Executor{}), []user_validation.Validation{}, service)
+	body := user.CreatePostBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), []user_validation.Validation{}, service)
 
 	reader := new(http_wrapper.MockReader)
 	reader.On("ReadBody", mock.MatchedBy(func(obj interface{}) bool {
@@ -83,7 +82,7 @@ func TestUserPostControllerBody_500OnNoUserStoredInService(t *testing.T) {
 		return true
 	})).Return(nil, nil).Once()
 
-	body := user.CreatePostBody(http_executor.CreateHttpExecutor(&hystrix.Executor{}), []user_validation.Validation{}, service)
+	body := user.CreatePostBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), []user_validation.Validation{}, service)
 
 	reader := new(http_wrapper.MockReader)
 	reader.On("ReadBody", mock.MatchedBy(func(obj interface{}) bool {
@@ -119,7 +118,7 @@ func TestUserPostControllerBody_200OnUserStoredOnService(t *testing.T) {
 		return true
 	})).Return(expectedUser, nil).Once()
 
-	body := user.CreatePostBody(http_executor.CreateHttpExecutor(&hystrix.Executor{}), []user_validation.Validation{}, service)
+	body := user.CreatePostBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), []user_validation.Validation{}, service)
 
 	reader := new(http_wrapper.MockReader)
 	reader.On("ReadBody", mock.MatchedBy(func(obj *model.AuthenticatedUser) bool {

@@ -8,28 +8,17 @@ import (
 type renderSessionCommand struct {
 	writer      http_wrapper.Writer
 	inputStream <-chan string
-
-	data        string
 }
 
 func (c *renderSessionCommand) Name() string {
 	return "render_session_command"
 }
 
-func (c *renderSessionCommand) Prepare() bool {
-	c.data = <-c.inputStream
-	return len(c.data) != 0
-}
-
 func (c *renderSessionCommand) Run() error {
 	c.writer.WriteJson(http.StatusOK, http_wrapper.Json{
-		"token": c.data,
+		"token": <-c.inputStream,
 	})
 	return nil
-}
-
-func (c *renderSessionCommand) Fallback(err error) error {
-	return err
 }
 
 func CreateRenderSessionCommand(writer http_wrapper.Writer,

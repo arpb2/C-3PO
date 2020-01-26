@@ -1,7 +1,6 @@
 package user_command
 
 import (
-	"github.com/arpb2/C-3PO/src/api/command"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/arpb2/C-3PO/src/api/model"
 	"github.com/arpb2/C-3PO/src/api/service"
@@ -13,44 +12,27 @@ type createUserCommand struct {
 	inputStream  <-chan *model.AuthenticatedUser
 
 	OutputStream chan *model.User
-
-	user         *model.AuthenticatedUser
 }
 
 func (c *createUserCommand) Name() string {
 	return "create_user_command"
 }
 
-func (c *createUserCommand) Prepare() bool {
-	c.user = <-c.inputStream
-
-	if c.user == nil {
-		close(c.OutputStream)
-		return false
-	}
-
-	return true
-}
-
 func (c *createUserCommand) Run() error {
 	defer close(c.OutputStream)
 
-	user, err := c.service.CreateUser(c.user)
+	user, err := c.service.CreateUser(<-c.inputStream)
 
 	if err != nil {
-		return command.HaltClientHttpError(c.context, err)
+		return err
 	}
 
 	if user == nil {
-		return command.HaltClientHttpError(c.context, http_wrapper.CreateInternalError())
+		return http_wrapper.CreateInternalError()
 	}
 
 	c.OutputStream <- user
 	return nil
-}
-
-func (c *createUserCommand) Fallback(err error) error {
-	return err
 }
 
 func CreateCreateUserCommand(ctx *http_wrapper.Context,

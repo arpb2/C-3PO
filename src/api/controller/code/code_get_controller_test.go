@@ -6,8 +6,8 @@ import (
 	"github.com/arpb2/C-3PO/src/api/auth/jwt"
 	"github.com/arpb2/C-3PO/src/api/controller"
 	"github.com/arpb2/C-3PO/src/api/controller/code"
-	"github.com/arpb2/C-3PO/src/api/executor/http_executor"
-	"github.com/arpb2/C-3PO/src/api/executor/hystrixdebug"
+	"github.com/arpb2/C-3PO/src/api/executor"
+
 	"github.com/arpb2/C-3PO/src/api/golden"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper/gin_wrapper"
@@ -24,7 +24,7 @@ import (
 
 func createGetController() controller.Controller {
 	return code.CreateGetController(
-		http_executor.CreateHttpExecutor(&hystrix.Executor{}),
+		executor.CreatePipeline(executor.CreateDebugHttpExecutor()),
 		teacher_auth.CreateMiddleware(
 			jwt.CreateTokenHandler(),
 			teacher_service.CreateService(user_service.CreateService()),
@@ -120,7 +120,7 @@ func TestCodeGetControllerBody_500OnServiceReadError(t *testing.T) {
 	c, w := gin_wrapper.CreateTestContext()
 	c.Reader = reader
 
-	code.CreateGetBody(http_executor.CreateHttpExecutor(&hystrix.Executor{}), codeService)(c)
+	code.CreateGetBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), codeService)(c)
 
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "internal_server_error.error_read.service.golden.json")
@@ -142,7 +142,7 @@ func TestCodeGetControllerBody_400OnNoCodeStoredInService(t *testing.T) {
 	c, w := gin_wrapper.CreateTestContext()
 	c.Reader = reader
 
-	code.CreateGetBody(http_executor.CreateHttpExecutor(&hystrix.Executor{}), codeService)(c)
+	code.CreateGetBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), codeService)(c)
 
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "not_found.missing_code.read.service.golden.json")
@@ -180,7 +180,7 @@ func main() {
 	c, w := gin_wrapper.CreateTestContext()
 	c.Reader = reader
 
-	code.CreateGetBody(http_executor.CreateHttpExecutor(&hystrix.Executor{}), codeService)(c)
+	code.CreateGetBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), codeService)(c)
 
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "ok.get_code.golden.json")
@@ -207,7 +207,7 @@ func TestCodeGetControllerBody_200OnEmptyCodeStoredOnService(t *testing.T) {
 	c, w := gin_wrapper.CreateTestContext()
 	c.Reader = reader
 
-	code.CreateGetBody(http_executor.CreateHttpExecutor(&hystrix.Executor{}), codeService)(c)
+	code.CreateGetBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), codeService)(c)
 
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "ok.get_empty_code.golden.json")

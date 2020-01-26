@@ -1,7 +1,6 @@
 package user_command
 
 import (
-	"github.com/arpb2/C-3PO/src/api/command"
 	"github.com/arpb2/C-3PO/src/api/controller/user/user_validation"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/arpb2/C-3PO/src/api/model"
@@ -13,34 +12,23 @@ type validateParametersCommand struct {
 	validations  []user_validation.Validation
 
 	OutputStream chan *model.AuthenticatedUser
-
-	user         *model.AuthenticatedUser
 }
 
 func (c *validateParametersCommand) Name() string {
 	return "validate_user_parameters_command"
 }
 
-func (c *validateParametersCommand) Prepare() bool {
-	c.user = <-c.inputStream
-
-	if c.user == nil {
-		close(c.OutputStream)
-	}
-
-	return c.user != nil
-}
-
 func (c *validateParametersCommand) Run() error {
 	defer close(c.OutputStream)
+	user := <-c.inputStream
 
 	for _, requirement := range c.validations {
-		if err := requirement(c.user); err != nil {
-			return command.HaltClientHttpError(c.context, http_wrapper.CreateBadRequestError(err.Error()))
+		if err := requirement(user); err != nil {
+			return http_wrapper.CreateBadRequestError(err.Error())
 		}
 	}
 
-	c.OutputStream <- c.user
+	c.OutputStream <- user
 	return nil
 }
 

@@ -6,8 +6,8 @@ import (
 	"github.com/arpb2/C-3PO/src/api/auth/jwt"
 	"github.com/arpb2/C-3PO/src/api/controller"
 	"github.com/arpb2/C-3PO/src/api/controller/user"
-	"github.com/arpb2/C-3PO/src/api/executor/http_executor"
-	"github.com/arpb2/C-3PO/src/api/executor/hystrixdebug"
+	"github.com/arpb2/C-3PO/src/api/executor"
+
 	"github.com/arpb2/C-3PO/src/api/golden"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper/gin_wrapper"
@@ -21,7 +21,7 @@ import (
 
 func createDeleteController() controller.Controller {
 	return user.CreateDeleteController(
-		http_executor.CreateHttpExecutor(&hystrix.Executor{}),
+		executor.CreatePipeline(executor.CreateDebugHttpExecutor()),
 		single_auth.CreateMiddleware(
 			jwt.CreateTokenHandler(),
 		),
@@ -73,7 +73,7 @@ func TestUserDeleteControllerBody_500OnServiceDeleteError(t *testing.T) {
 	service := new(service.MockUserService)
 	service.On("DeleteUser", uint(1000)).Return(errors.New("whoops error")).Once()
 
-	body := user.CreateDeleteBody(http_executor.CreateHttpExecutor(&hystrix.Executor{}), service)
+	body := user.CreateDeleteBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), service)
 
 	reader := new(http_wrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("1000").Once()
@@ -96,7 +96,7 @@ func TestUserDeleteControllerBody_200OnUserDeletedOnService(t *testing.T) {
 	service := new(service.MockUserService)
 	service.On("DeleteUser", uint(1000)).Return(nil).Once()
 
-	body := user.CreateDeleteBody(http_executor.CreateHttpExecutor(&hystrix.Executor{}), service)
+	body := user.CreateDeleteBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), service)
 
 	reader := new(http_wrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("1000").Once()

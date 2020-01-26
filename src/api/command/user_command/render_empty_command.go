@@ -14,17 +14,9 @@ func (c *renderEmptyCommand) Name() string {
 	return "render_empty_command"
 }
 
-func (c *renderEmptyCommand) Prepare() bool {
-	return <-c.inputStream
-}
-
 func (c *renderEmptyCommand) Run() error {
 	c.writer.WriteStatus(http.StatusOK)
 	return nil
-}
-
-func (c *renderEmptyCommand) Fallback(err error) error {
-	return err
 }
 
 func CreateRenderEmptyCommand(writer http_wrapper.Writer,

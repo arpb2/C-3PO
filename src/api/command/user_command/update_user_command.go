@@ -1,7 +1,6 @@
 package user_command
 
 import (
-	"github.com/arpb2/C-3PO/src/api/command"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/arpb2/C-3PO/src/api/model"
 	"github.com/arpb2/C-3PO/src/api/service"
@@ -14,47 +13,30 @@ type updateUserCommand struct {
 	userInputStream   <-chan *model.AuthenticatedUser
 
 	OutputStream      chan *model.User
-
-	authenticatedUser *model.AuthenticatedUser
 }
 
 func (c *updateUserCommand) Name() string {
 	return "update_user_command"
 }
 
-func (c *updateUserCommand) Prepare() bool {
-	userId, openUserIdChan := <-c.userIdInputStream
-	user, openUserChan := <-c.userInputStream
-
-	if !openUserIdChan || !openUserChan {
-		close(c.OutputStream)
-		return false
-	}
-
-	c.authenticatedUser = user
-	c.authenticatedUser.Id = userId
-	return true
-}
-
 func (c *updateUserCommand) Run() error {
 	defer close(c.OutputStream)
 
-	user, err := c.service.UpdateUser(c.authenticatedUser)
+	authenticatedUser := <-c.userInputStream
+	authenticatedUser.Id = <-c.userIdInputStream
+
+	user, err := c.service.UpdateUser(authenticatedUser)
 
 	if err != nil {
-		return command.HaltClientHttpError(c.context, err)
+		return err
 	}
 
 	if user == nil {
-		return command.HaltClientHttpError(c.context, http_wrapper.CreateInternalError())
+		return http_wrapper.CreateInternalError()
 	}
 
 	c.OutputStream <- user
 	return nil
-}
-
-func (c *updateUserCommand) Fallback(err error) error {
-	return err
 }
 
 func CreateUpdateUserCommand(ctx *http_wrapper.Context,

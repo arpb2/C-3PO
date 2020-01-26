@@ -9,9 +9,10 @@ import (
 	"github.com/arpb2/C-3PO/src/api/executor"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/arpb2/C-3PO/src/api/service"
+	"github.com/saantiaguilera/go-pipeline/pkg/stage/sequential"
 )
 
-func CreatePostController(executor executor.HttpExecutor,
+func CreatePostController(executor executor.HttpPipeline,
 						  tokenHandler auth.TokenHandler,
 	                      service service.CredentialService,
 	                      validations []session_validation.Validation) controller.Controller {
@@ -28,7 +29,7 @@ func CreatePostController(executor executor.HttpExecutor,
 }
 
 type PostBody struct {
-	Executor     executor.HttpExecutor
+	Executor     executor.HttpPipeline
 	TokenHandler auth.TokenHandler
 	Service      service.CredentialService
 
@@ -42,13 +43,13 @@ func (b PostBody) Method(ctx *http_wrapper.Context) {
 	createTokenCommand := session_command.CreateCreateTokenCommand(ctx, b.TokenHandler, authenticateCommand.OutputStream)
 	renderCommand := session_command.CreateRenderSessionCommand(ctx, createTokenCommand.OutputStream)
 
-	commands := []executor.Command{
+	graph := sequential.CreateSequentialStage(
 		fetchUserCommand,
 		validateParamsCommand,
 		authenticateCommand,
 		createTokenCommand,
 		renderCommand,
-	}
+	)
 
-	b.Executor.BatchRun(ctx, commands)
+	b.Executor.Run(ctx, graph)
 }

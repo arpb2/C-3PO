@@ -6,9 +6,10 @@ import (
 	"github.com/arpb2/C-3PO/src/api/executor"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/arpb2/C-3PO/src/api/service"
+	"github.com/saantiaguilera/go-pipeline/pkg/stage/sequential"
 )
 
-func CreateDeleteController(exec executor.HttpExecutor, authMiddleware http_wrapper.Handler, userService service.UserService) controller.Controller {
+func CreateDeleteController(exec executor.HttpPipeline, authMiddleware http_wrapper.Handler, userService service.UserService) controller.Controller {
 	return controller.Controller{
 		Method: "DELETE",
 		Path:   "/users/:user_id",
@@ -19,18 +20,18 @@ func CreateDeleteController(exec executor.HttpExecutor, authMiddleware http_wrap
 	}
 }
 
-func CreateDeleteBody(exec executor.HttpExecutor, userService service.UserService) http_wrapper.Handler {
+func CreateDeleteBody(exec executor.HttpPipeline, userService service.UserService) http_wrapper.Handler {
 	return func(ctx *http_wrapper.Context) {
 		fetchUserIdCommand := user_command.CreateFetchUserIdCommand(ctx)
 		serviceCommand := user_command.CreateDeleteUserCommand(ctx, userService, fetchUserIdCommand.OutputStream)
 		renderCommand := user_command.CreateRenderEmptyCommand(ctx, serviceCommand.OutputStream)
 
-		commands := []executor.Command{
+		graph := sequential.CreateSequentialStage(
 			fetchUserIdCommand,
 			serviceCommand,
 			renderCommand,
-		}
+		)
 
-		exec.BatchRun(ctx, commands)
+		exec.Run(ctx, graph)
 	}
 }
