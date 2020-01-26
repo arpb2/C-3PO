@@ -5,10 +5,10 @@ services:
         image: hopsoft/graphite-statsd
         volumes:
             - type: "bind"
-              source: ./statsd.config.js
+              source: ./build/statsd/statsd.config.js
               target: /opt/statsd/config.js
             - type: "bind"
-              source: ./graphite.storage-schemas.conf
+              source: ./build/graphite/graphite.storage-schemas.conf
               target: /opt/graphite/conf/storage-schemas.conf
         ports:
             - "8090:80"
