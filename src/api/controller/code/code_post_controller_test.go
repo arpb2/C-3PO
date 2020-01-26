@@ -12,6 +12,7 @@ import (
 	"github.com/arpb2/C-3PO/src/api/middleware/auth/teacher_auth"
 	"github.com/arpb2/C-3PO/src/api/service/code_service"
 	"github.com/arpb2/C-3PO/src/api/service/teacher_service"
+	"github.com/arpb2/C-3PO/src/api/service/user_service"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"testing"
@@ -21,9 +22,9 @@ func createPostController() controller.Controller {
 	return code.CreatePostController(
 		teacher_auth.CreateMiddleware(
 			jwt.CreateTokenHandler(),
-			teacher_service.GetService(),
+			teacher_service.CreateService(user_service.CreateService()),
 		),
-		code_service.GetService(),
+		code_service.CreateService(),
 	)
 }
 

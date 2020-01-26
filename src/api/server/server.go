@@ -2,14 +2,20 @@ package server
 
 import (
 	"fmt"
+	"github.com/arpb2/C-3PO/src/api/auth/jwt"
 	"github.com/arpb2/C-3PO/src/api/controller/code"
 	"github.com/arpb2/C-3PO/src/api/controller/health"
 	"github.com/arpb2/C-3PO/src/api/controller/user"
 	"github.com/arpb2/C-3PO/src/api/engine"
+	"github.com/arpb2/C-3PO/src/api/middleware/auth/single_auth"
+	"github.com/arpb2/C-3PO/src/api/middleware/auth/teacher_auth"
+	"github.com/arpb2/C-3PO/src/api/service/code_service"
+	"github.com/arpb2/C-3PO/src/api/service/teacher_service"
+	"github.com/arpb2/C-3PO/src/api/service/user_service"
 )
 
 func StartApplication(engine engine.ServerEngine) error {
-	RegisterRoutes(engine)
+	RegisterRoutes(engine, CreateBinders())
 
 	if err := engine.Run(); err != nil {
 		_ = fmt.Errorf("error running server %s", err.Error())
@@ -18,15 +24,25 @@ func StartApplication(engine engine.ServerEngine) error {
 	return nil
 }
 
-type Binder func(engine.ControllerRegistrable)
-var binders = []Binder{
-	health.Binder,
-	code.Binder,
-	user.Binder,
+func CreateBinders() []engine.ControllerBinder {
+	tokenHandler := jwt.CreateTokenHandler()
+
+	userService := user_service.CreateService()
+	teacherService := teacher_service.CreateService(userService)
+	codeService := code_service.CreateService()
+
+	singleAuthMiddleware := single_auth.CreateMiddleware(tokenHandler)
+	teacherAuthMiddleware := teacher_auth.CreateMiddleware(tokenHandler, teacherService)
+
+	return []engine.ControllerBinder{
+		health.CreateBinder(),
+		code.CreateBinder(teacherAuthMiddleware, codeService),
+		user.CreateBinder(singleAuthMiddleware, userService),
+	}
 }
 
-func RegisterRoutes(engine engine.ServerEngine) {
+func RegisterRoutes(engine engine.ServerEngine, binders []engine.ControllerBinder) {
 	for _, binder := range binders {
-		binder(engine)
+		binder.BindControllers(engine)
 	}
 }

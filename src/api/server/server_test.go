@@ -56,7 +56,7 @@ func TestStartApplicationFailureIsHandled(t *testing.T) {
 
 func TestHealthGet(test *testing.T) {
 	engine := gin_engine.New()
-	server.RegisterRoutes(engine)
+	server.RegisterRoutes(engine, server.CreateBinders())
 
 	w := performRequest(engine, "GET", "/ping", "")
 
@@ -66,7 +66,7 @@ func TestHealthGet(test *testing.T) {
 
 func TestCodeGetRegistered(test *testing.T) {
 	engine := gin_engine.New()
-	server.RegisterRoutes(engine)
+	server.RegisterRoutes(engine, server.CreateBinders())
 
 	w := performRequest(engine, "GET", "/users/1/codes/1", "")
 
@@ -75,7 +75,7 @@ func TestCodeGetRegistered(test *testing.T) {
 
 func TestCodePostRegistered(test *testing.T) {
 	engine := gin_engine.New()
-	server.RegisterRoutes(engine)
+	server.RegisterRoutes(engine, server.CreateBinders())
 
 	w := performRequest(engine, "POST", "/users/1/codes", "")
 
@@ -84,7 +84,7 @@ func TestCodePostRegistered(test *testing.T) {
 
 func TestCodePutRegistered(test *testing.T) {
 	engine := gin_engine.New()
-	server.RegisterRoutes(engine)
+	server.RegisterRoutes(engine, server.CreateBinders())
 
 	w := performRequest(engine, "PUT", "/users/1/codes/1", "")
 
@@ -93,7 +93,7 @@ func TestCodePutRegistered(test *testing.T) {
 
 func TestUserGetRegistered(test *testing.T) {
 	engine := gin_engine.New()
-	server.RegisterRoutes(engine)
+	server.RegisterRoutes(engine, server.CreateBinders())
 
 	w := performRequest(engine, "GET", "/users/1", "")
 
@@ -102,7 +102,7 @@ func TestUserGetRegistered(test *testing.T) {
 
 func TestUserPostRegistered(test *testing.T) {
 	engine := gin_engine.New()
-	server.RegisterRoutes(engine)
+	server.RegisterRoutes(engine, server.CreateBinders())
 
 	w := performRequest(engine, "POST", "/users", "")
 
@@ -111,7 +111,7 @@ func TestUserPostRegistered(test *testing.T) {
 
 func TestUserPutRegistered(test *testing.T) {
 	engine := gin_engine.New()
-	server.RegisterRoutes(engine)
+	server.RegisterRoutes(engine, server.CreateBinders())
 
 	w := performRequest(engine, "PUT", "/users/1", "")
 
@@ -120,7 +120,7 @@ func TestUserPutRegistered(test *testing.T) {
 
 func TestUserDeleteRegistered(test *testing.T) {
 	engine := gin_engine.New()
-	server.RegisterRoutes(engine)
+	server.RegisterRoutes(engine, server.CreateBinders())
 
 	w := performRequest(engine, "DELETE", "/users/1", "")
 

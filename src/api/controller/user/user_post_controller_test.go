@@ -3,13 +3,11 @@ package user_test
 import (
 	"bytes"
 	"errors"
-	"github.com/arpb2/C-3PO/src/api/auth/jwt"
 	"github.com/arpb2/C-3PO/src/api/controller"
 	"github.com/arpb2/C-3PO/src/api/controller/user"
 	"github.com/arpb2/C-3PO/src/api/golden"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper"
 	"github.com/arpb2/C-3PO/src/api/http_wrapper/gin_wrapper"
-	"github.com/arpb2/C-3PO/src/api/middleware/auth/single_auth"
 	"github.com/arpb2/C-3PO/src/api/model"
 	"github.com/arpb2/C-3PO/src/api/service/user_service"
 	"github.com/stretchr/testify/assert"
@@ -19,12 +17,7 @@ import (
 )
 
 func createPostController() controller.Controller {
-	return user.CreatePostController(
-		single_auth.CreateMiddleware(
-			jwt.CreateTokenHandler(),
-		),
-		user_service.GetService(),
-	)
+	return user.CreatePostController(user_service.CreateService())
 }
 
 func TestUserPostControllerMethodIsPOST(t *testing.T) {

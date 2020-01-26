@@ -17,3 +17,7 @@ type ServerEngine interface {
 type ControllerRegistrable interface {
 	Register(controller controller.Controller)
 }
+
+type ControllerBinder interface {
+	BindControllers(controllerRegistrable ControllerRegistrable)
+}

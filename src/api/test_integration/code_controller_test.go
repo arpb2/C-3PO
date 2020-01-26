@@ -42,7 +42,7 @@ func Test_Get(t *testing.T) {
 
 	// Add code to retrieve
 	code := "expected code"
-	codeId, err := code_service.GetService().CreateCode(uint(1000), &code)
+	codeId, err := code_service.CreateService().CreateCode(uint(1000), &code)
 
 	assert.Nil(t, err)
 
@@ -119,7 +119,7 @@ func Test_Put(t *testing.T) {
 
 	// Add code to replace
 	code := "test code"
-	codeId, err := code_service.GetService().CreateCode(uint(1000), &code)
+	codeId, err := code_service.CreateService().CreateCode(uint(1000), &code)
 
 	assert.Nil(t, err)
 
