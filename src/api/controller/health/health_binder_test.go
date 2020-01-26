@@ -24,13 +24,13 @@ func bindControllers() *MockControllerRegistrable {
 	return registrable
 }
 
-func lookupController(path string) controller.Controller {
+func lookupController(method, path string) *controller.Controller {
 	registrable := bindControllers()
-	var expectedController controller.Controller
+	var expectedController *controller.Controller
 
 	for _, registeredController := range registrable.RegisteredControllers {
-		if registeredController.Path == path {
-			expectedController = registeredController
+		if registeredController.Method == method && registeredController.Path == path {
+			expectedController = &registeredController
 		}
 	}
 
@@ -38,7 +38,7 @@ func lookupController(path string) controller.Controller {
 }
 
 func TestCreateBinder_RegistersRoutes(t *testing.T) {
-	assert.NotNil(t, lookupController("GET"))
+	assert.NotNil(t, lookupController("GET", "/ping"))
 }
 
 func TestCreateBinder_RegistersOnlyRoutes(t *testing.T) {
