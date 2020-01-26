@@ -1,7 +1,7 @@
 package single_auth_test
 
 import (
-	controller2 "github.com/arpb2/C-3PO/api/controller"
+	"github.com/arpb2/C-3PO/api/controller"
 	"github.com/arpb2/C-3PO/api/http_wrapper"
 	"github.com/arpb2/C-3PO/internal/auth/jwt"
 	"github.com/arpb2/C-3PO/internal/engine/gin"
@@ -26,7 +26,7 @@ func performRequest(r http.Handler, method, path, body string, headers map[strin
 
 func Test_Single_HandlingOfAuthentication_NoHeader(t *testing.T) {
 	e := gin_engine.New()
-	e.Register(controller2.Controller{
+	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test",
 		Middleware: []http_wrapper.Handler{
@@ -45,7 +45,7 @@ func Test_Single_HandlingOfAuthentication_NoHeader(t *testing.T) {
 
 func Test_Single_HandlingOfAuthentication_BadHeader(t *testing.T) {
 	e := gin_engine.New()
-	e.Register(controller2.Controller{
+	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test",
 		Middleware: []http_wrapper.Handler{
@@ -66,7 +66,7 @@ func Test_Single_HandlingOfAuthentication_BadHeader(t *testing.T) {
 
 func Test_Single_HandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
 	e := gin_engine.New()
-	e.Register(controller2.Controller{
+	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test/:user_id",
 		Middleware: []http_wrapper.Handler{
@@ -88,7 +88,7 @@ func Test_Single_HandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
 
 func Test_Single_HandlingOfAuthentication_Authorized_SameUser(t *testing.T) {
 	e := gin_engine.New()
-	e.Register(controller2.Controller{
+	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test/:user_id",
 		Middleware: []http_wrapper.Handler{

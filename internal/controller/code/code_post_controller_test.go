@@ -3,7 +3,7 @@ package code_controller_test
 import (
 	"bytes"
 	"errors"
-	controller2 "github.com/arpb2/C-3PO/api/controller"
+	"github.com/arpb2/C-3PO/api/controller"
 	"github.com/arpb2/C-3PO/api/model"
 	"github.com/arpb2/C-3PO/internal/auth/jwt"
 	"github.com/arpb2/C-3PO/internal/controller/code"
@@ -20,7 +20,7 @@ import (
 	"testing"
 )
 
-func createPostController() controller2.Controller {
+func createPostController() controller.Controller {
 	return code_controller.CreatePostController(
 		executor.CreatePipeline(executor.CreateDebugHttpExecutor()),
 		teacher_auth.CreateMiddleware(

@@ -3,7 +3,7 @@ package auth_test
 import (
 	"errors"
 	"github.com/arpb2/C-3PO/api/auth"
-	controller2 "github.com/arpb2/C-3PO/api/controller"
+	"github.com/arpb2/C-3PO/api/controller"
 	"github.com/arpb2/C-3PO/api/http_wrapper"
 	internal_auth "github.com/arpb2/C-3PO/internal/auth/jwt"
 	"github.com/arpb2/C-3PO/internal/engine/gin"
@@ -36,7 +36,7 @@ func performRequest(r http.Handler, method, path, body string, headers map[strin
 
 func Test_HandlingOfAuthentication_NoHeader(t *testing.T) {
 	e := gin_engine.New()
-	e.Register(controller2.Controller{
+	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test",
 		Middleware: []http_wrapper.Handler{
@@ -57,7 +57,7 @@ func Test_HandlingOfAuthentication_NoHeader(t *testing.T) {
 
 func Test_HandlingOfAuthentication_BadHeader(t *testing.T) {
 	e := gin_engine.New()
-	e.Register(controller2.Controller{
+	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test",
 		Middleware: []http_wrapper.Handler{
@@ -80,7 +80,7 @@ func Test_HandlingOfAuthentication_BadHeader(t *testing.T) {
 
 func Test_HandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
 	e := gin_engine.New()
-	e.Register(controller2.Controller{
+	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test/:user_id",
 		Middleware: []http_wrapper.Handler{
@@ -104,7 +104,7 @@ func Test_HandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
 
 func Test_HandlingOfAuthentication_Authorized_SameUser(t *testing.T) {
 	e := gin_engine.New()
-	e.Register(controller2.Controller{
+	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test/:user_id",
 		Middleware: []http_wrapper.Handler{
@@ -133,7 +133,7 @@ func TestStrategy_Error_Halts(t *testing.T) {
 	}), "1001").Return(false, errors.New("whoops this fails")).Once()
 
 	e := gin_engine.New()
-	e.Register(controller2.Controller{
+	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test/:user_id",
 		Middleware: []http_wrapper.Handler{
@@ -163,7 +163,7 @@ func TestStrategy_Unauthorized_Halts(t *testing.T) {
 	}), "1001").Return(false, nil).Once()
 
 	e := gin_engine.New()
-	e.Register(controller2.Controller{
+	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test/:user_id",
 		Middleware: []http_wrapper.Handler{
@@ -193,7 +193,7 @@ func TestStrategy_Authorized_Continues(t *testing.T) {
 	}), "1001").Return(true, nil).Once()
 
 	e := gin_engine.New()
-	e.Register(controller2.Controller{
+	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test/:user_id",
 		Middleware: []http_wrapper.Handler{

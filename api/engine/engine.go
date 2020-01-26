@@ -1,7 +1,7 @@
 package engine
 
 import (
-	controller2 "github.com/arpb2/C-3PO/api/controller"
+	"github.com/arpb2/C-3PO/api/controller"
 	"net/http"
 )
 
@@ -15,7 +15,7 @@ type ServerEngine interface {
 }
 
 type ControllerRegistrable interface {
-	Register(controller controller2.Controller)
+	Register(controller controller.Controller)
 }
 
 type ControllerBinder interface {

@@ -1,17 +1,17 @@
 package health_binder_test
 
 import (
-	controller2 "github.com/arpb2/C-3PO/api/controller"
+	"github.com/arpb2/C-3PO/api/controller"
 	"github.com/arpb2/C-3PO/internal/binder/health"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 type MockControllerRegistrable struct {
-	RegisteredControllers []controller2.Controller
+	RegisteredControllers []controller.Controller
 }
 
-func (m *MockControllerRegistrable) Register(controller controller2.Controller) {
+func (m *MockControllerRegistrable) Register(controller controller.Controller) {
 	m.RegisteredControllers = append(m.RegisteredControllers, controller)
 }
 
@@ -24,9 +24,9 @@ func bindControllers() *MockControllerRegistrable {
 	return registrable
 }
 
-func lookupController(method, path string) *controller2.Controller {
+func lookupController(method, path string) *controller.Controller {
 	registrable := bindControllers()
-	var expectedController *controller2.Controller
+	var expectedController *controller.Controller
 
 	for _, registeredController := range registrable.RegisteredControllers {
 		if registeredController.Method == method && registeredController.Path == path {

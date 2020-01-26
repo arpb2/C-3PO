@@ -3,23 +3,22 @@ package session_controller_test
 import (
 	"errors"
 	"github.com/arpb2/C-3PO/api/auth"
-	controller2 "github.com/arpb2/C-3PO/api/controller"
+	"github.com/arpb2/C-3PO/api/controller"
+	"github.com/arpb2/C-3PO/api/http_wrapper"
+	"github.com/arpb2/C-3PO/api/model"
 	"github.com/arpb2/C-3PO/internal/controller/session"
 	"github.com/arpb2/C-3PO/internal/executor"
 	user_validation "github.com/arpb2/C-3PO/internal/validation/user"
-	auth2 "github.com/arpb2/C-3PO/test/auth"
+	test_auth "github.com/arpb2/C-3PO/test/auth"
 	test_http_wrapper "github.com/arpb2/C-3PO/test/http_wrapper"
-	service2 "github.com/arpb2/C-3PO/test/service"
-
-	"github.com/arpb2/C-3PO/api/http_wrapper"
-	"github.com/arpb2/C-3PO/api/model"
+	"github.com/arpb2/C-3PO/test/service"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"net/http"
 	"testing"
 )
 
-func createPostController() controller2.Controller {
+func createPostController() controller.Controller {
 	return session_controller.CreatePostController(
 		nil,
 		nil,
@@ -90,7 +89,7 @@ func TestFetchUserIdTaskImpl_FailsOnServiceFailure(t *testing.T) {
 		return true
 	})).Return(nil).Once()
 
-	service := new(service2.MockCredentialService)
+	service := new(service.MockCredentialService)
 	service.On("Retrieve", "test@email.com", "testpassword").Return(uint(0), http_wrapper.CreateInternalError()).Once()
 
 	var validations []user_validation.Validation
@@ -128,10 +127,10 @@ func TestFetchUserIdTaskImpl_FailsOnTokenFailure(t *testing.T) {
 
 	var validations []user_validation.Validation
 
-	credentialService := new(service2.MockCredentialService)
+	credentialService := new(service.MockCredentialService)
 	credentialService.On("Retrieve", "test@email.com", "testpassword").Return(uint(1000), nil)
 
-	tokenHandler := new(auth2.MockTokenHandler)
+	tokenHandler := new(test_auth.MockTokenHandler)
 	tokenHandler.On("Create", mock.MatchedBy(func(tkn *auth.Token) bool {
 		return tkn.UserId == uint(1000)
 	})).Return("", http_wrapper.CreateInternalError())
@@ -174,10 +173,10 @@ func TestFetchUserIdTaskImpl_SuccessReturnsToken(t *testing.T) {
 
 	var validations []user_validation.Validation
 
-	credentialService := new(service2.MockCredentialService)
+	credentialService := new(service.MockCredentialService)
 	credentialService.On("Retrieve", "test@email.com", "test password").Return(uint(1000), nil)
 
-	tokenHandler := new(auth2.MockTokenHandler)
+	tokenHandler := new(test_auth.MockTokenHandler)
 	tokenHandler.On("Create", mock.MatchedBy(func(tkn *auth.Token) bool {
 		return tkn.UserId == uint(1000)
 	})).Return("test token", nil)

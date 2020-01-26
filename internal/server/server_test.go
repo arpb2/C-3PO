@@ -2,7 +2,7 @@ package server_test
 
 import (
 	"errors"
-	controller2 "github.com/arpb2/C-3PO/api/controller"
+	"github.com/arpb2/C-3PO/api/controller"
 	"github.com/arpb2/C-3PO/internal/engine/gin"
 	"github.com/arpb2/C-3PO/internal/server"
 	"github.com/stretchr/testify/assert"
@@ -25,7 +25,7 @@ func (server ServerEngineMock) ServeHTTP(writer http.ResponseWriter, request *ht
 func (server ServerEngineMock) Run() error {
 	return nil
 }
-func (server ServerEngineMock) Register(controller controller2.Controller) {}
+func (server ServerEngineMock) Register(controller controller.Controller) {}
 func (server ServerEngineMock) Shutdown() error {
 	return nil
 }
@@ -36,7 +36,7 @@ func (server FailingServerEngineMock) ServeHTTP(writer http.ResponseWriter, requ
 func (server FailingServerEngineMock) Run() error {
 	return errors.New("woops this fails")
 }
-func (server FailingServerEngineMock) Register(controller controller2.Controller) {}
+func (server FailingServerEngineMock) Register(controller controller.Controller) {}
 func (server FailingServerEngineMock) Shutdown() error {
 	return nil
 }

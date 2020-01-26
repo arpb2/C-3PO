@@ -1,7 +1,7 @@
 package user_controller
 
 import (
-	controller2 "github.com/arpb2/C-3PO/api/controller"
+	"github.com/arpb2/C-3PO/api/controller"
 	"github.com/arpb2/C-3PO/api/http_wrapper"
 	"github.com/arpb2/C-3PO/api/pipeline"
 	user_service "github.com/arpb2/C-3PO/api/service/user"
@@ -11,8 +11,8 @@ import (
 	"github.com/saantiaguilera/go-pipeline/pkg/stage/sequential"
 )
 
-func CreatePutController(exec pipeline.HttpPipeline, validations []user_validation.Validation, authMiddleware http_wrapper.Handler, userService user_service.Service) controller2.Controller {
-	return controller2.Controller{
+func CreatePutController(exec pipeline.HttpPipeline, validations []user_validation.Validation, authMiddleware http_wrapper.Handler, userService user_service.Service) controller.Controller {
+	return controller.Controller{
 		Method: "PUT",
 		Path:   "/users/:user_id",
 		Middleware: []http_wrapper.Handler{

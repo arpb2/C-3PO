@@ -3,7 +3,7 @@ package user_controller_test
 import (
 	"bytes"
 	"errors"
-	controller2 "github.com/arpb2/C-3PO/api/controller"
+	"github.com/arpb2/C-3PO/api/controller"
 	"github.com/arpb2/C-3PO/api/model"
 	"github.com/arpb2/C-3PO/internal/auth/jwt"
 	"github.com/arpb2/C-3PO/internal/controller/user"
@@ -13,14 +13,14 @@ import (
 	user_validation "github.com/arpb2/C-3PO/internal/validation/user"
 	"github.com/arpb2/C-3PO/test/golden"
 	test_http_wrapper "github.com/arpb2/C-3PO/test/http_wrapper"
-	service2 "github.com/arpb2/C-3PO/test/service"
+	"github.com/arpb2/C-3PO/test/service"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"net/http"
 	"testing"
 )
 
-func createPutController() controller2.Controller {
+func createPutController() controller.Controller {
 	return user_controller.CreatePutController(
 		executor.CreatePipeline(executor.CreateDebugHttpExecutor()),
 		[]user_validation.Validation{},
@@ -97,7 +97,7 @@ func TestUserPutControllerBody_400OnEmptyOrMalformedUser(t *testing.T) {
 }
 
 func TestUserPutControllerBody_500OnServiceCreateError(t *testing.T) {
-	service := new(service2.MockUserService)
+	service := new(service.MockUserService)
 	service.On("UpdateUser", mock.MatchedBy(func(obj interface{}) bool {
 		return true
 	})).Return(&model.User{
@@ -137,7 +137,7 @@ func TestUserPutControllerBody_500OnServiceCreateError(t *testing.T) {
 }
 
 func TestUserPutControllerBody_500OnNoUserStoredInService(t *testing.T) {
-	service := new(service2.MockUserService)
+	service := new(service.MockUserService)
 	service.On("UpdateUser", mock.MatchedBy(func(obj interface{}) bool {
 		return true
 	})).Return(nil, nil).Once()
@@ -172,7 +172,7 @@ func TestUserPutControllerBody_500OnNoUserStoredInService(t *testing.T) {
 }
 
 func TestUserPutControllerBody_400OnIdSpecified(t *testing.T) {
-	service := new(service2.MockUserService)
+	service := new(service.MockUserService)
 
 	body := user_controller.CreatePutBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), []user_validation.Validation{
 		user_validation.IdProvided,
@@ -208,7 +208,7 @@ func TestUserPutControllerBody_200OnUserStoredOnService(t *testing.T) {
 		Name:    "TestName",
 		Surname: "TestSurname",
 	}
-	service := new(service2.MockUserService)
+	service := new(service.MockUserService)
 	service.On("UpdateUser", mock.MatchedBy(func(obj interface{}) bool {
 		return true
 	})).Return(expectedUser, nil).Once()

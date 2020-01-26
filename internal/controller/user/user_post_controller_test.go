@@ -3,7 +3,7 @@ package user_controller_test
 import (
 	"bytes"
 	"errors"
-	controller2 "github.com/arpb2/C-3PO/api/controller"
+	"github.com/arpb2/C-3PO/api/controller"
 	"github.com/arpb2/C-3PO/api/model"
 	"github.com/arpb2/C-3PO/internal/controller/user"
 	"github.com/arpb2/C-3PO/internal/executor"
@@ -11,14 +11,14 @@ import (
 	user_validation "github.com/arpb2/C-3PO/internal/validation/user"
 	"github.com/arpb2/C-3PO/test/golden"
 	test_http_wrapper "github.com/arpb2/C-3PO/test/http_wrapper"
-	service2 "github.com/arpb2/C-3PO/test/service"
+	"github.com/arpb2/C-3PO/test/service"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"net/http"
 	"testing"
 )
 
-func createPostController() controller2.Controller {
+func createPostController() controller.Controller {
 	return user_controller.CreatePostController(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), []user_validation.Validation{}, user_service.CreateService())
 }
 
@@ -49,7 +49,7 @@ func TestUserPostControllerBody_400OnEmptyOrMalformedUser(t *testing.T) {
 }
 
 func TestUserPostControllerBody_500OnServiceCreateError(t *testing.T) {
-	service := new(service2.MockUserService)
+	service := new(service.MockUserService)
 	service.On("CreateUser", mock.MatchedBy(func(obj interface{}) bool {
 		return true
 	})).Return(&model.AuthenticatedUser{}, errors.New("whoops error")).Once()
@@ -76,7 +76,7 @@ func TestUserPostControllerBody_500OnServiceCreateError(t *testing.T) {
 }
 
 func TestUserPostControllerBody_500OnNoUserStoredInService(t *testing.T) {
-	service := new(service2.MockUserService)
+	service := new(service.MockUserService)
 	service.On("CreateUser", mock.MatchedBy(func(obj interface{}) bool {
 		return true
 	})).Return(nil, nil).Once()
@@ -112,7 +112,7 @@ func TestUserPostControllerBody_200OnUserStoredOnService(t *testing.T) {
 		},
 		Password: "testpassword",
 	}
-	service := new(service2.MockUserService)
+	service := new(service.MockUserService)
 	service.On("CreateUser", mock.MatchedBy(func(obj interface{}) bool {
 		return true
 	})).Return(expectedUser, nil).Once()

@@ -3,7 +3,7 @@ package code_controller_test
 import (
 	"bytes"
 	"errors"
-	controller2 "github.com/arpb2/C-3PO/api/controller"
+	"github.com/arpb2/C-3PO/api/controller"
 	"github.com/arpb2/C-3PO/api/model"
 	"github.com/arpb2/C-3PO/internal/auth/jwt"
 	"github.com/arpb2/C-3PO/internal/controller/code"
@@ -13,7 +13,6 @@ import (
 	"github.com/arpb2/C-3PO/internal/service/teacher"
 	"github.com/arpb2/C-3PO/internal/service/user"
 	"github.com/arpb2/C-3PO/test/golden"
-	http_wrapper2 "github.com/arpb2/C-3PO/test/http_wrapper"
 	test_http_wrapper "github.com/arpb2/C-3PO/test/http_wrapper"
 	"github.com/arpb2/C-3PO/test/service"
 	"github.com/stretchr/testify/assert"
@@ -21,7 +20,7 @@ import (
 	"testing"
 )
 
-func createGetController() controller2.Controller {
+func createGetController() controller.Controller {
 	return code_controller.CreateGetController(
 		executor.CreatePipeline(executor.CreateDebugHttpExecutor()),
 		teacher_auth.CreateMiddleware(
@@ -41,7 +40,7 @@ func TestCodeGetControllerPathIsAsExpected(t *testing.T) {
 }
 
 func TestCodeGetControllerBody_400OnEmptyUserId(t *testing.T) {
-	reader := new(http_wrapper2.MockReader)
+	reader := new(test_http_wrapper.MockReader)
 	reader.On("GetParameter", "code_id").Return("1").Maybe()
 	reader.On("GetParameter", "user_id").Return("").Once()
 
@@ -58,11 +57,11 @@ func TestCodeGetControllerBody_400OnEmptyUserId(t *testing.T) {
 }
 
 func TestCodeGetControllerBody_400OnMalformedUserId(t *testing.T) {
-	reader := new(http_wrapper2.MockReader)
+	reader := new(test_http_wrapper.MockReader)
 	reader.On("GetParameter", "code_id").Return("1000").Maybe()
 	reader.On("GetParameter", "user_id").Return("not a number").Once()
 
-	c, w := http_wrapper2.CreateTestContext()
+	c, w := test_http_wrapper.CreateTestContext()
 	c.Reader = reader
 
 	createGetController().Body(c)
@@ -75,7 +74,7 @@ func TestCodeGetControllerBody_400OnMalformedUserId(t *testing.T) {
 }
 
 func TestCodeGetControllerBody_400OnMalformedCodeId(t *testing.T) {
-	reader := new(http_wrapper2.MockReader)
+	reader := new(test_http_wrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("1000").Once()
 	reader.On("GetParameter", "code_id").Return("not a number").Once()
 
@@ -112,7 +111,7 @@ func TestCodeGetControllerBody_500OnServiceReadError(t *testing.T) {
 	codeService := new(service.MockCodeService)
 	codeService.On("GetCode", uint(1000), uint(1000)).Return(nil, errors.New("whoops error"))
 
-	reader := new(http_wrapper2.MockReader)
+	reader := new(test_http_wrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("1000").Once()
 	reader.On("GetParameter", "code_id").Return("1000").Once()
 
@@ -134,7 +133,7 @@ func TestCodeGetControllerBody_400OnNoCodeStoredInService(t *testing.T) {
 	codeService := new(service.MockCodeService)
 	codeService.On("GetCode", uint(1000), uint(1000)).Return(nil, nil)
 
-	reader := new(http_wrapper2.MockReader)
+	reader := new(test_http_wrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("1000").Once()
 	reader.On("GetParameter", "code_id").Return("1000").Once()
 
@@ -172,7 +171,7 @@ func main() {
 		Code:   expectedCode,
 	}, nil)
 
-	reader := new(http_wrapper2.MockReader)
+	reader := new(test_http_wrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("1000").Once()
 	reader.On("GetParameter", "code_id").Return("1000").Once()
 
@@ -199,7 +198,7 @@ func TestCodeGetControllerBody_200OnEmptyCodeStoredOnService(t *testing.T) {
 		Code:   expectedCode,
 	}, nil)
 
-	reader := new(http_wrapper2.MockReader)
+	reader := new(test_http_wrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("1000").Once()
 	reader.On("GetParameter", "code_id").Return("1000").Once()
 

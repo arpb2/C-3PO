@@ -1,7 +1,7 @@
 package gin_engine_test
 
 import (
-	controller2 "github.com/arpb2/C-3PO/api/controller"
+	"github.com/arpb2/C-3PO/api/controller"
 	"github.com/arpb2/C-3PO/api/http_wrapper"
 	"github.com/arpb2/C-3PO/internal/engine/gin"
 	"github.com/stretchr/testify/assert"
@@ -24,7 +24,7 @@ func TestGetPortReturns8080(t *testing.T) {
 
 func TestRegisterMiddleware(t *testing.T) {
 	e := gin_engine.New()
-	e.Register(controller2.Controller{
+	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test",
 		Middleware: []http_wrapper.Handler{func(c *http_wrapper.Context) {

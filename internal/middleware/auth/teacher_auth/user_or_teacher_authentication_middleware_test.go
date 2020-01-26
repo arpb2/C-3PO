@@ -2,7 +2,7 @@ package teacher_auth_test
 
 import (
 	"errors"
-	controller2 "github.com/arpb2/C-3PO/api/controller"
+	"github.com/arpb2/C-3PO/api/controller"
 	"github.com/arpb2/C-3PO/api/http_wrapper"
 	"github.com/arpb2/C-3PO/api/model"
 	"github.com/arpb2/C-3PO/internal/auth/jwt"
@@ -61,7 +61,7 @@ func performRequest(r http.Handler, method, path, body string, headers map[strin
 
 func Test_Multi_HandlingOfAuthentication_NoHeader(t *testing.T) {
 	e := gin_engine.New()
-	e.Register(controller2.Controller{
+	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test",
 		Middleware: []http_wrapper.Handler{
@@ -80,7 +80,7 @@ func Test_Multi_HandlingOfAuthentication_NoHeader(t *testing.T) {
 
 func Test_Multi_HandlingOfAuthentication_BadHeader(t *testing.T) {
 	e := gin_engine.New()
-	e.Register(controller2.Controller{
+	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test",
 		Middleware: []http_wrapper.Handler{
@@ -104,7 +104,7 @@ func Test_Multi_HandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
 	service.On("GetStudents", uint(1000)).Return(nil, nil).Once()
 
 	e := gin_engine.New()
-	e.Register(controller2.Controller{
+	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test/:user_id",
 		Middleware: []http_wrapper.Handler{
@@ -128,7 +128,7 @@ func Test_Multi_HandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
 
 func Test_Multi_HandlingOfAuthentication_Authorized_SameUser(t *testing.T) {
 	e := gin_engine.New()
-	e.Register(controller2.Controller{
+	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test/:user_id",
 		Middleware: []http_wrapper.Handler{
@@ -160,7 +160,7 @@ func Test_Multi_HandlingOfAuthentication_Authorized_Student(t *testing.T) {
 	}, nil).Once()
 
 	e := gin_engine.New()
-	e.Register(controller2.Controller{
+	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test/:user_id",
 		Middleware: []http_wrapper.Handler{
@@ -196,7 +196,7 @@ func Test_Multi_HandlingOfAuthentication_Unauthorized_Student(t *testing.T) {
 	}, nil).Once()
 
 	e := gin_engine.New()
-	e.Register(controller2.Controller{
+	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test/:user_id",
 		Middleware: []http_wrapper.Handler{
@@ -222,7 +222,7 @@ func Test_Multi_HandlingOfAuthentication_Service_Error(t *testing.T) {
 	service.On("GetStudents", uint(1001)).Return(nil, errors.New("whoops this fails")).Once()
 
 	e := gin_engine.New()
-	e.Register(controller2.Controller{
+	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test/:user_id",
 		Middleware: []http_wrapper.Handler{

@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	controller2 "github.com/arpb2/C-3PO/api/controller"
+	"github.com/arpb2/C-3PO/api/controller"
 	"github.com/arpb2/C-3PO/api/engine"
 	gin_wrapper "github.com/arpb2/C-3PO/internal/http_wrapper/gin"
 	"github.com/gin-gonic/gin"
@@ -76,7 +76,7 @@ func (server serverEngine) Shutdown() error {
 	return nil
 }
 
-func (server serverEngine) Register(controller controller2.Controller) {
+func (server serverEngine) Register(controller controller.Controller) {
 	var handlers []gin.HandlerFunc
 	if controller.Middleware != nil {
 		handlers = append(handlers, gin_wrapper.CreateHandlers(controller.Middleware...)...)
