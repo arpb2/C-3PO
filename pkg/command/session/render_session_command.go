@@ -1,8 +1,9 @@
 package session
 
 import (
-	"github.com/arpb2/C-3PO/api/model"
 	"net/http"
+
+	"github.com/arpb2/C-3PO/api/model"
 
 	httpwrapper "github.com/arpb2/C-3PO/api/http"
 )

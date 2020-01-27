@@ -12,7 +12,7 @@ func TestSession_ToJson(t *testing.T) {
 	expectedJson := `{"user_id":1000,"token":"test_token"}`
 
 	session := &model.Session{
-		Token: "test_token",
+		Token:  "test_token",
 		UserId: uint(1000),
 	}
 
@@ -38,4 +38,3 @@ func TestSession_FromJson(t *testing.T) {
 	assert.Equal(t, expectedSession.UserId, session.UserId)
 	assert.Equal(t, expectedSession.Token, session.Token)
 }
-
