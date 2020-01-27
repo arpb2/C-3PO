@@ -2,6 +2,7 @@ package session_test
 
 import (
 	"errors"
+	"github.com/arpb2/C-3PO/pkg/pipeline"
 	"net/http"
 	"testing"
 
@@ -9,12 +10,12 @@ import (
 	"github.com/arpb2/C-3PO/api/controller"
 	httpwrapper "github.com/arpb2/C-3PO/api/http"
 	"github.com/arpb2/C-3PO/api/model"
-	testauth "github.com/arpb2/C-3PO/hack/auth"
-	testhttpwrapper "github.com/arpb2/C-3PO/hack/http"
-	"github.com/arpb2/C-3PO/hack/service"
 	sessioncontroller "github.com/arpb2/C-3PO/pkg/controller/session"
 	"github.com/arpb2/C-3PO/pkg/executor"
 	uservalidation "github.com/arpb2/C-3PO/pkg/validation/user"
+	testauth "github.com/arpb2/C-3PO/test/mock/auth"
+	testhttpwrapper "github.com/arpb2/C-3PO/test/mock/http"
+	"github.com/arpb2/C-3PO/test/mock/service"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -61,7 +62,7 @@ func TestPostController_FetchUserIdTask_FailsOnValidationFail(t *testing.T) {
 	}
 
 	postController := sessioncontroller.CreatePostController(
-		executor.CreatePipeline(executor.CreateDebugHttpExecutor()),
+		pipeline.CreatePipeline(executor.CreateDebugHttpExecutor()),
 		nil,
 		nil,
 		validations,
@@ -96,7 +97,7 @@ func TestFetchUserIdTaskImpl_FailsOnServiceFailure(t *testing.T) {
 	var validations []uservalidation.Validation
 
 	postController := sessioncontroller.CreatePostController(
-		executor.CreatePipeline(executor.CreateDebugHttpExecutor()),
+		pipeline.CreatePipeline(executor.CreateDebugHttpExecutor()),
 		nil,
 		service,
 		validations,
@@ -137,7 +138,7 @@ func TestFetchUserIdTaskImpl_FailsOnTokenFailure(t *testing.T) {
 	})).Return("", httpwrapper.CreateInternalError())
 
 	postController := sessioncontroller.CreatePostController(
-		executor.CreatePipeline(executor.CreateDebugHttpExecutor()),
+		pipeline.CreatePipeline(executor.CreateDebugHttpExecutor()),
 		tokenHandler,
 		credentialService,
 		validations,
@@ -183,7 +184,7 @@ func TestFetchUserIdTaskImpl_SuccessReturnsToken(t *testing.T) {
 	})).Return("test token", nil)
 
 	postController := sessioncontroller.CreatePostController(
-		executor.CreatePipeline(executor.CreateDebugHttpExecutor()),
+		pipeline.CreatePipeline(executor.CreateDebugHttpExecutor()),
 		tokenHandler,
 		credentialService,
 		validations,

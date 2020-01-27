@@ -2,7 +2,6 @@ package server
 
 import (
 	"fmt"
-
 	"github.com/arpb2/C-3PO/api/engine"
 	"github.com/arpb2/C-3PO/pkg/auth/jwt"
 	codebinder "github.com/arpb2/C-3PO/pkg/binder/code"
@@ -10,8 +9,10 @@ import (
 	sessionbinder "github.com/arpb2/C-3PO/pkg/binder/session"
 	userbinder "github.com/arpb2/C-3PO/pkg/binder/user"
 	"github.com/arpb2/C-3PO/pkg/executor"
+	"github.com/arpb2/C-3PO/pkg/executor/decorator"
 	"github.com/arpb2/C-3PO/pkg/middleware/auth/single"
 	"github.com/arpb2/C-3PO/pkg/middleware/auth/teacher"
+	"github.com/arpb2/C-3PO/pkg/pipeline"
 	codeservice "github.com/arpb2/C-3PO/pkg/service/code"
 	credentialservice "github.com/arpb2/C-3PO/pkg/service/credential"
 	teacherservice "github.com/arpb2/C-3PO/pkg/service/teacher"
@@ -29,8 +30,10 @@ func StartApplication(engine engine.ServerEngine) error {
 }
 
 func CreateBinders() []engine.ControllerBinder {
-	httpExecutor := executor.CreateHttpExecutor()
-	httpPipeline := executor.CreatePipeline(httpExecutor)
+	traceDecorator := decorator.TraceRunnableDecorator
+
+	httpExecutor := executor.CreateHttpExecutor(traceDecorator)
+	httpPipeline := pipeline.CreatePipeline(httpExecutor)
 
 	tokenHandler := jwt.CreateTokenHandler()
 

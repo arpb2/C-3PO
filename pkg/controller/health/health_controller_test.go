@@ -3,8 +3,8 @@ package health_test
 import (
 	"testing"
 
-	"github.com/arpb2/C-3PO/hack/http"
 	healthcontroller "github.com/arpb2/C-3PO/pkg/controller/health"
+	"github.com/arpb2/C-3PO/test/mock/http"
 	"github.com/stretchr/testify/assert"
 )
 

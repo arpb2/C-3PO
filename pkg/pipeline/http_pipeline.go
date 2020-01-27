@@ -1,4 +1,4 @@
-package executor
+package pipeline
 
 import (
 	"github.com/arpb2/C-3PO/api/http"

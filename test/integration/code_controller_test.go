@@ -12,10 +12,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/arpb2/C-3PO/hack/golden"
 	ginengine "github.com/arpb2/C-3PO/pkg/engine/gin"
 	"github.com/arpb2/C-3PO/pkg/server"
 	codeservice "github.com/arpb2/C-3PO/pkg/service/code"
+	"github.com/arpb2/C-3PO/test/mock/golden"
 	"github.com/stretchr/testify/assert"
 )
 

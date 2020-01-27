@@ -3,14 +3,12 @@ package code_test
 import (
 	"bytes"
 	"errors"
+	"github.com/arpb2/C-3PO/pkg/pipeline"
 	"net/http"
 	"testing"
 
 	"github.com/arpb2/C-3PO/api/controller"
 	"github.com/arpb2/C-3PO/api/model"
-	"github.com/arpb2/C-3PO/hack/golden"
-	testhttpwrapper "github.com/arpb2/C-3PO/hack/http"
-	"github.com/arpb2/C-3PO/hack/service"
 	"github.com/arpb2/C-3PO/pkg/auth/jwt"
 	codecontroller "github.com/arpb2/C-3PO/pkg/controller/code"
 	"github.com/arpb2/C-3PO/pkg/executor"
@@ -18,12 +16,15 @@ import (
 	codeservice "github.com/arpb2/C-3PO/pkg/service/code"
 	teacherservice "github.com/arpb2/C-3PO/pkg/service/teacher"
 	userservice "github.com/arpb2/C-3PO/pkg/service/user"
+	"github.com/arpb2/C-3PO/test/mock/golden"
+	testhttpwrapper "github.com/arpb2/C-3PO/test/mock/http"
+	"github.com/arpb2/C-3PO/test/mock/service"
 	"github.com/stretchr/testify/assert"
 )
 
 func createPutController() controller.Controller {
 	return codecontroller.CreatePutController(
-		executor.CreatePipeline(executor.CreateDebugHttpExecutor()),
+		pipeline.CreatePipeline(executor.CreateDebugHttpExecutor()),
 		teacher.CreateMiddleware(
 			jwt.CreateTokenHandler(),
 			teacherservice.CreateService(userservice.CreateService()),
@@ -141,7 +142,7 @@ func TestCodePutControllerBody_500OnServiceWriteError(t *testing.T) {
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
-	codecontroller.CreateGetBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), codeService)(c)
+	codecontroller.CreateGetBody(pipeline.CreatePipeline(executor.CreateDebugHttpExecutor()), codeService)(c)
 
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "internal_server_error.error_write.service.golden.json")
@@ -178,7 +179,7 @@ func main() {
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
-	codecontroller.CreateGetBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), codeService)(c)
+	codecontroller.CreateGetBody(pipeline.CreatePipeline(executor.CreateDebugHttpExecutor()), codeService)(c)
 
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "ok.replace_code.golden.json")
@@ -205,7 +206,7 @@ func TestCodePutControllerBody_200OnEmptyCodeStoredOnService(t *testing.T) {
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
-	codecontroller.CreateGetBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), codeService)(c)
+	codecontroller.CreateGetBody(pipeline.CreatePipeline(executor.CreateDebugHttpExecutor()), codeService)(c)
 
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "ok.replace_empty_code.golden.json")
