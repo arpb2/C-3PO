@@ -2,9 +2,10 @@ package session_test
 
 import (
 	"errors"
-	"github.com/arpb2/C-3PO/pkg/pipeline"
 	"net/http"
 	"testing"
+
+	"github.com/arpb2/C-3PO/pkg/pipeline"
 
 	"github.com/arpb2/C-3PO/api/auth"
 	"github.com/arpb2/C-3PO/api/controller"

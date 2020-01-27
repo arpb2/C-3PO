@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+
 	"github.com/arpb2/C-3PO/api/engine"
 	"github.com/arpb2/C-3PO/pkg/auth/jwt"
 	codebinder "github.com/arpb2/C-3PO/pkg/binder/code"

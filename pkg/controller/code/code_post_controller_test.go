@@ -3,9 +3,10 @@ package code_test
 import (
 	"bytes"
 	"errors"
-	"github.com/arpb2/C-3PO/pkg/pipeline"
 	"net/http"
 	"testing"
+
+	"github.com/arpb2/C-3PO/pkg/pipeline"
 
 	"github.com/arpb2/C-3PO/api/controller"
 	"github.com/arpb2/C-3PO/api/model"

@@ -1,8 +1,9 @@
 package executor
 
 import (
-	"github.com/arpb2/C-3PO/api/executor/decorator"
 	"net/http"
+
+	"github.com/arpb2/C-3PO/api/executor/decorator"
 
 	"github.com/afex/hystrix-go/hystrix"
 	httpwrapper "github.com/arpb2/C-3PO/api/http"
@@ -16,7 +17,7 @@ func CreateHttpExecutor(decorators ...decorator.RunnableDecorator) gopipeline.Ex
 	}
 }
 
-type httpExecutor struct{
+type httpExecutor struct {
 	Decorators []decorator.RunnableDecorator
 }
 
