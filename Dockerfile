@@ -16,7 +16,7 @@ WORKDIR /go/src/github.com/arpb2/C-3PO
 COPY . ./
 
 RUN echo "Checking go fmt formatting" && \
-  gofmt -l api/ build/ cmd/ internal/ test/  | if [ $(grep -c -o -E ".*") -gt 0 ]; then exit 1; fi
+  gofmt -l api/ build/ cmd/ hack/ pkg/  | if [ $(grep -c -o -E ".*") -gt 0 ]; then exit 1; fi
 
 RUN echo "Running go build" && \
   go build ./...
