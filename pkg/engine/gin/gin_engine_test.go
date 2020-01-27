@@ -1,15 +1,16 @@
 package gin_engine_test
 
 import (
-	"github.com/arpb2/C-3PO/api/controller"
-	"github.com/arpb2/C-3PO/api/http_wrapper"
-	"github.com/arpb2/C-3PO/pkg/engine/gin"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/arpb2/C-3PO/api/controller"
+	"github.com/arpb2/C-3PO/api/http_wrapper"
+	gin_engine "github.com/arpb2/C-3PO/pkg/engine/gin"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGetPortReturnsSpecificIfUsingEnvVar(t *testing.T) {

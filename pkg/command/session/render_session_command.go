@@ -1,8 +1,9 @@
 package session_command
 
 import (
-	"github.com/arpb2/C-3PO/api/http_wrapper"
 	"net/http"
+
+	"github.com/arpb2/C-3PO/api/http_wrapper"
 )
 
 type renderSessionCommand struct {

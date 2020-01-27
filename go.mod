@@ -9,5 +9,6 @@ require (
 	github.com/saantiaguilera/go-pipeline v0.1.6
 	github.com/smartystreets/goconvey v1.6.4 // indirect
 	github.com/stretchr/testify v1.4.0
+	golang.org/x/tools v0.0.0-20200125223703-d33eef8e6825 // indirect
 	golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543
 )

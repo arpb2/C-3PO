@@ -2,9 +2,10 @@ package model_test
 
 import (
 	"encoding/json"
+	"testing"
+
 	"github.com/arpb2/C-3PO/api/model"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestUser_ToJson(t *testing.T) {

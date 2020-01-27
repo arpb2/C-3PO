@@ -3,7 +3,7 @@ package user_command
 import (
 	"github.com/arpb2/C-3PO/api/http_wrapper"
 	"github.com/arpb2/C-3PO/api/model"
-	"github.com/arpb2/C-3PO/pkg/validation/user"
+	user_validation "github.com/arpb2/C-3PO/pkg/validation/user"
 )
 
 type validateParametersCommand struct {

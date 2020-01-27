@@ -2,6 +2,7 @@ package user_validation
 
 import (
 	"errors"
+
 	"github.com/arpb2/C-3PO/api/model"
 )
 

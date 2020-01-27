@@ -1,9 +1,10 @@
 package gin_wrapper
 
 import (
+	"testing"
+
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestCreateContext_Reader_Exists(t *testing.T) {

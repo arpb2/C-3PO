@@ -2,7 +2,7 @@ package user_service
 
 import (
 	"github.com/arpb2/C-3PO/api/model"
-	"github.com/arpb2/C-3PO/api/service/user"
+	user_service "github.com/arpb2/C-3PO/api/service/user"
 )
 
 func CreateService() user_service.Service {

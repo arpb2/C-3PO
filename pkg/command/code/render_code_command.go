@@ -1,9 +1,10 @@
 package code_command
 
 import (
+	"net/http"
+
 	"github.com/arpb2/C-3PO/api/http_wrapper"
 	"github.com/arpb2/C-3PO/api/model"
-	"net/http"
 )
 
 type renderCodeCommand struct {

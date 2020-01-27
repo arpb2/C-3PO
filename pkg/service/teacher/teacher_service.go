@@ -2,8 +2,8 @@ package teacher_service
 
 import (
 	"github.com/arpb2/C-3PO/api/model"
-	"github.com/arpb2/C-3PO/api/service/teacher"
-	"github.com/arpb2/C-3PO/api/service/user"
+	teacher_service "github.com/arpb2/C-3PO/api/service/teacher"
+	user_service "github.com/arpb2/C-3PO/api/service/user"
 )
 
 func CreateService(userService user_service.Service) teacher_service.Service {

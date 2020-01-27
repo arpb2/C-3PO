@@ -1,16 +1,17 @@
 package single_auth_test
 
 import (
-	"github.com/arpb2/C-3PO/api/controller"
-	"github.com/arpb2/C-3PO/api/http_wrapper"
-	"github.com/arpb2/C-3PO/pkg/auth/jwt"
-	"github.com/arpb2/C-3PO/pkg/engine/gin"
-	"github.com/arpb2/C-3PO/pkg/middleware/auth/single_auth"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/arpb2/C-3PO/api/controller"
+	"github.com/arpb2/C-3PO/api/http_wrapper"
+	"github.com/arpb2/C-3PO/pkg/auth/jwt"
+	gin_engine "github.com/arpb2/C-3PO/pkg/engine/gin"
+	"github.com/arpb2/C-3PO/pkg/middleware/auth/single_auth"
+	"github.com/stretchr/testify/assert"
 )
 
 var SingleTokenHandler = jwt.CreateTokenHandler()

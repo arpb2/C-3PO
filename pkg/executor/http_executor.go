@@ -1,12 +1,13 @@
 package executor
 
 import (
+	"net/http"
+
 	"github.com/afex/hystrix-go/hystrix"
 	"github.com/arpb2/C-3PO/api/http_wrapper"
 	go_pipeline "github.com/saantiaguilera/go-pipeline/pkg/api"
 	"github.com/saantiaguilera/go-pipeline/pkg/step/trace"
 	"golang.org/x/xerrors"
-	"net/http"
 )
 
 func CreateHttpExecutor() go_pipeline.Executor {

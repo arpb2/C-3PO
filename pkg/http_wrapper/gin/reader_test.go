@@ -1,14 +1,15 @@
 package gin_wrapper_test
 
 import (
-	"github.com/arpb2/C-3PO/pkg/http_wrapper/gin"
-	"github.com/gin-gonic/gin"
-	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
 	"testing"
+
+	gin_wrapper "github.com/arpb2/C-3PO/pkg/http_wrapper/gin"
+	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestCreateReader_Url(t *testing.T) {

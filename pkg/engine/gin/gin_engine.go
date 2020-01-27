@@ -4,16 +4,17 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/arpb2/C-3PO/api/controller"
-	"github.com/arpb2/C-3PO/api/engine"
-	gin_wrapper "github.com/arpb2/C-3PO/pkg/http_wrapper/gin"
-	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/arpb2/C-3PO/api/controller"
+	"github.com/arpb2/C-3PO/api/engine"
+	gin_wrapper "github.com/arpb2/C-3PO/pkg/http_wrapper/gin"
+	"github.com/gin-gonic/gin"
 )
 
 func New() engine.ServerEngine {

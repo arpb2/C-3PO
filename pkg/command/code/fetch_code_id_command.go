@@ -1,8 +1,9 @@
 package code_command
 
 import (
-	"github.com/arpb2/C-3PO/api/http_wrapper"
 	"strconv"
+
+	"github.com/arpb2/C-3PO/api/http_wrapper"
 )
 
 type fetchCodeIdCommand struct {

@@ -1,9 +1,10 @@
 package health_controller
 
 import (
+	"net/http"
+
 	"github.com/arpb2/C-3PO/api/controller"
 	"github.com/arpb2/C-3PO/api/http_wrapper"
-	"net/http"
 )
 
 func CreateGetController() controller.Controller {

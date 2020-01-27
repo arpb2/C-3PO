@@ -2,7 +2,7 @@ package health_binder
 
 import (
 	"github.com/arpb2/C-3PO/api/engine"
-	"github.com/arpb2/C-3PO/pkg/controller/health"
+	health_controller "github.com/arpb2/C-3PO/pkg/controller/health"
 )
 
 type binder struct{}

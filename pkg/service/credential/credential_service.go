@@ -2,7 +2,7 @@ package credential_service
 
 import (
 	"github.com/arpb2/C-3PO/api/model"
-	"github.com/arpb2/C-3PO/api/service/credential"
+	credential_service "github.com/arpb2/C-3PO/api/service/credential"
 )
 
 func CreateService() credential_service.Service {

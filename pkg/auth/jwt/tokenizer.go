@@ -2,10 +2,11 @@ package jwt
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/arpb2/C-3PO/api/auth"
 	"github.com/arpb2/C-3PO/api/http_wrapper"
 	"github.com/dgrijalva/jwt-go"
-	"os"
 )
 
 func CreateTokenHandler() auth.TokenHandler {

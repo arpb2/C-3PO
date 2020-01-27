@@ -1,10 +1,11 @@
 package user_validation_test
 
 import (
-	"github.com/arpb2/C-3PO/api/model"
-	"github.com/arpb2/C-3PO/pkg/validation/user"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/arpb2/C-3PO/api/model"
+	user_validation "github.com/arpb2/C-3PO/pkg/validation/user"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestEmptyPasswordValidation_Error(t *testing.T) {

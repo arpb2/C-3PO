@@ -3,7 +3,7 @@ package code_command
 import (
 	"github.com/arpb2/C-3PO/api/http_wrapper"
 	"github.com/arpb2/C-3PO/api/model"
-	"github.com/arpb2/C-3PO/api/service/code"
+	code_service "github.com/arpb2/C-3PO/api/service/code"
 )
 
 type createCodeCommand struct {

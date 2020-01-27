@@ -2,14 +2,15 @@ package server_test
 
 import (
 	"errors"
-	"github.com/arpb2/C-3PO/api/controller"
-	"github.com/arpb2/C-3PO/pkg/engine/gin"
-	"github.com/arpb2/C-3PO/pkg/server"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/arpb2/C-3PO/api/controller"
+	gin_engine "github.com/arpb2/C-3PO/pkg/engine/gin"
+	"github.com/arpb2/C-3PO/pkg/server"
+	"github.com/stretchr/testify/assert"
 )
 
 func performRequest(r http.Handler, method, path, body string) *httptest.ResponseRecorder {

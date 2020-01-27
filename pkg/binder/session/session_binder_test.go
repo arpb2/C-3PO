@@ -1,10 +1,11 @@
 package session_binder_test
 
 import (
-	"github.com/arpb2/C-3PO/api/controller"
-	"github.com/arpb2/C-3PO/pkg/binder/session"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/arpb2/C-3PO/api/controller"
+	session_binder "github.com/arpb2/C-3PO/pkg/binder/session"
+	"github.com/stretchr/testify/assert"
 )
 
 type MockControllerRegistrable struct {

@@ -2,10 +2,11 @@ package auth
 
 import (
 	"fmt"
+	"strconv"
+
 	"github.com/arpb2/C-3PO/api/auth"
 	"github.com/arpb2/C-3PO/api/http_wrapper"
 	auth_middleware "github.com/arpb2/C-3PO/api/middleware/auth"
-	"strconv"
 )
 
 func HandleAuthentication(ctx *http_wrapper.Context, tokenHandler auth.TokenHandler, strategies ...auth_middleware.AuthenticationStrategy) {

@@ -1,10 +1,11 @@
 package user_binder_test
 
 import (
+	"testing"
+
 	"github.com/arpb2/C-3PO/api/controller"
 	"github.com/arpb2/C-3PO/pkg/binder/user_binder"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 type MockControllerRegistrable struct {

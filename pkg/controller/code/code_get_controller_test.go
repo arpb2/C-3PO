@@ -3,21 +3,22 @@ package code_controller_test
 import (
 	"bytes"
 	"errors"
+	"net/http"
+	"testing"
+
 	"github.com/arpb2/C-3PO/api/controller"
 	"github.com/arpb2/C-3PO/api/model"
-	"github.com/arpb2/C-3PO/pkg/auth/jwt"
-	"github.com/arpb2/C-3PO/pkg/controller/code"
-	"github.com/arpb2/C-3PO/pkg/executor"
-	"github.com/arpb2/C-3PO/pkg/middleware/auth/teacher_auth"
-	code_service "github.com/arpb2/C-3PO/pkg/service/code"
-	"github.com/arpb2/C-3PO/pkg/service/teacher"
-	"github.com/arpb2/C-3PO/pkg/service/user"
 	"github.com/arpb2/C-3PO/hack/golden"
 	test_http_wrapper "github.com/arpb2/C-3PO/hack/http_wrapper"
 	"github.com/arpb2/C-3PO/hack/service"
+	"github.com/arpb2/C-3PO/pkg/auth/jwt"
+	code_controller "github.com/arpb2/C-3PO/pkg/controller/code"
+	"github.com/arpb2/C-3PO/pkg/executor"
+	"github.com/arpb2/C-3PO/pkg/middleware/auth/teacher_auth"
+	code_service "github.com/arpb2/C-3PO/pkg/service/code"
+	teacher_service "github.com/arpb2/C-3PO/pkg/service/teacher"
+	user_service "github.com/arpb2/C-3PO/pkg/service/user"
 	"github.com/stretchr/testify/assert"
-	"net/http"
-	"testing"
 )
 
 func createGetController() controller.Controller {

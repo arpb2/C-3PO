@@ -2,18 +2,19 @@ package teacher_auth_test
 
 import (
 	"errors"
-	"github.com/arpb2/C-3PO/api/controller"
-	"github.com/arpb2/C-3PO/api/http_wrapper"
-	"github.com/arpb2/C-3PO/api/model"
-	"github.com/arpb2/C-3PO/pkg/auth/jwt"
-	"github.com/arpb2/C-3PO/pkg/engine/gin"
-	"github.com/arpb2/C-3PO/pkg/middleware/auth/teacher_auth"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/arpb2/C-3PO/api/controller"
+	"github.com/arpb2/C-3PO/api/http_wrapper"
+	"github.com/arpb2/C-3PO/api/model"
+	"github.com/arpb2/C-3PO/pkg/auth/jwt"
+	gin_engine "github.com/arpb2/C-3PO/pkg/engine/gin"
+	"github.com/arpb2/C-3PO/pkg/middleware/auth/teacher_auth"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
 var MultiTokenHandler = jwt.CreateTokenHandler()

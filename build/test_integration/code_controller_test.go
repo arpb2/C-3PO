@@ -3,11 +3,6 @@ package integration_test
 import (
 	"bytes"
 	"fmt"
-	"github.com/arpb2/C-3PO/pkg/engine/gin"
-	"github.com/arpb2/C-3PO/pkg/server"
-	code_service "github.com/arpb2/C-3PO/pkg/service/code"
-	"github.com/arpb2/C-3PO/hack/golden"
-	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -16,6 +11,12 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/arpb2/C-3PO/hack/golden"
+	gin_engine "github.com/arpb2/C-3PO/pkg/engine/gin"
+	"github.com/arpb2/C-3PO/pkg/server"
+	code_service "github.com/arpb2/C-3PO/pkg/service/code"
+	"github.com/stretchr/testify/assert"
 )
 
 func dial(t *testing.T) {

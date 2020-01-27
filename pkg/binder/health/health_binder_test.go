@@ -1,10 +1,11 @@
 package health_binder_test
 
 import (
-	"github.com/arpb2/C-3PO/api/controller"
-	"github.com/arpb2/C-3PO/pkg/binder/health"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/arpb2/C-3PO/api/controller"
+	health_binder "github.com/arpb2/C-3PO/pkg/binder/health"
+	"github.com/stretchr/testify/assert"
 )
 
 type MockControllerRegistrable struct {

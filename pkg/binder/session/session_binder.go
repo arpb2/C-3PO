@@ -4,9 +4,9 @@ import (
 	"github.com/arpb2/C-3PO/api/auth"
 	"github.com/arpb2/C-3PO/api/engine"
 	"github.com/arpb2/C-3PO/api/pipeline"
-	"github.com/arpb2/C-3PO/api/service/credential"
+	credential_service "github.com/arpb2/C-3PO/api/service/credential"
 	session_controller "github.com/arpb2/C-3PO/pkg/controller/session"
-	"github.com/arpb2/C-3PO/pkg/validation/user"
+	user_validation "github.com/arpb2/C-3PO/pkg/validation/user"
 )
 
 type binder struct {

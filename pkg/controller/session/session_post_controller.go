@@ -5,7 +5,7 @@ import (
 	"github.com/arpb2/C-3PO/api/controller"
 	"github.com/arpb2/C-3PO/api/http_wrapper"
 	"github.com/arpb2/C-3PO/api/pipeline"
-	"github.com/arpb2/C-3PO/api/service/credential"
+	credential_service "github.com/arpb2/C-3PO/api/service/credential"
 	session_command "github.com/arpb2/C-3PO/pkg/command/session"
 	user_command "github.com/arpb2/C-3PO/pkg/command/user"
 	user_validation "github.com/arpb2/C-3PO/pkg/validation/user"

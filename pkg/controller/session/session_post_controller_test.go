@@ -2,20 +2,21 @@ package session_controller_test
 
 import (
 	"errors"
+	"net/http"
+	"testing"
+
 	"github.com/arpb2/C-3PO/api/auth"
 	"github.com/arpb2/C-3PO/api/controller"
 	"github.com/arpb2/C-3PO/api/http_wrapper"
 	"github.com/arpb2/C-3PO/api/model"
-	"github.com/arpb2/C-3PO/pkg/controller/session"
-	"github.com/arpb2/C-3PO/pkg/executor"
-	user_validation "github.com/arpb2/C-3PO/pkg/validation/user"
 	test_auth "github.com/arpb2/C-3PO/hack/auth"
 	test_http_wrapper "github.com/arpb2/C-3PO/hack/http_wrapper"
 	"github.com/arpb2/C-3PO/hack/service"
+	session_controller "github.com/arpb2/C-3PO/pkg/controller/session"
+	"github.com/arpb2/C-3PO/pkg/executor"
+	user_validation "github.com/arpb2/C-3PO/pkg/validation/user"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"net/http"
-	"testing"
 )
 
 func createPostController() controller.Controller {

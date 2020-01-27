@@ -1,11 +1,12 @@
 package teacher_auth
 
 import (
+	"strconv"
+
 	"github.com/arpb2/C-3PO/api/auth"
 	"github.com/arpb2/C-3PO/api/http_wrapper"
-	"github.com/arpb2/C-3PO/api/service/teacher"
+	teacher_service "github.com/arpb2/C-3PO/api/service/teacher"
 	middleware_auth "github.com/arpb2/C-3PO/pkg/middleware/auth"
-	"strconv"
 )
 
 func CreateMiddleware(tokenHandler auth.TokenHandler, teacherService teacher_service.Service) http_wrapper.Handler {

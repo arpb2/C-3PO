@@ -1,10 +1,11 @@
 package health_controller_test
 
 import (
-	"github.com/arpb2/C-3PO/pkg/controller/health"
-	"github.com/arpb2/C-3PO/hack/http_wrapper"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/arpb2/C-3PO/hack/http_wrapper"
+	health_controller "github.com/arpb2/C-3PO/pkg/controller/health"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestHealthControllerMethodIsGET(t *testing.T) {

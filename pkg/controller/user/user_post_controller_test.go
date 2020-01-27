@@ -3,19 +3,20 @@ package user_controller_test
 import (
 	"bytes"
 	"errors"
+	"net/http"
+	"testing"
+
 	"github.com/arpb2/C-3PO/api/controller"
 	"github.com/arpb2/C-3PO/api/model"
-	"github.com/arpb2/C-3PO/pkg/controller/user"
-	"github.com/arpb2/C-3PO/pkg/executor"
-	user_service "github.com/arpb2/C-3PO/pkg/service/user"
-	user_validation "github.com/arpb2/C-3PO/pkg/validation/user"
 	"github.com/arpb2/C-3PO/hack/golden"
 	test_http_wrapper "github.com/arpb2/C-3PO/hack/http_wrapper"
 	"github.com/arpb2/C-3PO/hack/service"
+	user_controller "github.com/arpb2/C-3PO/pkg/controller/user"
+	"github.com/arpb2/C-3PO/pkg/executor"
+	user_service "github.com/arpb2/C-3PO/pkg/service/user"
+	user_validation "github.com/arpb2/C-3PO/pkg/validation/user"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"net/http"
-	"testing"
 )
 
 func createPostController() controller.Controller {

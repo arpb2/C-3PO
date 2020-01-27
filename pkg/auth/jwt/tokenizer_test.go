@@ -1,13 +1,14 @@
 package jwt
 
 import (
+	"net/http"
+	"os"
+	"testing"
+
 	"github.com/arpb2/C-3PO/api/auth"
 	"github.com/arpb2/C-3PO/api/http_wrapper"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/xerrors"
-	"net/http"
-	"os"
-	"testing"
 )
 
 var defaultSha = "52bfd2de0a2e69dff4517518590ac32a46bd76606ec22a258f99584a6e70aca2"

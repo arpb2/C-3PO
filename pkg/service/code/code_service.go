@@ -2,7 +2,7 @@ package code_service
 
 import (
 	"github.com/arpb2/C-3PO/api/model"
-	"github.com/arpb2/C-3PO/api/service/code"
+	code_service "github.com/arpb2/C-3PO/api/service/code"
 )
 
 func CreateService() code_service.Service {
