@@ -1,13 +1,13 @@
-package user_command
+package user
 
 import (
 	"net/http"
 
-	"github.com/arpb2/C-3PO/api/http_wrapper"
+	httpwrapper "github.com/arpb2/C-3PO/api/http"
 )
 
 type renderEmptyCommand struct {
-	writer      http_wrapper.Writer
+	writer      httpwrapper.Writer
 	inputStream <-chan bool
 }
 
@@ -20,8 +20,7 @@ func (c *renderEmptyCommand) Run() error {
 	return nil
 }
 
-func CreateRenderEmptyCommand(writer http_wrapper.Writer,
-	inputStream <-chan bool) *renderEmptyCommand {
+func CreateRenderEmptyCommand(writer httpwrapper.Writer, inputStream <-chan bool) *renderEmptyCommand {
 	return &renderEmptyCommand{
 		writer:      writer,
 		inputStream: inputStream,

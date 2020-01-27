@@ -1,13 +1,13 @@
-package session_command
+package session
 
 import (
 	"github.com/arpb2/C-3PO/api/auth"
-	"github.com/arpb2/C-3PO/api/http_wrapper"
+	"github.com/arpb2/C-3PO/api/http"
 	"github.com/arpb2/C-3PO/api/model"
 )
 
 type createTokenCommand struct {
-	context      *http_wrapper.Context
+	context      *http.Context
 	tokenHandler auth.TokenHandler
 	inputStream  <-chan *model.AuthenticatedUser
 
@@ -33,7 +33,7 @@ func (c *createTokenCommand) Run() error {
 	return nil
 }
 
-func CreateCreateTokenCommand(ctx *http_wrapper.Context,
+func CreateCreateTokenCommand(ctx *http.Context,
 	tokenHandler auth.TokenHandler,
 	inputStream <-chan *model.AuthenticatedUser) *createTokenCommand {
 	return &createTokenCommand{

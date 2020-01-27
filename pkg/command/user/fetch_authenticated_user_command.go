@@ -1,12 +1,12 @@
-package user_command
+package user
 
 import (
-	"github.com/arpb2/C-3PO/api/http_wrapper"
+	"github.com/arpb2/C-3PO/api/http"
 	"github.com/arpb2/C-3PO/api/model"
 )
 
 type fetchAuthenticatedUserCommand struct {
-	context *http_wrapper.Context
+	context *http.Context
 
 	OutputStream chan *model.AuthenticatedUser
 }
@@ -20,14 +20,14 @@ func (c *fetchAuthenticatedUserCommand) Run() error {
 	var authenticatedUser model.AuthenticatedUser
 
 	if err := c.context.ReadBody(&authenticatedUser); err != nil {
-		return http_wrapper.CreateBadRequestError("malformed body")
+		return http.CreateBadRequestError("malformed body")
 	}
 
 	c.OutputStream <- &authenticatedUser
 	return nil
 }
 
-func CreateFetchAuthenticatedUserCommand(ctx *http_wrapper.Context) *fetchAuthenticatedUserCommand {
+func CreateFetchAuthenticatedUserCommand(ctx *http.Context) *fetchAuthenticatedUserCommand {
 	return &fetchAuthenticatedUserCommand{
 		context:      ctx,
 		OutputStream: make(chan *model.AuthenticatedUser, 1),

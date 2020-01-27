@@ -1,11 +1,11 @@
-package code_service
+package code
 
 import (
 	"github.com/arpb2/C-3PO/api/model"
-	code_service "github.com/arpb2/C-3PO/api/service/code"
+	codeservice "github.com/arpb2/C-3PO/api/service/code"
 )
 
-func CreateService() code_service.Service {
+func CreateService() codeservice.Service {
 	return &codeService{}
 }
 

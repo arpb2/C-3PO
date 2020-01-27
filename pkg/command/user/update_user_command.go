@@ -1,14 +1,14 @@
-package user_command
+package user
 
 import (
-	"github.com/arpb2/C-3PO/api/http_wrapper"
+	"github.com/arpb2/C-3PO/api/http"
 	"github.com/arpb2/C-3PO/api/model"
-	user_service "github.com/arpb2/C-3PO/api/service/user"
+	userservice "github.com/arpb2/C-3PO/api/service/user"
 )
 
 type updateUserCommand struct {
-	context           *http_wrapper.Context
-	service           user_service.Service
+	context           *http.Context
+	service           userservice.Service
 	userIdInputStream <-chan uint
 	userInputStream   <-chan *model.AuthenticatedUser
 
@@ -32,15 +32,15 @@ func (c *updateUserCommand) Run() error {
 	}
 
 	if user == nil {
-		return http_wrapper.CreateInternalError()
+		return http.CreateInternalError()
 	}
 
 	c.OutputStream <- user
 	return nil
 }
 
-func CreateUpdateUserCommand(ctx *http_wrapper.Context,
-	service user_service.Service,
+func CreateUpdateUserCommand(ctx *http.Context,
+	service userservice.Service,
 	userIdInputStream <-chan uint,
 	userInputStream <-chan *model.AuthenticatedUser) *updateUserCommand {
 	return &updateUserCommand{

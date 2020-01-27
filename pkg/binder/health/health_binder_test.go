@@ -1,10 +1,10 @@
-package health_binder_test
+package health_test
 
 import (
 	"testing"
 
 	"github.com/arpb2/C-3PO/api/controller"
-	health_binder "github.com/arpb2/C-3PO/pkg/binder/health"
+	healthbinder "github.com/arpb2/C-3PO/pkg/binder/health"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -17,7 +17,7 @@ func (m *MockControllerRegistrable) Register(controller controller.Controller) {
 }
 
 func bindControllers() *MockControllerRegistrable {
-	binder := health_binder.CreateBinder()
+	binder := healthbinder.CreateBinder()
 	registrable := &MockControllerRegistrable{}
 
 	binder.BindControllers(registrable)

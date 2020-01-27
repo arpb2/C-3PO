@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/arpb2/C-3PO/api/auth"
-	"github.com/arpb2/C-3PO/api/http_wrapper"
+	httpwrapper "github.com/arpb2/C-3PO/api/http"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/xerrors"
 )
@@ -63,7 +63,7 @@ func TestRetrieve_OnBadToken(t *testing.T) {
 
 	assert.NotNil(t, err)
 
-	var httpError http_wrapper.HttpError
+	var httpError httpwrapper.Error
 	assert.True(t, xerrors.As(err, &httpError))
 	assert.Equal(t, http.StatusBadRequest, httpError.Code)
 

@@ -5,15 +5,15 @@ import (
 	"strconv"
 
 	"github.com/arpb2/C-3PO/api/auth"
-	"github.com/arpb2/C-3PO/api/http_wrapper"
-	auth_middleware "github.com/arpb2/C-3PO/api/middleware/auth"
+	"github.com/arpb2/C-3PO/api/http"
+	authmiddleware "github.com/arpb2/C-3PO/api/middleware/auth"
 )
 
-func HandleAuthentication(ctx *http_wrapper.Context, tokenHandler auth.TokenHandler, strategies ...auth_middleware.AuthenticationStrategy) {
+func HandleAuthentication(ctx *http.Context, tokenHandler auth.TokenHandler, strategies ...authmiddleware.AuthenticationStrategy) {
 	authToken := ctx.GetHeader("Authorization")
 
 	if authToken == "" {
-		ctx.AbortTransactionWithError(http_wrapper.CreateUnauthorizedError())
+		ctx.AbortTransactionWithError(http.CreateUnauthorizedError())
 		return
 	}
 
@@ -55,5 +55,5 @@ func HandleAuthentication(ctx *http_wrapper.Context, tokenHandler auth.TokenHand
 		}
 	}(requestedUserId, ctx.GetUrl())
 
-	ctx.AbortTransactionWithError(http_wrapper.CreateUnauthorizedError())
+	ctx.AbortTransactionWithError(http.CreateUnauthorizedError())
 }

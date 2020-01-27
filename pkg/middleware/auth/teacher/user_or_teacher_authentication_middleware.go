@@ -1,26 +1,26 @@
-package teacher_auth
+package teacher
 
 import (
 	"strconv"
 
 	"github.com/arpb2/C-3PO/api/auth"
-	"github.com/arpb2/C-3PO/api/http_wrapper"
-	teacher_service "github.com/arpb2/C-3PO/api/service/teacher"
-	middleware_auth "github.com/arpb2/C-3PO/pkg/middleware/auth"
+	"github.com/arpb2/C-3PO/api/http"
+	teacherservice "github.com/arpb2/C-3PO/api/service/teacher"
+	middlewareauth "github.com/arpb2/C-3PO/pkg/middleware/auth"
 )
 
-func CreateMiddleware(tokenHandler auth.TokenHandler, teacherService teacher_service.Service) http_wrapper.Handler {
+func CreateMiddleware(tokenHandler auth.TokenHandler, teacherService teacherservice.Service) http.Handler {
 	strategy := &teacherAuthenticationStrategy{
 		teacherService,
 	}
 
-	return func(ctx *http_wrapper.Context) {
-		middleware_auth.HandleAuthentication(ctx, tokenHandler, strategy)
+	return func(ctx *http.Context) {
+		middlewareauth.HandleAuthentication(ctx, tokenHandler, strategy)
 	}
 }
 
 type teacherAuthenticationStrategy struct {
-	teacher_service.Service
+	teacherservice.Service
 }
 
 func (s teacherAuthenticationStrategy) Authenticate(token *auth.Token, userId string) (bool, error) {

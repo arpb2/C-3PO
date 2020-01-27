@@ -1,4 +1,4 @@
-package user_validation
+package user
 
 import "github.com/arpb2/C-3PO/api/model"
 

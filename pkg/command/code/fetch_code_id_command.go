@@ -1,13 +1,13 @@
-package code_command
+package code
 
 import (
 	"strconv"
 
-	"github.com/arpb2/C-3PO/api/http_wrapper"
+	"github.com/arpb2/C-3PO/api/http"
 )
 
 type fetchCodeIdCommand struct {
-	context *http_wrapper.Context
+	context *http.Context
 
 	OutputStream chan uint
 }
@@ -21,20 +21,20 @@ func (c *fetchCodeIdCommand) Run() error {
 	codeId := c.context.GetParameter("code_id")
 
 	if codeId == "" {
-		return http_wrapper.CreateBadRequestError("'code_id' empty")
+		return http.CreateBadRequestError("'code_id' empty")
 	}
 
 	codeIdUint, err := strconv.ParseUint(codeId, 10, 64)
 
 	if err != nil {
-		return http_wrapper.CreateBadRequestError("'code_id' malformed, expecting a positive number")
+		return http.CreateBadRequestError("'code_id' malformed, expecting a positive number")
 	}
 
 	c.OutputStream <- uint(codeIdUint)
 	return nil
 }
 
-func CreateFetchCodeIdCommand(ctx *http_wrapper.Context) *fetchCodeIdCommand {
+func CreateFetchCodeIdCommand(ctx *http.Context) *fetchCodeIdCommand {
 	return &fetchCodeIdCommand{
 		context:      ctx,
 		OutputStream: make(chan uint, 1),

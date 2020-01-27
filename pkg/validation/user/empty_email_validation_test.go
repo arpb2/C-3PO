@@ -1,15 +1,15 @@
-package user_validation_test
+package user_test
 
 import (
 	"testing"
 
 	"github.com/arpb2/C-3PO/api/model"
-	user_validation "github.com/arpb2/C-3PO/pkg/validation/user"
+	uservalidation "github.com/arpb2/C-3PO/pkg/validation/user"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestEmptyEmailValidation_Error(t *testing.T) {
-	err := user_validation.EmptyEmail(&model.AuthenticatedUser{
+	err := uservalidation.EmptyEmail(&model.AuthenticatedUser{
 		User:     &model.User{},
 		Password: "",
 	})
@@ -19,7 +19,7 @@ func TestEmptyEmailValidation_Error(t *testing.T) {
 }
 
 func TestEmptyEmailValidation_Success(t *testing.T) {
-	err := user_validation.EmptyEmail(&model.AuthenticatedUser{
+	err := uservalidation.EmptyEmail(&model.AuthenticatedUser{
 		User: &model.User{
 			Email: "test@email.com",
 		},

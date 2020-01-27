@@ -1,10 +1,10 @@
-package code_binder_test
+package code_test
 
 import (
 	"testing"
 
 	"github.com/arpb2/C-3PO/api/controller"
-	code_binder "github.com/arpb2/C-3PO/pkg/binder/code"
+	codebinder "github.com/arpb2/C-3PO/pkg/binder/code"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -17,7 +17,7 @@ func (m *MockControllerRegistrable) Register(controller controller.Controller) {
 }
 
 func bindControllers() *MockControllerRegistrable {
-	binder := code_binder.CreateBinder(nil, nil, nil)
+	binder := codebinder.CreateBinder(nil, nil, nil)
 	registrable := &MockControllerRegistrable{}
 
 	binder.BindControllers(registrable)

@@ -1,4 +1,4 @@
-package gin_wrapper
+package gin
 
 import (
 	"testing"

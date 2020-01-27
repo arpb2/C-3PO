@@ -1,10 +1,10 @@
-package health_controller
+package health
 
 import (
 	"net/http"
 
 	"github.com/arpb2/C-3PO/api/controller"
-	"github.com/arpb2/C-3PO/api/http_wrapper"
+	httpwrapper "github.com/arpb2/C-3PO/api/http"
 )
 
 func CreateGetController() controller.Controller {
@@ -15,6 +15,6 @@ func CreateGetController() controller.Controller {
 	}
 }
 
-func healthGet(ctx *http_wrapper.Context) {
+func healthGet(ctx *httpwrapper.Context) {
 	ctx.WriteString(http.StatusOK, "pong")
 }

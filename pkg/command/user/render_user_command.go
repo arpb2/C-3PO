@@ -1,14 +1,14 @@
-package user_command
+package user
 
 import (
 	"net/http"
 
-	"github.com/arpb2/C-3PO/api/http_wrapper"
+	httpwrapper "github.com/arpb2/C-3PO/api/http"
 	"github.com/arpb2/C-3PO/api/model"
 )
 
 type renderUserCommand struct {
-	writer      http_wrapper.Writer
+	writer      httpwrapper.Writer
 	inputStream <-chan *model.User
 }
 
@@ -21,8 +21,7 @@ func (c *renderUserCommand) Run() error {
 	return nil
 }
 
-func CreateRenderUserCommand(writer http_wrapper.Writer,
-	inputStream <-chan *model.User) *renderUserCommand {
+func CreateRenderUserCommand(writer httpwrapper.Writer, inputStream <-chan *model.User) *renderUserCommand {
 	return &renderUserCommand{
 		writer:      writer,
 		inputStream: inputStream,

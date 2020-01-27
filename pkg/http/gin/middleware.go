@@ -1,9 +1,9 @@
-package gin_wrapper
+package gin
 
 import (
 	"fmt"
 
-	"github.com/arpb2/C-3PO/api/http_wrapper"
+	"github.com/arpb2/C-3PO/api/http"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/xerrors"
 )
@@ -13,7 +13,7 @@ type ginMiddleware struct {
 }
 
 func (g ginMiddleware) AbortTransactionWithError(err error) {
-	var httpError http_wrapper.HttpError
+	var httpError http.Error
 	if xerrors.As(err, &httpError) {
 		if httpError.Code >= 200 && httpError.Code < 300 {
 			fmt.Printf(
@@ -22,12 +22,12 @@ func (g ginMiddleware) AbortTransactionWithError(err error) {
 				httpError.Reason,
 			)
 		} else {
-			g.AbortTransactionWithStatus(httpError.Code, http_wrapper.Json{
+			g.AbortTransactionWithStatus(httpError.Code, http.Json{
 				"error": httpError.Reason,
 			})
 		}
 	} else {
-		g.AbortTransactionWithError(http_wrapper.CreateInternalError())
+		g.AbortTransactionWithError(http.CreateInternalError())
 	}
 }
 
@@ -47,6 +47,6 @@ func (g ginMiddleware) AbortTransactionWithStatus(code int, jsonObj interface{})
 	}
 }
 
-func CreateMiddleware(ctx *gin.Context) http_wrapper.Middleware {
+func CreateMiddleware(ctx *gin.Context) http.Middleware {
 	return &ginMiddleware{ctx}
 }

@@ -1,4 +1,4 @@
-package auth_middleware
+package auth
 
 import "github.com/arpb2/C-3PO/api/auth"
 

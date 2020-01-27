@@ -1,4 +1,4 @@
-package user_controller_test
+package user_test
 
 import (
 	"bytes"
@@ -9,18 +9,18 @@ import (
 	"github.com/arpb2/C-3PO/api/controller"
 	"github.com/arpb2/C-3PO/api/model"
 	"github.com/arpb2/C-3PO/hack/golden"
-	test_http_wrapper "github.com/arpb2/C-3PO/hack/http_wrapper"
+	testhttpwrapper "github.com/arpb2/C-3PO/hack/http"
 	"github.com/arpb2/C-3PO/hack/service"
-	user_controller "github.com/arpb2/C-3PO/pkg/controller/user"
+	usercontroller "github.com/arpb2/C-3PO/pkg/controller/user"
 	"github.com/arpb2/C-3PO/pkg/executor"
-	user_service "github.com/arpb2/C-3PO/pkg/service/user"
-	user_validation "github.com/arpb2/C-3PO/pkg/validation/user"
+	userservice "github.com/arpb2/C-3PO/pkg/service/user"
+	uservalidation "github.com/arpb2/C-3PO/pkg/validation/user"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
 func createPostController() controller.Controller {
-	return user_controller.CreatePostController(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), []user_validation.Validation{}, user_service.CreateService())
+	return usercontroller.CreatePostController(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), []uservalidation.Validation{}, userservice.CreateService())
 }
 
 func TestUserPostControllerMethodIsPOST(t *testing.T) {
@@ -32,12 +32,12 @@ func TestUserPostControllerPathIsAsExpected(t *testing.T) {
 }
 
 func TestUserPostControllerBody_400OnEmptyOrMalformedUser(t *testing.T) {
-	reader := new(test_http_wrapper.MockReader)
+	reader := new(testhttpwrapper.MockReader)
 	reader.On("ReadBody", mock.MatchedBy(func(obj interface{}) bool {
 		return true
 	})).Return(errors.New("malformed")).Once()
 
-	c, w := test_http_wrapper.CreateTestContext()
+	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
 	createPostController().Body(c)
@@ -55,14 +55,14 @@ func TestUserPostControllerBody_500OnServiceCreateError(t *testing.T) {
 		return true
 	})).Return(&model.AuthenticatedUser{}, errors.New("whoops error")).Once()
 
-	body := user_controller.CreatePostBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), []user_validation.Validation{}, service)
+	body := usercontroller.CreatePostBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), []uservalidation.Validation{}, service)
 
-	reader := new(test_http_wrapper.MockReader)
+	reader := new(testhttpwrapper.MockReader)
 	reader.On("ReadBody", mock.MatchedBy(func(obj interface{}) bool {
 		return true
 	})).Return(nil).Once()
 
-	c, w := test_http_wrapper.CreateTestContext()
+	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
 	body(c)
@@ -82,14 +82,14 @@ func TestUserPostControllerBody_500OnNoUserStoredInService(t *testing.T) {
 		return true
 	})).Return(nil, nil).Once()
 
-	body := user_controller.CreatePostBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), []user_validation.Validation{}, service)
+	body := usercontroller.CreatePostBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), []uservalidation.Validation{}, service)
 
-	reader := new(test_http_wrapper.MockReader)
+	reader := new(testhttpwrapper.MockReader)
 	reader.On("ReadBody", mock.MatchedBy(func(obj interface{}) bool {
 		return true
 	})).Return(nil).Once()
 
-	c, w := test_http_wrapper.CreateTestContext()
+	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
 	body(c)
@@ -118,14 +118,14 @@ func TestUserPostControllerBody_200OnUserStoredOnService(t *testing.T) {
 		return true
 	})).Return(expectedUser, nil).Once()
 
-	body := user_controller.CreatePostBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), []user_validation.Validation{}, service)
+	body := usercontroller.CreatePostBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), []uservalidation.Validation{}, service)
 
-	reader := new(test_http_wrapper.MockReader)
+	reader := new(testhttpwrapper.MockReader)
 	reader.On("ReadBody", mock.MatchedBy(func(obj *model.AuthenticatedUser) bool {
 		return true
 	})).Return(nil).Once()
 
-	c, w := test_http_wrapper.CreateTestContext()
+	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
 	body(c)

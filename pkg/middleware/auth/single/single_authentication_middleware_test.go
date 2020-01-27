@@ -1,4 +1,4 @@
-package single_auth_test
+package single_test
 
 import (
 	"net/http"
@@ -7,10 +7,10 @@ import (
 	"testing"
 
 	"github.com/arpb2/C-3PO/api/controller"
-	"github.com/arpb2/C-3PO/api/http_wrapper"
+	httpwrapper "github.com/arpb2/C-3PO/api/http"
 	"github.com/arpb2/C-3PO/pkg/auth/jwt"
-	gin_engine "github.com/arpb2/C-3PO/pkg/engine/gin"
-	"github.com/arpb2/C-3PO/pkg/middleware/auth/single_auth"
+	ginengine "github.com/arpb2/C-3PO/pkg/engine/gin"
+	"github.com/arpb2/C-3PO/pkg/middleware/auth/single"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -26,14 +26,14 @@ func performRequest(r http.Handler, method, path, body string, headers map[strin
 }
 
 func Test_Single_HandlingOfAuthentication_NoHeader(t *testing.T) {
-	e := gin_engine.New()
+	e := ginengine.New()
 	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test",
-		Middleware: []http_wrapper.Handler{
-			single_auth.CreateMiddleware(SingleTokenHandler),
+		Middleware: []httpwrapper.Handler{
+			single.CreateMiddleware(SingleTokenHandler),
 		},
-		Body: func(ctx *http_wrapper.Context) {
+		Body: func(ctx *httpwrapper.Context) {
 			panic("Shouldn't reach here!")
 		},
 	})
@@ -45,14 +45,14 @@ func Test_Single_HandlingOfAuthentication_NoHeader(t *testing.T) {
 }
 
 func Test_Single_HandlingOfAuthentication_BadHeader(t *testing.T) {
-	e := gin_engine.New()
+	e := ginengine.New()
 	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test",
-		Middleware: []http_wrapper.Handler{
-			single_auth.CreateMiddleware(SingleTokenHandler),
+		Middleware: []httpwrapper.Handler{
+			single.CreateMiddleware(SingleTokenHandler),
 		},
-		Body: func(ctx *http_wrapper.Context) {
+		Body: func(ctx *httpwrapper.Context) {
 			panic("Shouldn't reach here!")
 		},
 	})
@@ -66,14 +66,14 @@ func Test_Single_HandlingOfAuthentication_BadHeader(t *testing.T) {
 }
 
 func Test_Single_HandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
-	e := gin_engine.New()
+	e := ginengine.New()
 	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test/:user_id",
-		Middleware: []http_wrapper.Handler{
-			single_auth.CreateMiddleware(SingleTokenHandler),
+		Middleware: []httpwrapper.Handler{
+			single.CreateMiddleware(SingleTokenHandler),
 		},
-		Body: func(ctx *http_wrapper.Context) {
+		Body: func(ctx *httpwrapper.Context) {
 			panic("Shouldn't reach here!")
 		},
 	})
@@ -88,14 +88,14 @@ func Test_Single_HandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
 }
 
 func Test_Single_HandlingOfAuthentication_Authorized_SameUser(t *testing.T) {
-	e := gin_engine.New()
+	e := ginengine.New()
 	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test/:user_id",
-		Middleware: []http_wrapper.Handler{
-			single_auth.CreateMiddleware(SingleTokenHandler),
+		Middleware: []httpwrapper.Handler{
+			single.CreateMiddleware(SingleTokenHandler),
 		},
-		Body: func(ctx *http_wrapper.Context) {
+		Body: func(ctx *httpwrapper.Context) {
 			ctx.WriteString(http.StatusOK, "Returned success")
 		},
 	})

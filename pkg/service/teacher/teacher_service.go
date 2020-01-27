@@ -1,19 +1,19 @@
-package teacher_service
+package teacher
 
 import (
 	"github.com/arpb2/C-3PO/api/model"
-	teacher_service "github.com/arpb2/C-3PO/api/service/teacher"
-	user_service "github.com/arpb2/C-3PO/api/service/user"
+	teacherservice "github.com/arpb2/C-3PO/api/service/teacher"
+	userservice "github.com/arpb2/C-3PO/api/service/user"
 )
 
-func CreateService(userService user_service.Service) teacher_service.Service {
+func CreateService(userService userservice.Service) teacherservice.Service {
 	return &teacherService{
 		Service: userService,
 	}
 }
 
 type teacherService struct {
-	user_service.Service
+	userservice.Service
 }
 
 func (t teacherService) GetStudents(userId uint) (students *[]model.User, err error) {

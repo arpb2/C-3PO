@@ -1,4 +1,4 @@
-package http_wrapper
+package http
 
 type Json map[string]interface{}
 

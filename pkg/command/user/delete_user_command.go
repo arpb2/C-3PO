@@ -1,13 +1,13 @@
-package user_command
+package user
 
 import (
-	"github.com/arpb2/C-3PO/api/http_wrapper"
-	user_service "github.com/arpb2/C-3PO/api/service/user"
+	"github.com/arpb2/C-3PO/api/http"
+	userservice "github.com/arpb2/C-3PO/api/service/user"
 )
 
 type deleteUserCommand struct {
-	context     *http_wrapper.Context
-	service     user_service.Service
+	context     *http.Context
+	service     userservice.Service
 	inputStream <-chan uint
 
 	OutputStream chan bool
@@ -30,8 +30,8 @@ func (c *deleteUserCommand) Run() error {
 	return nil
 }
 
-func CreateDeleteUserCommand(ctx *http_wrapper.Context,
-	service user_service.Service,
+func CreateDeleteUserCommand(ctx *http.Context,
+	service userservice.Service,
 	inputStream <-chan uint) *deleteUserCommand {
 	return &deleteUserCommand{
 		context:      ctx,

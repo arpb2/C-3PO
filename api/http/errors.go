@@ -1,17 +1,17 @@
-package http_wrapper
+package http
 
 import "net/http"
 
-type HttpError struct {
+type Error struct {
 	Code   int
 	Reason string
 }
 
-func (e HttpError) Error() string {
+func (e Error) Error() string {
 	return e.Reason
 }
 func createHttpError(code int, message string) error {
-	return HttpError{
+	return Error{
 		Code:   code,
 		Reason: message,
 	}

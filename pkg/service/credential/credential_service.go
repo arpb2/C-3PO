@@ -1,11 +1,11 @@
-package credential_service
+package credential
 
 import (
 	"github.com/arpb2/C-3PO/api/model"
-	credential_service "github.com/arpb2/C-3PO/api/service/credential"
+	credentialservice "github.com/arpb2/C-3PO/api/service/credential"
 )
 
-func CreateService() credential_service.Service {
+func CreateService() credentialservice.Service {
 	return &credentialService{}
 }
 

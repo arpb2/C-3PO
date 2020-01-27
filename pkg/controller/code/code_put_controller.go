@@ -1,35 +1,35 @@
-package code_controller
+package code
 
 import (
 	"github.com/arpb2/C-3PO/api/controller"
-	"github.com/arpb2/C-3PO/api/http_wrapper"
+	"github.com/arpb2/C-3PO/api/http"
 	"github.com/arpb2/C-3PO/api/pipeline"
-	code_service "github.com/arpb2/C-3PO/api/service/code"
-	code_command "github.com/arpb2/C-3PO/pkg/command/code"
-	user_command "github.com/arpb2/C-3PO/pkg/command/user"
+	codeservice "github.com/arpb2/C-3PO/api/service/code"
+	codecommand "github.com/arpb2/C-3PO/pkg/command/code"
+	usercommand "github.com/arpb2/C-3PO/pkg/command/user"
 	"github.com/saantiaguilera/go-pipeline/pkg/stage/concurrent"
 	"github.com/saantiaguilera/go-pipeline/pkg/stage/sequential"
 )
 
-func CreatePutController(exec pipeline.HttpPipeline, authMiddleware http_wrapper.Handler, codeService code_service.Service) controller.Controller {
+func CreatePutController(exec pipeline.HttpPipeline, authMiddleware http.Handler, codeService codeservice.Service) controller.Controller {
 	return controller.Controller{
 		Method: "PUT",
 		Path:   "/users/:user_id/codes/:code_id",
-		Middleware: []http_wrapper.Handler{
+		Middleware: []http.Handler{
 			authMiddleware,
 		},
 		Body: CreatePutBody(exec, codeService),
 	}
 }
 
-func CreatePutBody(exec pipeline.HttpPipeline, codeService code_service.Service) http_wrapper.Handler {
-	return func(ctx *http_wrapper.Context) {
-		fetchUserIdCommand := user_command.CreateFetchUserIdCommand(ctx)
-		fetchCodeCommand := code_command.CreateFetchCodeCommand(ctx)
-		fetchCodeIdCommand := code_command.CreateFetchCodeIdCommand(ctx)
-		serviceCommand := code_command.CreateReplaceCodeCommand(ctx, codeService,
+func CreatePutBody(exec pipeline.HttpPipeline, codeService codeservice.Service) http.Handler {
+	return func(ctx *http.Context) {
+		fetchUserIdCommand := usercommand.CreateFetchUserIdCommand(ctx)
+		fetchCodeCommand := codecommand.CreateFetchCodeCommand(ctx)
+		fetchCodeIdCommand := codecommand.CreateFetchCodeIdCommand(ctx)
+		serviceCommand := codecommand.CreateReplaceCodeCommand(ctx, codeService,
 			fetchCodeIdCommand.OutputStream, fetchUserIdCommand.OutputStream, fetchCodeCommand.OutputStream)
-		renderCommand := code_command.CreateRenderCodeCommand(ctx, serviceCommand.OutputStream)
+		renderCommand := codecommand.CreateRenderCodeCommand(ctx, serviceCommand.OutputStream)
 
 		graph := sequential.CreateSequentialGroup(
 			concurrent.CreateConcurrentStage(

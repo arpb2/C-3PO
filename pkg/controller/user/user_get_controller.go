@@ -1,32 +1,32 @@
-package user_controller
+package user
 
 import (
 	"github.com/arpb2/C-3PO/api/controller"
-	"github.com/arpb2/C-3PO/api/http_wrapper"
+	"github.com/arpb2/C-3PO/api/http"
 	"github.com/arpb2/C-3PO/api/pipeline"
-	user_service "github.com/arpb2/C-3PO/api/service/user"
-	user_command "github.com/arpb2/C-3PO/pkg/command/user"
+	userservice "github.com/arpb2/C-3PO/api/service/user"
+	usercommand "github.com/arpb2/C-3PO/pkg/command/user"
 	"github.com/saantiaguilera/go-pipeline/pkg/stage/sequential"
 )
 
 func CreateGetController(executor pipeline.HttpPipeline,
-	authMiddleware http_wrapper.Handler,
-	userService user_service.Service) controller.Controller {
+	authMiddleware http.Handler,
+	userService userservice.Service) controller.Controller {
 	return controller.Controller{
 		Method: "GET",
 		Path:   "/users/:user_id",
-		Middleware: []http_wrapper.Handler{
+		Middleware: []http.Handler{
 			authMiddleware,
 		},
 		Body: CreateGetBody(executor, userService),
 	}
 }
 
-func CreateGetBody(exec pipeline.HttpPipeline, userService user_service.Service) http_wrapper.Handler {
-	return func(ctx *http_wrapper.Context) {
-		fetchUserIdCommand := user_command.CreateFetchUserIdCommand(ctx)
-		serviceCommand := user_command.CreateGetUserCommand(ctx, userService, fetchUserIdCommand.OutputStream)
-		renderCommand := user_command.CreateRenderUserCommand(ctx, serviceCommand.OutputStream)
+func CreateGetBody(exec pipeline.HttpPipeline, userService userservice.Service) http.Handler {
+	return func(ctx *http.Context) {
+		fetchUserIdCommand := usercommand.CreateFetchUserIdCommand(ctx)
+		serviceCommand := usercommand.CreateGetUserCommand(ctx, userService, fetchUserIdCommand.OutputStream)
+		renderCommand := usercommand.CreateRenderUserCommand(ctx, serviceCommand.OutputStream)
 
 		graph := sequential.CreateSequentialStage(
 			fetchUserIdCommand,

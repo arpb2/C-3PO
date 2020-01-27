@@ -1,4 +1,4 @@
-package session_controller_test
+package session_test
 
 import (
 	"errors"
@@ -7,20 +7,20 @@ import (
 
 	"github.com/arpb2/C-3PO/api/auth"
 	"github.com/arpb2/C-3PO/api/controller"
-	"github.com/arpb2/C-3PO/api/http_wrapper"
+	httpwrapper "github.com/arpb2/C-3PO/api/http"
 	"github.com/arpb2/C-3PO/api/model"
-	test_auth "github.com/arpb2/C-3PO/hack/auth"
-	test_http_wrapper "github.com/arpb2/C-3PO/hack/http_wrapper"
+	testauth "github.com/arpb2/C-3PO/hack/auth"
+	testhttpwrapper "github.com/arpb2/C-3PO/hack/http"
 	"github.com/arpb2/C-3PO/hack/service"
-	session_controller "github.com/arpb2/C-3PO/pkg/controller/session"
+	sessioncontroller "github.com/arpb2/C-3PO/pkg/controller/session"
 	"github.com/arpb2/C-3PO/pkg/executor"
-	user_validation "github.com/arpb2/C-3PO/pkg/validation/user"
+	uservalidation "github.com/arpb2/C-3PO/pkg/validation/user"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
 func createPostController() controller.Controller {
-	return session_controller.CreatePostController(
+	return sessioncontroller.CreatePostController(
 		nil,
 		nil,
 		nil,
@@ -39,7 +39,7 @@ func TestPostControllerPath_IsSession(t *testing.T) {
 func TestPostController_FetchUserIdTask_FailsOnValidationFail(t *testing.T) {
 	err := errors.New("second throws error")
 
-	reader := new(test_http_wrapper.MockReader)
+	reader := new(testhttpwrapper.MockReader)
 	reader.On("ReadBody", mock.MatchedBy(func(obj *model.AuthenticatedUser) bool {
 		obj.User = &model.User{
 			Email: "test@email.com",
@@ -48,10 +48,10 @@ func TestPostController_FetchUserIdTask_FailsOnValidationFail(t *testing.T) {
 		return true
 	})).Return(nil).Once()
 
-	middleware := new(test_http_wrapper.MockMiddleware)
-	middleware.On("AbortTransactionWithError", http_wrapper.CreateBadRequestError(err.Error())).Once()
+	middleware := new(testhttpwrapper.MockMiddleware)
+	middleware.On("AbortTransactionWithError", httpwrapper.CreateBadRequestError(err.Error())).Once()
 
-	validations := []user_validation.Validation{
+	validations := []uservalidation.Validation{
 		func(user *model.AuthenticatedUser) error {
 			return nil
 		},
@@ -60,14 +60,14 @@ func TestPostController_FetchUserIdTask_FailsOnValidationFail(t *testing.T) {
 		},
 	}
 
-	postController := session_controller.CreatePostController(
+	postController := sessioncontroller.CreatePostController(
 		executor.CreatePipeline(executor.CreateDebugHttpExecutor()),
 		nil,
 		nil,
 		validations,
 	)
 
-	postController.Body(&http_wrapper.Context{
+	postController.Body(&httpwrapper.Context{
 		Reader:     reader,
 		Writer:     nil,
 		Middleware: middleware,
@@ -78,10 +78,10 @@ func TestPostController_FetchUserIdTask_FailsOnValidationFail(t *testing.T) {
 }
 
 func TestFetchUserIdTaskImpl_FailsOnServiceFailure(t *testing.T) {
-	middleware := new(test_http_wrapper.MockMiddleware)
-	middleware.On("AbortTransactionWithError", http_wrapper.CreateInternalError()).Once()
+	middleware := new(testhttpwrapper.MockMiddleware)
+	middleware.On("AbortTransactionWithError", httpwrapper.CreateInternalError()).Once()
 
-	reader := new(test_http_wrapper.MockReader)
+	reader := new(testhttpwrapper.MockReader)
 	reader.On("ReadBody", mock.MatchedBy(func(obj *model.AuthenticatedUser) bool {
 		obj.User = &model.User{
 			Email: "test@email.com",
@@ -91,18 +91,18 @@ func TestFetchUserIdTaskImpl_FailsOnServiceFailure(t *testing.T) {
 	})).Return(nil).Once()
 
 	service := new(service.MockCredentialService)
-	service.On("Retrieve", "test@email.com", "testpassword").Return(uint(0), http_wrapper.CreateInternalError()).Once()
+	service.On("Retrieve", "test@email.com", "testpassword").Return(uint(0), httpwrapper.CreateInternalError()).Once()
 
-	var validations []user_validation.Validation
+	var validations []uservalidation.Validation
 
-	postController := session_controller.CreatePostController(
+	postController := sessioncontroller.CreatePostController(
 		executor.CreatePipeline(executor.CreateDebugHttpExecutor()),
 		nil,
 		service,
 		validations,
 	)
 
-	postController.Body(&http_wrapper.Context{
+	postController.Body(&httpwrapper.Context{
 		Reader:     reader,
 		Writer:     nil,
 		Middleware: middleware,
@@ -114,10 +114,10 @@ func TestFetchUserIdTaskImpl_FailsOnServiceFailure(t *testing.T) {
 }
 
 func TestFetchUserIdTaskImpl_FailsOnTokenFailure(t *testing.T) {
-	middleware := new(test_http_wrapper.MockMiddleware)
-	middleware.On("AbortTransactionWithError", http_wrapper.CreateInternalError()).Once()
+	middleware := new(testhttpwrapper.MockMiddleware)
+	middleware.On("AbortTransactionWithError", httpwrapper.CreateInternalError()).Once()
 
-	reader := new(test_http_wrapper.MockReader)
+	reader := new(testhttpwrapper.MockReader)
 	reader.On("ReadBody", mock.MatchedBy(func(obj *model.AuthenticatedUser) bool {
 		obj.User = &model.User{
 			Email: "test@email.com",
@@ -126,24 +126,24 @@ func TestFetchUserIdTaskImpl_FailsOnTokenFailure(t *testing.T) {
 		return true
 	})).Return(nil).Once()
 
-	var validations []user_validation.Validation
+	var validations []uservalidation.Validation
 
 	credentialService := new(service.MockCredentialService)
 	credentialService.On("Retrieve", "test@email.com", "testpassword").Return(uint(1000), nil)
 
-	tokenHandler := new(test_auth.MockTokenHandler)
+	tokenHandler := new(testauth.MockTokenHandler)
 	tokenHandler.On("Create", mock.MatchedBy(func(tkn *auth.Token) bool {
 		return tkn.UserId == uint(1000)
-	})).Return("", http_wrapper.CreateInternalError())
+	})).Return("", httpwrapper.CreateInternalError())
 
-	postController := session_controller.CreatePostController(
+	postController := sessioncontroller.CreatePostController(
 		executor.CreatePipeline(executor.CreateDebugHttpExecutor()),
 		tokenHandler,
 		credentialService,
 		validations,
 	)
 
-	postController.Body(&http_wrapper.Context{
+	postController.Body(&httpwrapper.Context{
 		Reader:     reader,
 		Writer:     nil,
 		Middleware: middleware,
@@ -156,14 +156,14 @@ func TestFetchUserIdTaskImpl_FailsOnTokenFailure(t *testing.T) {
 }
 
 func TestFetchUserIdTaskImpl_SuccessReturnsToken(t *testing.T) {
-	writer := new(test_http_wrapper.MockWriter)
-	writer.On("WriteJson", http.StatusOK, http_wrapper.Json{
+	writer := new(testhttpwrapper.MockWriter)
+	writer.On("WriteJson", http.StatusOK, httpwrapper.Json{
 		"token": "test token",
 	}).Once()
 
-	middleware := new(test_http_wrapper.MockMiddleware)
+	middleware := new(testhttpwrapper.MockMiddleware)
 
-	reader := new(test_http_wrapper.MockReader)
+	reader := new(testhttpwrapper.MockReader)
 	reader.On("ReadBody", mock.MatchedBy(func(obj *model.AuthenticatedUser) bool {
 		obj.User = &model.User{
 			Email: "test@email.com",
@@ -172,24 +172,24 @@ func TestFetchUserIdTaskImpl_SuccessReturnsToken(t *testing.T) {
 		return true
 	})).Return(nil).Once()
 
-	var validations []user_validation.Validation
+	var validations []uservalidation.Validation
 
 	credentialService := new(service.MockCredentialService)
 	credentialService.On("Retrieve", "test@email.com", "test password").Return(uint(1000), nil)
 
-	tokenHandler := new(test_auth.MockTokenHandler)
+	tokenHandler := new(testauth.MockTokenHandler)
 	tokenHandler.On("Create", mock.MatchedBy(func(tkn *auth.Token) bool {
 		return tkn.UserId == uint(1000)
 	})).Return("test token", nil)
 
-	postController := session_controller.CreatePostController(
+	postController := sessioncontroller.CreatePostController(
 		executor.CreatePipeline(executor.CreateDebugHttpExecutor()),
 		tokenHandler,
 		credentialService,
 		validations,
 	)
 
-	postController.Body(&http_wrapper.Context{
+	postController.Body(&httpwrapper.Context{
 		Reader:     reader,
 		Writer:     writer,
 		Middleware: middleware,

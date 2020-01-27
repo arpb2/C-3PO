@@ -1,13 +1,13 @@
-package user_command
+package user
 
 import (
 	"strconv"
 
-	"github.com/arpb2/C-3PO/api/http_wrapper"
+	"github.com/arpb2/C-3PO/api/http"
 )
 
 type fetchUserIdCommand struct {
-	context      *http_wrapper.Context
+	context      *http.Context
 	OutputStream chan uint
 }
 
@@ -20,20 +20,20 @@ func (c *fetchUserIdCommand) Run() error {
 	userId := c.context.GetParameter("user_id")
 
 	if userId == "" {
-		return http_wrapper.CreateBadRequestError("'user_id' empty")
+		return http.CreateBadRequestError("'user_id' empty")
 	}
 
 	userIdUint, err := strconv.ParseUint(userId, 10, 64)
 
 	if err != nil {
-		return http_wrapper.CreateBadRequestError("'user_id' malformed, expecting a positive number")
+		return http.CreateBadRequestError("'user_id' malformed, expecting a positive number")
 	}
 
 	c.OutputStream <- uint(userIdUint)
 	return nil
 }
 
-func CreateFetchUserIdCommand(ctx *http_wrapper.Context) *fetchUserIdCommand {
+func CreateFetchUserIdCommand(ctx *http.Context) *fetchUserIdCommand {
 	return &fetchUserIdCommand{
 		context:      ctx,
 		OutputStream: make(chan uint, 1),

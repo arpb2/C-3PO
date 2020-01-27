@@ -1,4 +1,4 @@
-package code_controller_test
+package code_test
 
 import (
 	"bytes"
@@ -9,26 +9,26 @@ import (
 	"github.com/arpb2/C-3PO/api/controller"
 	"github.com/arpb2/C-3PO/api/model"
 	"github.com/arpb2/C-3PO/hack/golden"
-	test_http_wrapper "github.com/arpb2/C-3PO/hack/http_wrapper"
+	testhttpwrapper "github.com/arpb2/C-3PO/hack/http"
 	"github.com/arpb2/C-3PO/hack/service"
 	"github.com/arpb2/C-3PO/pkg/auth/jwt"
-	code_controller "github.com/arpb2/C-3PO/pkg/controller/code"
+	codecontroller "github.com/arpb2/C-3PO/pkg/controller/code"
 	"github.com/arpb2/C-3PO/pkg/executor"
-	"github.com/arpb2/C-3PO/pkg/middleware/auth/teacher_auth"
-	code_service "github.com/arpb2/C-3PO/pkg/service/code"
-	teacher_service "github.com/arpb2/C-3PO/pkg/service/teacher"
-	user_service "github.com/arpb2/C-3PO/pkg/service/user"
+	"github.com/arpb2/C-3PO/pkg/middleware/auth/teacher"
+	codeservice "github.com/arpb2/C-3PO/pkg/service/code"
+	teacherservice "github.com/arpb2/C-3PO/pkg/service/teacher"
+	userservice "github.com/arpb2/C-3PO/pkg/service/user"
 	"github.com/stretchr/testify/assert"
 )
 
 func createGetController() controller.Controller {
-	return code_controller.CreateGetController(
+	return codecontroller.CreateGetController(
 		executor.CreatePipeline(executor.CreateDebugHttpExecutor()),
-		teacher_auth.CreateMiddleware(
+		teacher.CreateMiddleware(
 			jwt.CreateTokenHandler(),
-			teacher_service.CreateService(user_service.CreateService()),
+			teacherservice.CreateService(userservice.CreateService()),
 		),
-		code_service.CreateService(),
+		codeservice.CreateService(),
 	)
 }
 
@@ -41,11 +41,11 @@ func TestCodeGetControllerPathIsAsExpected(t *testing.T) {
 }
 
 func TestCodeGetControllerBody_400OnEmptyUserId(t *testing.T) {
-	reader := new(test_http_wrapper.MockReader)
+	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetParameter", "code_id").Return("1").Maybe()
 	reader.On("GetParameter", "user_id").Return("").Once()
 
-	c, w := test_http_wrapper.CreateTestContext()
+	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
 	createGetController().Body(c)
@@ -58,11 +58,11 @@ func TestCodeGetControllerBody_400OnEmptyUserId(t *testing.T) {
 }
 
 func TestCodeGetControllerBody_400OnMalformedUserId(t *testing.T) {
-	reader := new(test_http_wrapper.MockReader)
+	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetParameter", "code_id").Return("1000").Maybe()
 	reader.On("GetParameter", "user_id").Return("not a number").Once()
 
-	c, w := test_http_wrapper.CreateTestContext()
+	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
 	createGetController().Body(c)
@@ -75,11 +75,11 @@ func TestCodeGetControllerBody_400OnMalformedUserId(t *testing.T) {
 }
 
 func TestCodeGetControllerBody_400OnMalformedCodeId(t *testing.T) {
-	reader := new(test_http_wrapper.MockReader)
+	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("1000").Once()
 	reader.On("GetParameter", "code_id").Return("not a number").Once()
 
-	c, w := test_http_wrapper.CreateTestContext()
+	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
 	createGetController().Body(c)
@@ -92,11 +92,11 @@ func TestCodeGetControllerBody_400OnMalformedCodeId(t *testing.T) {
 }
 
 func TestCodeGetControllerBody_400OnEmptyCodeId(t *testing.T) {
-	reader := new(test_http_wrapper.MockReader)
+	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("1000").Once()
 	reader.On("GetParameter", "code_id").Return("").Once()
 
-	c, w := test_http_wrapper.CreateTestContext()
+	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
 	createGetController().Body(c)
@@ -112,14 +112,14 @@ func TestCodeGetControllerBody_500OnServiceReadError(t *testing.T) {
 	codeService := new(service.MockCodeService)
 	codeService.On("GetCode", uint(1000), uint(1000)).Return(nil, errors.New("whoops error"))
 
-	reader := new(test_http_wrapper.MockReader)
+	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("1000").Once()
 	reader.On("GetParameter", "code_id").Return("1000").Once()
 
-	c, w := test_http_wrapper.CreateTestContext()
+	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
-	code_controller.CreateGetBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), codeService)(c)
+	codecontroller.CreateGetBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), codeService)(c)
 
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "internal_server_error.error_read.service.golden.json")
@@ -134,14 +134,14 @@ func TestCodeGetControllerBody_400OnNoCodeStoredInService(t *testing.T) {
 	codeService := new(service.MockCodeService)
 	codeService.On("GetCode", uint(1000), uint(1000)).Return(nil, nil)
 
-	reader := new(test_http_wrapper.MockReader)
+	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("1000").Once()
 	reader.On("GetParameter", "code_id").Return("1000").Once()
 
-	c, w := test_http_wrapper.CreateTestContext()
+	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
-	code_controller.CreateGetBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), codeService)(c)
+	codecontroller.CreateGetBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), codeService)(c)
 
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "not_found.missing_code.read.service.golden.json")
@@ -172,14 +172,14 @@ func main() {
 		Code:   expectedCode,
 	}, nil)
 
-	reader := new(test_http_wrapper.MockReader)
+	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("1000").Once()
 	reader.On("GetParameter", "code_id").Return("1000").Once()
 
-	c, w := test_http_wrapper.CreateTestContext()
+	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
-	code_controller.CreateGetBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), codeService)(c)
+	codecontroller.CreateGetBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), codeService)(c)
 
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "ok.get_code.golden.json")
@@ -199,14 +199,14 @@ func TestCodeGetControllerBody_200OnEmptyCodeStoredOnService(t *testing.T) {
 		Code:   expectedCode,
 	}, nil)
 
-	reader := new(test_http_wrapper.MockReader)
+	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("1000").Once()
 	reader.On("GetParameter", "code_id").Return("1000").Once()
 
-	c, w := test_http_wrapper.CreateTestContext()
+	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
-	code_controller.CreateGetBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), codeService)(c)
+	codecontroller.CreateGetBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), codeService)(c)
 
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "ok.get_empty_code.golden.json")

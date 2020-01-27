@@ -1,14 +1,14 @@
-package health_binder
+package health
 
 import (
 	"github.com/arpb2/C-3PO/api/engine"
-	health_controller "github.com/arpb2/C-3PO/pkg/controller/health"
+	healthcontroller "github.com/arpb2/C-3PO/pkg/controller/health"
 )
 
 type binder struct{}
 
 func (b binder) BindControllers(controllerRegistrable engine.ControllerRegistrable) {
-	controllerRegistrable.Register(health_controller.CreateGetController())
+	controllerRegistrable.Register(healthcontroller.CreateGetController())
 }
 
 func CreateBinder() engine.ControllerBinder {

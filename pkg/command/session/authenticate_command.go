@@ -1,14 +1,14 @@
-package session_command
+package session
 
 import (
-	"github.com/arpb2/C-3PO/api/http_wrapper"
+	"github.com/arpb2/C-3PO/api/http"
 	"github.com/arpb2/C-3PO/api/model"
-	credential_service "github.com/arpb2/C-3PO/api/service/credential"
+	credentialservice "github.com/arpb2/C-3PO/api/service/credential"
 )
 
 type authenticateCommand struct {
-	context     *http_wrapper.Context
-	service     credential_service.Service
+	context     *http.Context
+	service     credentialservice.Service
 	inputStream chan *model.AuthenticatedUser
 
 	OutputStream chan *model.AuthenticatedUser
@@ -34,8 +34,8 @@ func (c *authenticateCommand) Run() error {
 	return nil
 }
 
-func CreateAuthenticateCommand(ctx *http_wrapper.Context,
-	service credential_service.Service,
+func CreateAuthenticateCommand(ctx *http.Context,
+	service credentialservice.Service,
 	inputStream chan *model.AuthenticatedUser) *authenticateCommand {
 	return &authenticateCommand{
 		context:      ctx,

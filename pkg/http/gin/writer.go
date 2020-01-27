@@ -1,7 +1,7 @@
-package gin_wrapper
+package gin
 
 import (
-	"github.com/arpb2/C-3PO/api/http_wrapper"
+	"github.com/arpb2/C-3PO/api/http"
 	"github.com/gin-gonic/gin"
 )
 
@@ -27,6 +27,6 @@ func (g ginWriter) WriteStatus(code int) {
 	}
 }
 
-func CreateWriter(ctx *gin.Context) http_wrapper.Writer {
+func CreateWriter(ctx *gin.Context) http.Writer {
 	return &ginWriter{ctx}
 }

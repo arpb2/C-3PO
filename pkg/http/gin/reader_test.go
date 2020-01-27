@@ -1,4 +1,4 @@
-package gin_wrapper_test
+package gin_test
 
 import (
 	"io/ioutil"
@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	gin_wrapper "github.com/arpb2/C-3PO/pkg/http_wrapper/gin"
+	ginwrapper "github.com/arpb2/C-3PO/pkg/http/gin"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
@@ -21,7 +21,7 @@ func TestCreateReader_Url(t *testing.T) {
 			Path:   "/path",
 		},
 	}
-	reader := gin_wrapper.CreateReader(ctx)
+	reader := ginwrapper.CreateReader(ctx)
 
 	assert.Equal(t, "https://host/path", reader.GetUrl())
 }
@@ -34,7 +34,7 @@ func TestCreateReader_GetHeader(t *testing.T) {
 	ctx.Request = &http.Request{}
 	ctx.Request.Header = map[string][]string{}
 	ctx.Request.Header.Set(expectedKey, expectedValue)
-	reader := gin_wrapper.CreateReader(ctx)
+	reader := ginwrapper.CreateReader(ctx)
 
 	assert.Equal(t, expectedValue, reader.GetHeader(expectedKey))
 }
@@ -50,7 +50,7 @@ func TestCreateReader_Param(t *testing.T) {
 			Value: expectedValue,
 		},
 	}
-	reader := gin_wrapper.CreateReader(ctx)
+	reader := ginwrapper.CreateReader(ctx)
 
 	assert.Equal(t, expectedValue, reader.GetParameter(expectedKey))
 }
@@ -68,7 +68,7 @@ func TestCreateReader_GetPostForm(t *testing.T) {
 
 	assert.Nil(t, err)
 
-	reader := gin_wrapper.CreateReader(ctx)
+	reader := ginwrapper.CreateReader(ctx)
 
 	resultValue, exists := reader.GetFormData(expectedKey)
 
@@ -99,7 +99,7 @@ func TestCreateReader_ShouldBindJson(t *testing.T) {
 	ctx.Request = &http.Request{
 		Body: ioutil.NopCloser(strings.NewReader(structJson)),
 	}
-	reader := gin_wrapper.CreateReader(ctx)
+	reader := ginwrapper.CreateReader(ctx)
 
 	var result testStruct
 	err := reader.ReadBody(&result)

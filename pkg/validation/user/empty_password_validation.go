@@ -1,4 +1,4 @@
-package user_validation
+package user
 
 import (
 	"errors"

@@ -1,4 +1,4 @@
-package user_controller_test
+package user_test
 
 import (
 	"bytes"
@@ -9,26 +9,26 @@ import (
 	"github.com/arpb2/C-3PO/api/controller"
 	"github.com/arpb2/C-3PO/api/model"
 	"github.com/arpb2/C-3PO/hack/golden"
-	test_http_wrapper "github.com/arpb2/C-3PO/hack/http_wrapper"
+	testhttpwrapper "github.com/arpb2/C-3PO/hack/http"
 	"github.com/arpb2/C-3PO/hack/service"
 	"github.com/arpb2/C-3PO/pkg/auth/jwt"
-	user_controller "github.com/arpb2/C-3PO/pkg/controller/user"
+	usercontroller "github.com/arpb2/C-3PO/pkg/controller/user"
 	"github.com/arpb2/C-3PO/pkg/executor"
-	"github.com/arpb2/C-3PO/pkg/middleware/auth/single_auth"
-	user_service "github.com/arpb2/C-3PO/pkg/service/user"
-	user_validation "github.com/arpb2/C-3PO/pkg/validation/user"
+	"github.com/arpb2/C-3PO/pkg/middleware/auth/single"
+	userservice "github.com/arpb2/C-3PO/pkg/service/user"
+	uservalidation "github.com/arpb2/C-3PO/pkg/validation/user"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
 func createPutController() controller.Controller {
-	return user_controller.CreatePutController(
+	return usercontroller.CreatePutController(
 		executor.CreatePipeline(executor.CreateDebugHttpExecutor()),
-		[]user_validation.Validation{},
-		single_auth.CreateMiddleware(
+		[]uservalidation.Validation{},
+		single.CreateMiddleware(
 			jwt.CreateTokenHandler(),
 		),
-		user_service.CreateService(),
+		userservice.CreateService(),
 	)
 }
 
@@ -41,13 +41,13 @@ func TestUserPutControllerPathIsAsExpected(t *testing.T) {
 }
 
 func TestUserPutControllerBody_400OnNoUserId(t *testing.T) {
-	reader := new(test_http_wrapper.MockReader)
+	reader := new(testhttpwrapper.MockReader)
 	reader.On("ReadBody", mock.MatchedBy(func(obj interface{}) bool {
 		return true
 	})).Return(nil).Maybe()
 	reader.On("GetParameter", "user_id").Return("").Once()
 
-	c, w := test_http_wrapper.CreateTestContext()
+	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
 	createPutController().Body(c)
@@ -60,13 +60,13 @@ func TestUserPutControllerBody_400OnNoUserId(t *testing.T) {
 }
 
 func TestUserPutControllerBody_400OnMalformedUserId(t *testing.T) {
-	reader := new(test_http_wrapper.MockReader)
+	reader := new(testhttpwrapper.MockReader)
 	reader.On("ReadBody", mock.MatchedBy(func(obj interface{}) bool {
 		return true
 	})).Return(nil).Maybe()
 	reader.On("GetParameter", "user_id").Return("not a number").Once()
 
-	c, w := test_http_wrapper.CreateTestContext()
+	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
 	createPutController().Body(c)
@@ -79,13 +79,13 @@ func TestUserPutControllerBody_400OnMalformedUserId(t *testing.T) {
 }
 
 func TestUserPutControllerBody_400OnEmptyOrMalformedUser(t *testing.T) {
-	reader := new(test_http_wrapper.MockReader)
+	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("1000").Once()
 	reader.On("ReadBody", mock.MatchedBy(func(obj interface{}) bool {
 		return true
 	})).Return(errors.New("malformed")).Once()
 
-	c, w := test_http_wrapper.CreateTestContext()
+	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
 	createPutController().Body(c)
@@ -108,9 +108,9 @@ func TestUserPutControllerBody_500OnServiceCreateError(t *testing.T) {
 		Surname: "test surname",
 	}, errors.New("whoops error")).Once()
 
-	body := user_controller.CreatePutBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), []user_validation.Validation{}, service)
+	body := usercontroller.CreatePutBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), []uservalidation.Validation{}, service)
 
-	reader := new(test_http_wrapper.MockReader)
+	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("1000").Once()
 	reader.On("ReadBody", mock.MatchedBy(func(obj interface{}) bool {
 		return true
@@ -123,7 +123,7 @@ func TestUserPutControllerBody_500OnServiceCreateError(t *testing.T) {
 		args.Get(0).(*model.AuthenticatedUser).Password = "test password"
 	}).Return(nil).Once()
 
-	c, w := test_http_wrapper.CreateTestContext()
+	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
 	body(c)
@@ -143,9 +143,9 @@ func TestUserPutControllerBody_500OnNoUserStoredInService(t *testing.T) {
 		return true
 	})).Return(nil, nil).Once()
 
-	body := user_controller.CreatePutBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), []user_validation.Validation{}, service)
+	body := usercontroller.CreatePutBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), []uservalidation.Validation{}, service)
 
-	reader := new(test_http_wrapper.MockReader)
+	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("1000").Once()
 	reader.On("ReadBody", mock.MatchedBy(func(obj interface{}) bool {
 		return true
@@ -158,7 +158,7 @@ func TestUserPutControllerBody_500OnNoUserStoredInService(t *testing.T) {
 		args.Get(0).(*model.AuthenticatedUser).Password = "test password"
 	}).Return(nil).Once()
 
-	c, w := test_http_wrapper.CreateTestContext()
+	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
 	body(c)
@@ -175,11 +175,11 @@ func TestUserPutControllerBody_500OnNoUserStoredInService(t *testing.T) {
 func TestUserPutControllerBody_400OnIdSpecified(t *testing.T) {
 	service := new(service.MockUserService)
 
-	body := user_controller.CreatePutBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), []user_validation.Validation{
-		user_validation.IdProvided,
+	body := usercontroller.CreatePutBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), []uservalidation.Validation{
+		uservalidation.IdProvided,
 	}, service)
 
-	reader := new(test_http_wrapper.MockReader)
+	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("1000").Once()
 	reader.On("ReadBody", mock.MatchedBy(func(obj *model.AuthenticatedUser) bool {
 		obj.User = &model.User{
@@ -188,7 +188,7 @@ func TestUserPutControllerBody_400OnIdSpecified(t *testing.T) {
 		return true
 	})).Return(nil).Once()
 
-	c, w := test_http_wrapper.CreateTestContext()
+	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
 	body(c)
@@ -214,9 +214,9 @@ func TestUserPutControllerBody_200OnUserStoredOnService(t *testing.T) {
 		return true
 	})).Return(expectedUser, nil).Once()
 
-	body := user_controller.CreatePutBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), []user_validation.Validation{}, service)
+	body := usercontroller.CreatePutBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), []uservalidation.Validation{}, service)
 
-	reader := new(test_http_wrapper.MockReader)
+	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("1000").Once()
 	reader.On("ReadBody", mock.MatchedBy(func(obj *model.AuthenticatedUser) bool {
 		return true
@@ -229,7 +229,7 @@ func TestUserPutControllerBody_200OnUserStoredOnService(t *testing.T) {
 		args.Get(0).(*model.AuthenticatedUser).Password = "test password"
 	}).Return(nil).Once()
 
-	c, w := test_http_wrapper.CreateTestContext()
+	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
 	body(c)

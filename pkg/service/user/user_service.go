@@ -1,11 +1,11 @@
-package user_service
+package user
 
 import (
 	"github.com/arpb2/C-3PO/api/model"
-	user_service "github.com/arpb2/C-3PO/api/service/user"
+	userservice "github.com/arpb2/C-3PO/api/service/user"
 )
 
-func CreateService() user_service.Service {
+func CreateService() userservice.Service {
 	return &userService{}
 }
 

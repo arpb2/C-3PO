@@ -1,13 +1,13 @@
-package session_command
+package session
 
 import (
 	"net/http"
 
-	"github.com/arpb2/C-3PO/api/http_wrapper"
+	httpwrapper "github.com/arpb2/C-3PO/api/http"
 )
 
 type renderSessionCommand struct {
-	writer      http_wrapper.Writer
+	writer      httpwrapper.Writer
 	inputStream <-chan string
 }
 
@@ -16,14 +16,13 @@ func (c *renderSessionCommand) Name() string {
 }
 
 func (c *renderSessionCommand) Run() error {
-	c.writer.WriteJson(http.StatusOK, http_wrapper.Json{
+	c.writer.WriteJson(http.StatusOK, httpwrapper.Json{
 		"token": <-c.inputStream,
 	})
 	return nil
 }
 
-func CreateRenderSessionCommand(writer http_wrapper.Writer,
-	inputStream chan string) *renderSessionCommand {
+func CreateRenderSessionCommand(writer httpwrapper.Writer, inputStream chan string) *renderSessionCommand {
 	return &renderSessionCommand{
 		writer:      writer,
 		inputStream: inputStream,

@@ -1,4 +1,4 @@
-package gin_engine_test
+package gin_test
 
 import (
 	"net/http"
@@ -8,31 +8,31 @@ import (
 	"testing"
 
 	"github.com/arpb2/C-3PO/api/controller"
-	"github.com/arpb2/C-3PO/api/http_wrapper"
-	gin_engine "github.com/arpb2/C-3PO/pkg/engine/gin"
+	httpwrapper "github.com/arpb2/C-3PO/api/http"
+	ginengine "github.com/arpb2/C-3PO/pkg/engine/gin"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestGetPortReturnsSpecificIfUsingEnvVar(t *testing.T) {
 	_ = os.Setenv("PORT", "1234")
-	assert.Equal(t, "1234", gin_engine.GetPort())
+	assert.Equal(t, "1234", ginengine.GetPort())
 	_ = os.Unsetenv("PORT")
 }
 
 func TestGetPortReturns8080(t *testing.T) {
-	assert.Equal(t, "8080", gin_engine.GetPort())
+	assert.Equal(t, "8080", ginengine.GetPort())
 }
 
 func TestRegisterMiddleware(t *testing.T) {
-	e := gin_engine.New()
+	e := ginengine.New()
 	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test",
-		Middleware: []http_wrapper.Handler{func(c *http_wrapper.Context) {
+		Middleware: []httpwrapper.Handler{func(c *httpwrapper.Context) {
 			c.WriteString(http.StatusOK, "Test response")
 			c.AbortTransaction()
 		}},
-		Body: func(c *http_wrapper.Context) {
+		Body: func(c *httpwrapper.Context) {
 			panic("shouldn't reach here.")
 		},
 	})

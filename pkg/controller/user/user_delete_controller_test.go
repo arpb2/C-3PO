@@ -1,4 +1,4 @@
-package user_controller_test
+package user_test
 
 import (
 	"bytes"
@@ -8,23 +8,23 @@ import (
 
 	"github.com/arpb2/C-3PO/api/controller"
 	"github.com/arpb2/C-3PO/hack/golden"
-	test_http_wrapper "github.com/arpb2/C-3PO/hack/http_wrapper"
+	testhttpwrapper "github.com/arpb2/C-3PO/hack/http"
 	"github.com/arpb2/C-3PO/hack/service"
 	"github.com/arpb2/C-3PO/pkg/auth/jwt"
-	user_controller "github.com/arpb2/C-3PO/pkg/controller/user"
+	usercontroller "github.com/arpb2/C-3PO/pkg/controller/user"
 	"github.com/arpb2/C-3PO/pkg/executor"
-	"github.com/arpb2/C-3PO/pkg/middleware/auth/single_auth"
-	user_service "github.com/arpb2/C-3PO/pkg/service/user"
+	"github.com/arpb2/C-3PO/pkg/middleware/auth/single"
+	userservice "github.com/arpb2/C-3PO/pkg/service/user"
 	"github.com/stretchr/testify/assert"
 )
 
 func createDeleteController() controller.Controller {
-	return user_controller.CreateDeleteController(
+	return usercontroller.CreateDeleteController(
 		executor.CreatePipeline(executor.CreateDebugHttpExecutor()),
-		single_auth.CreateMiddleware(
+		single.CreateMiddleware(
 			jwt.CreateTokenHandler(),
 		),
-		user_service.CreateService(),
+		userservice.CreateService(),
 	)
 }
 
@@ -37,10 +37,10 @@ func TestUserDeleteControllerPathIsAsExpected(t *testing.T) {
 }
 
 func TestUserDeleteControllerBody_400OnNoUserId(t *testing.T) {
-	reader := new(test_http_wrapper.MockReader)
+	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("").Once()
 
-	c, w := test_http_wrapper.CreateTestContext()
+	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
 	createDeleteController().Body(c)
@@ -53,10 +53,10 @@ func TestUserDeleteControllerBody_400OnNoUserId(t *testing.T) {
 }
 
 func TestUserDeleteControllerBody_400OnMalformedUserId(t *testing.T) {
-	reader := new(test_http_wrapper.MockReader)
+	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("not a number").Once()
 
-	c, w := test_http_wrapper.CreateTestContext()
+	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
 	createDeleteController().Body(c)
@@ -72,12 +72,12 @@ func TestUserDeleteControllerBody_500OnServiceDeleteError(t *testing.T) {
 	service := new(service.MockUserService)
 	service.On("DeleteUser", uint(1000)).Return(errors.New("whoops error")).Once()
 
-	body := user_controller.CreateDeleteBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), service)
+	body := usercontroller.CreateDeleteBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), service)
 
-	reader := new(test_http_wrapper.MockReader)
+	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("1000").Once()
 
-	c, w := test_http_wrapper.CreateTestContext()
+	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
 	body(c)
@@ -95,12 +95,12 @@ func TestUserDeleteControllerBody_200OnUserDeletedOnService(t *testing.T) {
 	service := new(service.MockUserService)
 	service.On("DeleteUser", uint(1000)).Return(nil).Once()
 
-	body := user_controller.CreateDeleteBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), service)
+	body := usercontroller.CreateDeleteBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), service)
 
-	reader := new(test_http_wrapper.MockReader)
+	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("1000").Once()
 
-	c, w := test_http_wrapper.CreateTestContext()
+	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
 	body(c)

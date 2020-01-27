@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"github.com/arpb2/C-3PO/api/http_wrapper"
+	"github.com/arpb2/C-3PO/api/http"
 )
 
 type Controller struct {
@@ -9,7 +9,7 @@ type Controller struct {
 
 	Path string
 
-	Middleware []http_wrapper.Handler
+	Middleware []http.Handler
 
-	Body http_wrapper.Handler
+	Body http.Handler
 }

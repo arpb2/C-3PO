@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/arpb2/C-3PO/api/auth"
-	"github.com/arpb2/C-3PO/api/http_wrapper"
+	"github.com/arpb2/C-3PO/api/http"
 	"github.com/dgrijalva/jwt-go"
 )
 
@@ -44,7 +44,7 @@ func (t TokenHandler) Create(authToken *auth.Token) (string, error) {
 	tokenString, err := tkn.SignedString(t.Secret)
 
 	if err != nil {
-		return "", http_wrapper.CreateInternalError()
+		return "", http.CreateInternalError()
 	}
 	return tokenString, nil
 }
@@ -58,13 +58,13 @@ func (t TokenHandler) Retrieve(authToken string) (*auth.Token, error) {
 
 	if err != nil {
 		if err == jwt.ErrSignatureInvalid {
-			return nil, http_wrapper.CreateUnauthorizedError()
+			return nil, http.CreateUnauthorizedError()
 		}
-		return nil, http_wrapper.CreateBadRequestError("malformed token")
+		return nil, http.CreateBadRequestError("malformed token")
 	}
 
 	if !tkn.Valid {
-		return nil, http_wrapper.CreateUnauthorizedError()
+		return nil, http.CreateUnauthorizedError()
 	}
 
 	return claims.Token, nil

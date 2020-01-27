@@ -1,14 +1,14 @@
-package http_wrapper
+package http
 
 import (
 	"net/http/httptest"
 
-	"github.com/arpb2/C-3PO/api/http_wrapper"
-	internal "github.com/arpb2/C-3PO/pkg/http_wrapper/gin"
+	"github.com/arpb2/C-3PO/api/http"
+	internal "github.com/arpb2/C-3PO/pkg/http/gin"
 	"github.com/gin-gonic/gin"
 )
 
-func CreateTestContext() (*http_wrapper.Context, *httptest.ResponseRecorder) {
+func CreateTestContext() (*http.Context, *httptest.ResponseRecorder) {
 	gin.SetMode(gin.TestMode)
 
 	recorder := httptest.NewRecorder()

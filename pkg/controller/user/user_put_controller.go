@@ -1,34 +1,34 @@
-package user_controller
+package user
 
 import (
 	"github.com/arpb2/C-3PO/api/controller"
-	"github.com/arpb2/C-3PO/api/http_wrapper"
+	"github.com/arpb2/C-3PO/api/http"
 	"github.com/arpb2/C-3PO/api/pipeline"
-	user_service "github.com/arpb2/C-3PO/api/service/user"
-	user_command "github.com/arpb2/C-3PO/pkg/command/user"
-	user_validation "github.com/arpb2/C-3PO/pkg/validation/user"
+	userservice "github.com/arpb2/C-3PO/api/service/user"
+	usercommand "github.com/arpb2/C-3PO/pkg/command/user"
+	uservalidation "github.com/arpb2/C-3PO/pkg/validation/user"
 	"github.com/saantiaguilera/go-pipeline/pkg/stage/concurrent"
 	"github.com/saantiaguilera/go-pipeline/pkg/stage/sequential"
 )
 
-func CreatePutController(exec pipeline.HttpPipeline, validations []user_validation.Validation, authMiddleware http_wrapper.Handler, userService user_service.Service) controller.Controller {
+func CreatePutController(exec pipeline.HttpPipeline, validations []uservalidation.Validation, authMiddleware http.Handler, userService userservice.Service) controller.Controller {
 	return controller.Controller{
 		Method: "PUT",
 		Path:   "/users/:user_id",
-		Middleware: []http_wrapper.Handler{
+		Middleware: []http.Handler{
 			authMiddleware,
 		},
 		Body: CreatePutBody(exec, validations, userService),
 	}
 }
 
-func CreatePutBody(exec pipeline.HttpPipeline, validations []user_validation.Validation, userService user_service.Service) http_wrapper.Handler {
-	return func(ctx *http_wrapper.Context) {
-		fetchUserIdCommand := user_command.CreateFetchUserIdCommand(ctx)
-		fetchUserCommand := user_command.CreateFetchAuthenticatedUserCommand(ctx)
-		validateCommand := user_command.CreateValidateParametersCommand(ctx, fetchUserCommand.OutputStream, validations)
-		serviceCommand := user_command.CreateUpdateUserCommand(ctx, userService, fetchUserIdCommand.OutputStream, validateCommand.OutputStream)
-		renderCommand := user_command.CreateRenderUserCommand(ctx, serviceCommand.OutputStream)
+func CreatePutBody(exec pipeline.HttpPipeline, validations []uservalidation.Validation, userService userservice.Service) http.Handler {
+	return func(ctx *http.Context) {
+		fetchUserIdCommand := usercommand.CreateFetchUserIdCommand(ctx)
+		fetchUserCommand := usercommand.CreateFetchAuthenticatedUserCommand(ctx)
+		validateCommand := usercommand.CreateValidateParametersCommand(ctx, fetchUserCommand.OutputStream, validations)
+		serviceCommand := usercommand.CreateUpdateUserCommand(ctx, userService, fetchUserIdCommand.OutputStream, validateCommand.OutputStream)
+		renderCommand := usercommand.CreateRenderUserCommand(ctx, serviceCommand.OutputStream)
 
 		graph := sequential.CreateSequentialGroup(
 			concurrent.CreateConcurrentGroup(

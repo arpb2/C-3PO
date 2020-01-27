@@ -1,4 +1,4 @@
-package code_service
+package code
 
 import "github.com/arpb2/C-3PO/api/model"
 

@@ -5,17 +5,17 @@ import (
 
 	"github.com/arpb2/C-3PO/api/engine"
 	"github.com/arpb2/C-3PO/pkg/auth/jwt"
-	code_binder "github.com/arpb2/C-3PO/pkg/binder/code"
-	health_binder "github.com/arpb2/C-3PO/pkg/binder/health"
-	session_binder "github.com/arpb2/C-3PO/pkg/binder/session"
-	user_binder "github.com/arpb2/C-3PO/pkg/binder/user_binder"
+	codebinder "github.com/arpb2/C-3PO/pkg/binder/code"
+	healthbinder "github.com/arpb2/C-3PO/pkg/binder/health"
+	sessionbinder "github.com/arpb2/C-3PO/pkg/binder/session"
+	userbinder "github.com/arpb2/C-3PO/pkg/binder/user"
 	"github.com/arpb2/C-3PO/pkg/executor"
-	"github.com/arpb2/C-3PO/pkg/middleware/auth/single_auth"
-	"github.com/arpb2/C-3PO/pkg/middleware/auth/teacher_auth"
-	code_service "github.com/arpb2/C-3PO/pkg/service/code"
-	credential_service "github.com/arpb2/C-3PO/pkg/service/credential"
-	teacher_service "github.com/arpb2/C-3PO/pkg/service/teacher"
-	user_service "github.com/arpb2/C-3PO/pkg/service/user"
+	"github.com/arpb2/C-3PO/pkg/middleware/auth/single"
+	"github.com/arpb2/C-3PO/pkg/middleware/auth/teacher"
+	codeservice "github.com/arpb2/C-3PO/pkg/service/code"
+	credentialservice "github.com/arpb2/C-3PO/pkg/service/credential"
+	teacherservice "github.com/arpb2/C-3PO/pkg/service/teacher"
+	userservice "github.com/arpb2/C-3PO/pkg/service/user"
 )
 
 func StartApplication(engine engine.ServerEngine) error {
@@ -34,19 +34,19 @@ func CreateBinders() []engine.ControllerBinder {
 
 	tokenHandler := jwt.CreateTokenHandler()
 
-	userService := user_service.CreateService()
-	teacherService := teacher_service.CreateService(userService)
-	codeService := code_service.CreateService()
-	credentialService := credential_service.CreateService()
+	userService := userservice.CreateService()
+	teacherService := teacherservice.CreateService(userService)
+	codeService := codeservice.CreateService()
+	credentialService := credentialservice.CreateService()
 
-	singleAuthMiddleware := single_auth.CreateMiddleware(tokenHandler)
-	teacherAuthMiddleware := teacher_auth.CreateMiddleware(tokenHandler, teacherService)
+	singleAuthMiddleware := single.CreateMiddleware(tokenHandler)
+	teacherAuthMiddleware := teacher.CreateMiddleware(tokenHandler, teacherService)
 
 	return []engine.ControllerBinder{
-		health_binder.CreateBinder(),
-		code_binder.CreateBinder(httpPipeline, teacherAuthMiddleware, codeService),
-		user_binder.CreateBinder(httpPipeline, singleAuthMiddleware, userService),
-		session_binder.CreateBinder(httpPipeline, tokenHandler, credentialService),
+		healthbinder.CreateBinder(),
+		codebinder.CreateBinder(httpPipeline, teacherAuthMiddleware, codeService),
+		userbinder.CreateBinder(httpPipeline, singleAuthMiddleware, userService),
+		sessionbinder.CreateBinder(httpPipeline, tokenHandler, credentialService),
 	}
 }
 

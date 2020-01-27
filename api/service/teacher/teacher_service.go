@@ -1,4 +1,4 @@
-package teacher_service
+package teacher
 
 import "github.com/arpb2/C-3PO/api/model"
 

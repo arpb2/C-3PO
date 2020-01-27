@@ -1,4 +1,4 @@
-package teacher_auth_test
+package teacher_test
 
 import (
 	"errors"
@@ -8,11 +8,11 @@ import (
 	"testing"
 
 	"github.com/arpb2/C-3PO/api/controller"
-	"github.com/arpb2/C-3PO/api/http_wrapper"
+	httpwrapper "github.com/arpb2/C-3PO/api/http"
 	"github.com/arpb2/C-3PO/api/model"
 	"github.com/arpb2/C-3PO/pkg/auth/jwt"
-	gin_engine "github.com/arpb2/C-3PO/pkg/engine/gin"
-	"github.com/arpb2/C-3PO/pkg/middleware/auth/teacher_auth"
+	ginengine "github.com/arpb2/C-3PO/pkg/engine/gin"
+	"github.com/arpb2/C-3PO/pkg/middleware/auth/teacher"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -61,14 +61,14 @@ func performRequest(r http.Handler, method, path, body string, headers map[strin
 }
 
 func Test_Multi_HandlingOfAuthentication_NoHeader(t *testing.T) {
-	e := gin_engine.New()
+	e := ginengine.New()
 	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test",
-		Middleware: []http_wrapper.Handler{
-			teacher_auth.CreateMiddleware(MultiTokenHandler, MockTeacherService{}),
+		Middleware: []httpwrapper.Handler{
+			teacher.CreateMiddleware(MultiTokenHandler, MockTeacherService{}),
 		},
-		Body: func(ctx *http_wrapper.Context) {
+		Body: func(ctx *httpwrapper.Context) {
 			panic("Shouldn't reach here!")
 		},
 	})
@@ -80,14 +80,14 @@ func Test_Multi_HandlingOfAuthentication_NoHeader(t *testing.T) {
 }
 
 func Test_Multi_HandlingOfAuthentication_BadHeader(t *testing.T) {
-	e := gin_engine.New()
+	e := ginengine.New()
 	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test",
-		Middleware: []http_wrapper.Handler{
-			teacher_auth.CreateMiddleware(MultiTokenHandler, MockTeacherService{}),
+		Middleware: []httpwrapper.Handler{
+			teacher.CreateMiddleware(MultiTokenHandler, MockTeacherService{}),
 		},
-		Body: func(ctx *http_wrapper.Context) {
+		Body: func(ctx *httpwrapper.Context) {
 			panic("Shouldn't reach here!")
 		},
 	})
@@ -104,14 +104,14 @@ func Test_Multi_HandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
 	service := new(MockTeacherService)
 	service.On("GetStudents", uint(1000)).Return(nil, nil).Once()
 
-	e := gin_engine.New()
+	e := ginengine.New()
 	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test/:user_id",
-		Middleware: []http_wrapper.Handler{
-			teacher_auth.CreateMiddleware(MultiTokenHandler, service),
+		Middleware: []httpwrapper.Handler{
+			teacher.CreateMiddleware(MultiTokenHandler, service),
 		},
-		Body: func(ctx *http_wrapper.Context) {
+		Body: func(ctx *httpwrapper.Context) {
 			panic("Shouldn't reach here!")
 		},
 	})
@@ -128,14 +128,14 @@ func Test_Multi_HandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
 }
 
 func Test_Multi_HandlingOfAuthentication_Authorized_SameUser(t *testing.T) {
-	e := gin_engine.New()
+	e := ginengine.New()
 	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test/:user_id",
-		Middleware: []http_wrapper.Handler{
-			teacher_auth.CreateMiddleware(MultiTokenHandler, MockTeacherService{}),
+		Middleware: []httpwrapper.Handler{
+			teacher.CreateMiddleware(MultiTokenHandler, MockTeacherService{}),
 		},
-		Body: func(ctx *http_wrapper.Context) {
+		Body: func(ctx *httpwrapper.Context) {
 			ctx.WriteString(http.StatusOK, "Returned success")
 		},
 	})
@@ -160,14 +160,14 @@ func Test_Multi_HandlingOfAuthentication_Authorized_Student(t *testing.T) {
 		},
 	}, nil).Once()
 
-	e := gin_engine.New()
+	e := ginengine.New()
 	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test/:user_id",
-		Middleware: []http_wrapper.Handler{
-			teacher_auth.CreateMiddleware(MultiTokenHandler, service),
+		Middleware: []httpwrapper.Handler{
+			teacher.CreateMiddleware(MultiTokenHandler, service),
 		},
-		Body: func(ctx *http_wrapper.Context) {
+		Body: func(ctx *httpwrapper.Context) {
 			ctx.WriteString(http.StatusOK, "Returned success")
 		},
 	})
@@ -196,14 +196,14 @@ func Test_Multi_HandlingOfAuthentication_Unauthorized_Student(t *testing.T) {
 		},
 	}, nil).Once()
 
-	e := gin_engine.New()
+	e := ginengine.New()
 	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test/:user_id",
-		Middleware: []http_wrapper.Handler{
-			teacher_auth.CreateMiddleware(MultiTokenHandler, service),
+		Middleware: []httpwrapper.Handler{
+			teacher.CreateMiddleware(MultiTokenHandler, service),
 		},
-		Body: func(ctx *http_wrapper.Context) {
+		Body: func(ctx *httpwrapper.Context) {
 			ctx.WriteString(http.StatusOK, "Returned success")
 		},
 	})
@@ -222,14 +222,14 @@ func Test_Multi_HandlingOfAuthentication_Service_Error(t *testing.T) {
 	service := new(MockTeacherService)
 	service.On("GetStudents", uint(1001)).Return(nil, errors.New("whoops this fails")).Once()
 
-	e := gin_engine.New()
+	e := ginengine.New()
 	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test/:user_id",
-		Middleware: []http_wrapper.Handler{
-			teacher_auth.CreateMiddleware(MultiTokenHandler, service),
+		Middleware: []httpwrapper.Handler{
+			teacher.CreateMiddleware(MultiTokenHandler, service),
 		},
-		Body: func(ctx *http_wrapper.Context) {
+		Body: func(ctx *httpwrapper.Context) {
 			ctx.WriteString(http.StatusOK, "Returned success")
 		},
 	})

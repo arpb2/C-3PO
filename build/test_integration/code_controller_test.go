@@ -13,9 +13,9 @@ import (
 	"time"
 
 	"github.com/arpb2/C-3PO/hack/golden"
-	gin_engine "github.com/arpb2/C-3PO/pkg/engine/gin"
+	ginengine "github.com/arpb2/C-3PO/pkg/engine/gin"
 	"github.com/arpb2/C-3PO/pkg/server"
-	code_service "github.com/arpb2/C-3PO/pkg/service/code"
+	codeservice "github.com/arpb2/C-3PO/pkg/service/code"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -36,14 +36,14 @@ func dial(t *testing.T) {
 
 func Test_Get(t *testing.T) {
 	// Ignite server
-	engine := gin_engine.New()
+	engine := ginengine.New()
 
 	defer engine.Shutdown()
 	go server.StartApplication(engine)
 
 	// Add code to retrieve
 	code := "expected code"
-	createdCode, err := code_service.CreateService().CreateCode(uint(1000), code)
+	createdCode, err := codeservice.CreateService().CreateCode(uint(1000), code)
 
 	assert.Nil(t, err)
 
@@ -76,7 +76,7 @@ func Test_Get(t *testing.T) {
 
 func Test_Post(t *testing.T) {
 	// Ignite server
-	engine := gin_engine.New()
+	engine := ginengine.New()
 
 	defer engine.Shutdown()
 	go server.StartApplication(engine)
@@ -113,14 +113,14 @@ func Test_Post(t *testing.T) {
 
 func Test_Put(t *testing.T) {
 	// Ignite server
-	engine := gin_engine.New()
+	engine := ginengine.New()
 
 	defer engine.Shutdown()
 	go server.StartApplication(engine)
 
 	// Add code to replace
 	code := "test code"
-	codeModel, err := code_service.CreateService().CreateCode(uint(1000), code)
+	codeModel, err := codeservice.CreateService().CreateCode(uint(1000), code)
 
 	assert.Nil(t, err)
 

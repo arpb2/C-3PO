@@ -1,14 +1,14 @@
-package user_command
+package user
 
 import (
-	"github.com/arpb2/C-3PO/api/http_wrapper"
+	"github.com/arpb2/C-3PO/api/http"
 	"github.com/arpb2/C-3PO/api/model"
-	user_service "github.com/arpb2/C-3PO/api/service/user"
+	userservice "github.com/arpb2/C-3PO/api/service/user"
 )
 
 type getUserCommand struct {
-	context     *http_wrapper.Context
-	service     user_service.Service
+	context     *http.Context
+	service     userservice.Service
 	inputStream <-chan uint
 
 	OutputStream chan *model.User
@@ -28,15 +28,15 @@ func (c *getUserCommand) Run() error {
 	}
 
 	if user == nil {
-		return http_wrapper.CreateNotFoundError()
+		return http.CreateNotFoundError()
 	}
 
 	c.OutputStream <- user
 	return nil
 }
 
-func CreateGetUserCommand(ctx *http_wrapper.Context,
-	service user_service.Service,
+func CreateGetUserCommand(ctx *http.Context,
+	service userservice.Service,
 	inputStream <-chan uint) *getUserCommand {
 	return &getUserCommand{
 		context:      ctx,

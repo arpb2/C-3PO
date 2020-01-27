@@ -1,7 +1,7 @@
-package gin_wrapper
+package gin
 
 import (
-	"github.com/arpb2/C-3PO/api/http_wrapper"
+	"github.com/arpb2/C-3PO/api/http"
 	"github.com/gin-gonic/gin"
 )
 
@@ -25,6 +25,6 @@ func (g ginReader) GetUrl() string {
 	return g.Request.URL.String()
 }
 
-func CreateReader(ctx *gin.Context) http_wrapper.Reader {
+func CreateReader(ctx *gin.Context) http.Reader {
 	return &ginReader{ctx}
 }

@@ -1,12 +1,12 @@
-package gin_wrapper
+package gin
 
 import (
-	"github.com/arpb2/C-3PO/api/http_wrapper"
+	"github.com/arpb2/C-3PO/api/http"
 	"github.com/gin-gonic/gin"
 )
 
-func CreateContext(context *gin.Context) *http_wrapper.Context {
-	return &http_wrapper.Context{
+func CreateContext(context *gin.Context) *http.Context {
+	return &http.Context{
 		Reader:     CreateReader(context),
 		Writer:     CreateWriter(context),
 		Middleware: CreateMiddleware(context),

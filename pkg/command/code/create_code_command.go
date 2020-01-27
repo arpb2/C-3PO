@@ -1,14 +1,14 @@
-package code_command
+package code
 
 import (
-	"github.com/arpb2/C-3PO/api/http_wrapper"
+	"github.com/arpb2/C-3PO/api/http"
 	"github.com/arpb2/C-3PO/api/model"
-	code_service "github.com/arpb2/C-3PO/api/service/code"
+	codeservice "github.com/arpb2/C-3PO/api/service/code"
 )
 
 type createCodeCommand struct {
-	context           *http_wrapper.Context
-	service           code_service.Service
+	context           *http.Context
+	service           codeservice.Service
 	userIdInputStream <-chan uint
 	codeInputStream   <-chan string
 
@@ -32,8 +32,8 @@ func (c *createCodeCommand) Run() error {
 	return nil
 }
 
-func CreateCreateCodeCommand(ctx *http_wrapper.Context,
-	service code_service.Service,
+func CreateCreateCodeCommand(ctx *http.Context,
+	service codeservice.Service,
 	userIdInputStream <-chan uint,
 	codeInputStream <-chan string) *createCodeCommand {
 	return &createCodeCommand{

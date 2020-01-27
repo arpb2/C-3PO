@@ -1,10 +1,10 @@
-package session_binder_test
+package session_test
 
 import (
 	"testing"
 
 	"github.com/arpb2/C-3PO/api/controller"
-	session_binder "github.com/arpb2/C-3PO/pkg/binder/session"
+	sessionbinder "github.com/arpb2/C-3PO/pkg/binder/session"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -17,7 +17,7 @@ func (m *MockControllerRegistrable) Register(controller controller.Controller) {
 }
 
 func bindControllers() *MockControllerRegistrable {
-	binder := session_binder.CreateBinder(nil, nil, nil)
+	binder := sessionbinder.CreateBinder(nil, nil, nil)
 	registrable := &MockControllerRegistrable{}
 
 	binder.BindControllers(registrable)

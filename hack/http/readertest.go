@@ -1,4 +1,4 @@
-package http_wrapper
+package http
 
 import "github.com/stretchr/testify/mock"
 

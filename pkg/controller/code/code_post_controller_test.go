@@ -1,4 +1,4 @@
-package code_controller_test
+package code_test
 
 import (
 	"bytes"
@@ -9,26 +9,26 @@ import (
 	"github.com/arpb2/C-3PO/api/controller"
 	"github.com/arpb2/C-3PO/api/model"
 	"github.com/arpb2/C-3PO/hack/golden"
-	test_http_wrapper "github.com/arpb2/C-3PO/hack/http_wrapper"
+	testhttpwrapper "github.com/arpb2/C-3PO/hack/http"
 	"github.com/arpb2/C-3PO/hack/service"
 	"github.com/arpb2/C-3PO/pkg/auth/jwt"
-	code_controller "github.com/arpb2/C-3PO/pkg/controller/code"
+	codecontroller "github.com/arpb2/C-3PO/pkg/controller/code"
 	"github.com/arpb2/C-3PO/pkg/executor"
-	"github.com/arpb2/C-3PO/pkg/middleware/auth/teacher_auth"
-	code_service "github.com/arpb2/C-3PO/pkg/service/code"
-	teacher_service "github.com/arpb2/C-3PO/pkg/service/teacher"
-	user_service "github.com/arpb2/C-3PO/pkg/service/user"
+	"github.com/arpb2/C-3PO/pkg/middleware/auth/teacher"
+	codeservice "github.com/arpb2/C-3PO/pkg/service/code"
+	teacherservice "github.com/arpb2/C-3PO/pkg/service/teacher"
+	userservice "github.com/arpb2/C-3PO/pkg/service/user"
 	"github.com/stretchr/testify/assert"
 )
 
 func createPostController() controller.Controller {
-	return code_controller.CreatePostController(
+	return codecontroller.CreatePostController(
 		executor.CreatePipeline(executor.CreateDebugHttpExecutor()),
-		teacher_auth.CreateMiddleware(
+		teacher.CreateMiddleware(
 			jwt.CreateTokenHandler(),
-			teacher_service.CreateService(user_service.CreateService()),
+			teacherservice.CreateService(userservice.CreateService()),
 		),
-		code_service.CreateService(),
+		codeservice.CreateService(),
 	)
 }
 
@@ -41,11 +41,11 @@ func TestCodePostControllerPathIsAsExpected(t *testing.T) {
 }
 
 func TestCodePostControllerBody_400OnEmptyUserId(t *testing.T) {
-	reader := new(test_http_wrapper.MockReader)
+	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetFormData", "code").Return("", true).Maybe()
 	reader.On("GetParameter", "user_id").Return("").Once()
 
-	c, w := test_http_wrapper.CreateTestContext()
+	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
 	createPostController().Body(c)
@@ -58,11 +58,11 @@ func TestCodePostControllerBody_400OnEmptyUserId(t *testing.T) {
 }
 
 func TestCodePostControllerBody_400OnMalformedUserId(t *testing.T) {
-	reader := new(test_http_wrapper.MockReader)
+	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetFormData", "code").Return("", true).Maybe()
 	reader.On("GetParameter", "user_id").Return("not a number").Once()
 
-	c, w := test_http_wrapper.CreateTestContext()
+	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
 	createPostController().Body(c)
@@ -75,11 +75,11 @@ func TestCodePostControllerBody_400OnMalformedUserId(t *testing.T) {
 }
 
 func TestCodePostControllerBody_400OnNoCode(t *testing.T) {
-	reader := new(test_http_wrapper.MockReader)
+	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("1000").Once()
 	reader.On("GetFormData", "code").Return("", false).Once()
 
-	c, w := test_http_wrapper.CreateTestContext()
+	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
 	createPostController().Body(c)
@@ -96,15 +96,15 @@ func TestCodePostControllerBody_500OnServiceWriteError(t *testing.T) {
 	codeService := new(service.MockCodeService)
 	codeService.On("GetCode", uint(1000), uint(1000)).Return(nil, errors.New("whoops error"))
 
-	reader := new(test_http_wrapper.MockReader)
+	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetParameter", "code_id").Return("1000").Maybe()
 	reader.On("GetParameter", "user_id").Return("1000").Once()
 	reader.On("GetFormData", "code").Return("sending some code", true).Once()
 
-	c, w := test_http_wrapper.CreateTestContext()
+	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
-	code_controller.CreateGetBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), codeService)(c)
+	codecontroller.CreateGetBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), codeService)(c)
 
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "internal_server_error.error_write.service.golden.json")
@@ -133,15 +133,15 @@ func main() {
 		Code:   expectedCode,
 	}, nil)
 
-	reader := new(test_http_wrapper.MockReader)
+	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetParameter", "code_id").Return("1000").Maybe()
 	reader.On("GetParameter", "user_id").Return("1000").Once()
 	reader.On("GetFormData", "code").Return(expectedCode, true).Once()
 
-	c, w := test_http_wrapper.CreateTestContext()
+	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
-	code_controller.CreateGetBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), codeService)(c)
+	codecontroller.CreateGetBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), codeService)(c)
 
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "ok.write_code.golden.json")
@@ -160,15 +160,15 @@ func TestCodePostControllerBody_200OnEmptyCodeStoredOnService(t *testing.T) {
 		Code:   expectedCode,
 	}, nil)
 
-	reader := new(test_http_wrapper.MockReader)
+	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetParameter", "code_id").Return("1000").Maybe()
 	reader.On("GetParameter", "user_id").Return("1000").Once()
 	reader.On("GetFormData", "code").Return(expectedCode, true).Once()
 
-	c, w := test_http_wrapper.CreateTestContext()
+	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
-	code_controller.CreateGetBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), codeService)(c)
+	codecontroller.CreateGetBody(executor.CreatePipeline(executor.CreateDebugHttpExecutor()), codeService)(c)
 
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "ok.write_empty_code.golden.json")
