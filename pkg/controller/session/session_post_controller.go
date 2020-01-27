@@ -28,14 +28,14 @@ func CreatePostBody(executor pipeline.HttpPipeline, tokenHandler auth.TokenHandl
 		fetchUserCommand := usercommand.CreateFetchAuthenticatedUserCommand(ctx)
 		validateParamsCommand := usercommand.CreateValidateParametersCommand(ctx, fetchUserCommand.OutputStream, validations)
 		authenticateCommand := sessioncommand.CreateAuthenticateCommand(ctx, service, validateParamsCommand.OutputStream)
-		createTokenCommand := sessioncommand.CreateCreateTokenCommand(ctx, tokenHandler, authenticateCommand.OutputStream)
-		renderCommand := sessioncommand.CreateRenderSessionCommand(ctx, createTokenCommand.OutputStream)
+		createSessionCommand := sessioncommand.CreateCreateSessionCommand(ctx, tokenHandler, authenticateCommand.OutputStream)
+		renderCommand := sessioncommand.CreateRenderSessionCommand(ctx, createSessionCommand.OutputStream)
 
 		graph := sequential.CreateSequentialStage(
 			fetchUserCommand,
 			validateParamsCommand,
 			authenticateCommand,
-			createTokenCommand,
+			createSessionCommand,
 			renderCommand,
 		)
 

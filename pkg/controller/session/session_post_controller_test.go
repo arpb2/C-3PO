@@ -159,8 +159,9 @@ func TestFetchUserIdTaskImpl_FailsOnTokenFailure(t *testing.T) {
 
 func TestFetchUserIdTaskImpl_SuccessReturnsToken(t *testing.T) {
 	writer := new(testhttpwrapper.MockWriter)
-	writer.On("WriteJson", http.StatusOK, httpwrapper.Json{
-		"token": "test token",
+	writer.On("WriteJson", http.StatusOK, model.Session{
+		UserId: uint(1000),
+		Token:  "test token",
 	}).Once()
 
 	middleware := new(testhttpwrapper.MockMiddleware)

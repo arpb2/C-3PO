@@ -6,40 +6,44 @@ import (
 	"github.com/arpb2/C-3PO/api/model"
 )
 
-type createTokenCommand struct {
+type createSessionCommand struct {
 	context      *http.Context
 	tokenHandler auth.TokenHandler
 	inputStream  <-chan *model.AuthenticatedUser
 
-	OutputStream chan string
+	OutputStream chan *model.Session
 }
 
-func (c *createTokenCommand) Name() string {
+func (c *createSessionCommand) Name() string {
 	return "create_token_command"
 }
 
-func (c *createTokenCommand) Run() error {
+func (c *createSessionCommand) Run() error {
 	defer close(c.OutputStream)
 
+	userId := (<-c.inputStream).Id
 	token, err := c.tokenHandler.Create(&auth.Token{
-		UserId: (<-c.inputStream).Id,
+		UserId: userId,
 	})
 
 	if err != nil {
 		return err
 	}
 
-	c.OutputStream <- token
+	c.OutputStream <- &model.Session{
+		UserId: userId,
+		Token:  token,
+	}
 	return nil
 }
 
-func CreateCreateTokenCommand(ctx *http.Context,
+func CreateCreateSessionCommand(ctx *http.Context,
 	tokenHandler auth.TokenHandler,
-	inputStream <-chan *model.AuthenticatedUser) *createTokenCommand {
-	return &createTokenCommand{
+	inputStream <-chan *model.AuthenticatedUser) *createSessionCommand {
+	return &createSessionCommand{
 		context:      ctx,
 		tokenHandler: tokenHandler,
 		inputStream:  inputStream,
-		OutputStream: make(chan string, 1),
+		OutputStream: make(chan *model.Session, 1),
 	}
 }
