@@ -6,7 +6,7 @@ import (
 	"github.com/arpb2/C-3PO/api/pipeline"
 	userservice "github.com/arpb2/C-3PO/api/service/user"
 	usercommand "github.com/arpb2/C-3PO/pkg/command/user"
-	"github.com/saantiaguilera/go-pipeline/pkg/stage/sequential"
+	gopipeline "github.com/saantiaguilera/go-pipeline"
 )
 
 func CreateGetController(executor pipeline.HttpPipeline,
@@ -28,7 +28,7 @@ func CreateGetBody(exec pipeline.HttpPipeline, userService userservice.Service) 
 		serviceCommand := usercommand.CreateGetUserCommand(ctx, userService, fetchUserIdCommand.OutputStream)
 		renderCommand := usercommand.CreateRenderUserCommand(ctx, serviceCommand.OutputStream)
 
-		graph := sequential.CreateSequentialStage(
+		graph := gopipeline.CreateSequentialStage(
 			fetchUserIdCommand,
 			serviceCommand,
 			renderCommand,

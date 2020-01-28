@@ -9,7 +9,7 @@ import (
 	sessioncommand "github.com/arpb2/C-3PO/pkg/command/session"
 	usercommand "github.com/arpb2/C-3PO/pkg/command/user"
 	uservalidation "github.com/arpb2/C-3PO/pkg/validation/user"
-	"github.com/saantiaguilera/go-pipeline/pkg/stage/sequential"
+	gopipeline "github.com/saantiaguilera/go-pipeline"
 )
 
 func CreatePostController(executor pipeline.HttpPipeline,
@@ -31,7 +31,7 @@ func CreatePostBody(executor pipeline.HttpPipeline, tokenHandler auth.TokenHandl
 		createSessionCommand := sessioncommand.CreateCreateSessionCommand(ctx, tokenHandler, authenticateCommand.OutputStream)
 		renderCommand := sessioncommand.CreateRenderSessionCommand(ctx, createSessionCommand.OutputStream)
 
-		graph := sequential.CreateSequentialStage(
+		graph := gopipeline.CreateSequentialStage(
 			fetchUserCommand,
 			validateParamsCommand,
 			authenticateCommand,

@@ -3,11 +3,10 @@ package pipeline
 import (
 	"github.com/arpb2/C-3PO/api/http"
 	api "github.com/arpb2/C-3PO/api/pipeline"
-	gopipeline "github.com/saantiaguilera/go-pipeline/pkg/api"
-	"github.com/saantiaguilera/go-pipeline/pkg/pipeline"
+	"github.com/saantiaguilera/go-pipeline"
 )
 
-func CreatePipeline(executor gopipeline.Executor) api.HttpPipeline {
+func CreatePipeline(executor pipeline.Executor) api.HttpPipeline {
 	pipe := pipeline.CreatePipeline(executor)
 
 	return &httpPipeline{
@@ -16,10 +15,10 @@ func CreatePipeline(executor gopipeline.Executor) api.HttpPipeline {
 }
 
 type httpPipeline struct {
-	Pipeline gopipeline.Pipeline
+	Pipeline pipeline.Pipeline
 }
 
-func (h *httpPipeline) Run(context *http.Context, stage gopipeline.Stage) {
+func (h *httpPipeline) Run(context *http.Context, stage pipeline.Stage) {
 	err := h.Pipeline.Run(stage)
 
 	if err != nil {

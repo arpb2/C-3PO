@@ -7,8 +7,7 @@ import (
 	codeservice "github.com/arpb2/C-3PO/api/service/code"
 	codecommand "github.com/arpb2/C-3PO/pkg/command/code"
 	usercommand "github.com/arpb2/C-3PO/pkg/command/user"
-	"github.com/saantiaguilera/go-pipeline/pkg/stage/concurrent"
-	"github.com/saantiaguilera/go-pipeline/pkg/stage/sequential"
+	gopipeline "github.com/saantiaguilera/go-pipeline"
 )
 
 func CreatePostController(exec pipeline.HttpPipeline, authMiddleware http.Handler, codeService codeservice.Service) controller.Controller {
@@ -29,12 +28,12 @@ func CreatePostBody(exec pipeline.HttpPipeline, codeService codeservice.Service)
 		serviceCommand := codecommand.CreateCreateCodeCommand(ctx, codeService, fetchUserIdCommand.OutputStream, fetchCodeCommand.OutputStream)
 		renderCommand := codecommand.CreateRenderCodeCommand(ctx, serviceCommand.OutputStream)
 
-		graph := sequential.CreateSequentialGroup(
-			concurrent.CreateConcurrentStage(
+		graph := gopipeline.CreateSequentialGroup(
+			gopipeline.CreateConcurrentStage(
 				fetchUserIdCommand,
 				fetchCodeCommand,
 			),
-			sequential.CreateSequentialStage(
+			gopipeline.CreateSequentialStage(
 				serviceCommand,
 				renderCommand,
 			),

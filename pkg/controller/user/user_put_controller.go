@@ -7,8 +7,7 @@ import (
 	userservice "github.com/arpb2/C-3PO/api/service/user"
 	usercommand "github.com/arpb2/C-3PO/pkg/command/user"
 	uservalidation "github.com/arpb2/C-3PO/pkg/validation/user"
-	"github.com/saantiaguilera/go-pipeline/pkg/stage/concurrent"
-	"github.com/saantiaguilera/go-pipeline/pkg/stage/sequential"
+	gopipeline "github.com/saantiaguilera/go-pipeline"
 )
 
 func CreatePutController(exec pipeline.HttpPipeline, validations []uservalidation.Validation, authMiddleware http.Handler, userService userservice.Service) controller.Controller {
@@ -30,17 +29,17 @@ func CreatePutBody(exec pipeline.HttpPipeline, validations []uservalidation.Vali
 		serviceCommand := usercommand.CreateUpdateUserCommand(ctx, userService, fetchUserIdCommand.OutputStream, validateCommand.OutputStream)
 		renderCommand := usercommand.CreateRenderUserCommand(ctx, serviceCommand.OutputStream)
 
-		graph := sequential.CreateSequentialGroup(
-			concurrent.CreateConcurrentGroup(
-				sequential.CreateSequentialStage(
+		graph := gopipeline.CreateSequentialGroup(
+			gopipeline.CreateConcurrentGroup(
+				gopipeline.CreateSequentialStage(
 					fetchUserIdCommand,
 				),
-				sequential.CreateSequentialStage(
+				gopipeline.CreateSequentialStage(
 					fetchUserCommand,
 					validateCommand,
 				),
 			),
-			sequential.CreateSequentialStage(
+			gopipeline.CreateSequentialStage(
 				serviceCommand,
 				renderCommand,
 			),

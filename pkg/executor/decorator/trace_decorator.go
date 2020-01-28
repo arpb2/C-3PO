@@ -1,10 +1,9 @@
 package decorator
 
 import (
-	"github.com/saantiaguilera/go-pipeline/pkg/api"
-	"github.com/saantiaguilera/go-pipeline/pkg/step/trace"
+	"github.com/saantiaguilera/go-pipeline"
 )
 
-func TraceRunnableDecorator(runnable api.Runnable) api.Runnable {
-	return trace.CreateTracedStep(runnable)
+func TraceRunnableDecorator(runnable pipeline.Runnable) pipeline.Runnable {
+	return pipeline.CreateTracedStep(runnable)
 }

@@ -7,7 +7,7 @@ import (
 
 	"github.com/afex/hystrix-go/hystrix"
 	httpwrapper "github.com/arpb2/C-3PO/api/http"
-	gopipeline "github.com/saantiaguilera/go-pipeline/pkg/api"
+	gopipeline "github.com/saantiaguilera/go-pipeline"
 	"golang.org/x/xerrors"
 )
 

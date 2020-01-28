@@ -7,7 +7,7 @@ import (
 	userservice "github.com/arpb2/C-3PO/api/service/user"
 	usercommand "github.com/arpb2/C-3PO/pkg/command/user"
 	uservalidation "github.com/arpb2/C-3PO/pkg/validation/user"
-	"github.com/saantiaguilera/go-pipeline/pkg/stage/sequential"
+	gopipeline "github.com/saantiaguilera/go-pipeline"
 )
 
 func CreatePostController(exec pipeline.HttpPipeline, validations []uservalidation.Validation, userService userservice.Service) controller.Controller {
@@ -25,7 +25,7 @@ func CreatePostBody(exec pipeline.HttpPipeline, validations []uservalidation.Val
 		serviceCommand := usercommand.CreateCreateUserCommand(ctx, userService, validateCommand.OutputStream)
 		renderCommand := usercommand.CreateRenderUserCommand(ctx, serviceCommand.OutputStream)
 
-		graph := sequential.CreateSequentialStage(
+		graph := gopipeline.CreateSequentialStage(
 			fetchUserCommand,
 			validateCommand,
 			serviceCommand,
