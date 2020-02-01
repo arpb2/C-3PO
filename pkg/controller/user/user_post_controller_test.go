@@ -22,7 +22,7 @@ import (
 )
 
 func createPostController() controller.Controller {
-	return usercontroller.CreatePostController(pipeline.CreatePipeline(executor.CreateDebugHttpExecutor()), []uservalidation.Validation{}, userservice.CreateService())
+	return usercontroller.CreatePostController(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), []uservalidation.Validation{}, userservice.CreateService())
 }
 
 func TestUserPostControllerMethodIsPOST(t *testing.T) {
@@ -57,7 +57,7 @@ func TestUserPostControllerBody_500OnServiceCreateError(t *testing.T) {
 		return true
 	})).Return(&model.AuthenticatedUser{}, errors.New("whoops error")).Once()
 
-	body := usercontroller.CreatePostBody(pipeline.CreatePipeline(executor.CreateDebugHttpExecutor()), []uservalidation.Validation{}, service)
+	body := usercontroller.CreatePostBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), []uservalidation.Validation{}, service)
 
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("ReadBody", mock.MatchedBy(func(obj interface{}) bool {
@@ -84,7 +84,7 @@ func TestUserPostControllerBody_500OnNoUserStoredInService(t *testing.T) {
 		return true
 	})).Return(nil, nil).Once()
 
-	body := usercontroller.CreatePostBody(pipeline.CreatePipeline(executor.CreateDebugHttpExecutor()), []uservalidation.Validation{}, service)
+	body := usercontroller.CreatePostBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), []uservalidation.Validation{}, service)
 
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("ReadBody", mock.MatchedBy(func(obj interface{}) bool {
@@ -120,7 +120,7 @@ func TestUserPostControllerBody_200OnUserStoredOnService(t *testing.T) {
 		return true
 	})).Return(expectedUser, nil).Once()
 
-	body := usercontroller.CreatePostBody(pipeline.CreatePipeline(executor.CreateDebugHttpExecutor()), []uservalidation.Validation{}, service)
+	body := usercontroller.CreatePostBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), []uservalidation.Validation{}, service)
 
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("ReadBody", mock.MatchedBy(func(obj *model.AuthenticatedUser) bool {

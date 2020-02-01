@@ -12,6 +12,12 @@ func (m MockReader) ReadBody(obj interface{}) error {
 	return args.Error(0)
 }
 
+func (m MockReader) GetMethod() string {
+	args := m.Called()
+
+	return args.String(0)
+}
+
 func (m MockReader) GetUrl() string {
 	args := m.Called()
 

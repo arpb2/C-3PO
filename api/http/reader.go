@@ -3,6 +3,8 @@ package http
 type Reader interface {
 	GetUrl() string
 
+	GetMethod() string
+
 	GetParameter(key string) string
 
 	GetHeader(key string) string

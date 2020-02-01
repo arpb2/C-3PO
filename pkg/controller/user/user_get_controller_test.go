@@ -23,7 +23,7 @@ import (
 
 func createGetController() controller.Controller {
 	return usercontroller.CreateGetController(
-		pipeline.CreatePipeline(executor.CreateDebugHttpExecutor()),
+		pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()),
 		single.CreateMiddleware(
 			jwt.CreateTokenHandler(),
 		),
@@ -75,7 +75,7 @@ func TestUserGetControllerBody_500OnServiceReadError(t *testing.T) {
 	service := new(service.MockUserService)
 	service.On("GetUser", uint(1000)).Return(nil, errors.New("whoops error")).Once()
 
-	body := usercontroller.CreateGetBody(pipeline.CreatePipeline(executor.CreateDebugHttpExecutor()), service)
+	body := usercontroller.CreateGetBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), service)
 
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("1000").Once()
@@ -98,7 +98,7 @@ func TestUserGetControllerBody_400OnNoUserStoredInService(t *testing.T) {
 	service := new(service.MockUserService)
 	service.On("GetUser", uint(1000)).Return(nil, nil).Once()
 
-	body := usercontroller.CreateGetBody(pipeline.CreatePipeline(executor.CreateDebugHttpExecutor()), service)
+	body := usercontroller.CreateGetBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), service)
 
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("1000").Once()
@@ -127,7 +127,7 @@ func TestUserGetControllerBody_200OnUserStoredOnService(t *testing.T) {
 	service := new(service.MockUserService)
 	service.On("GetUser", uint(1000)).Return(expectedUser, nil).Once()
 
-	body := usercontroller.CreateGetBody(pipeline.CreatePipeline(executor.CreateDebugHttpExecutor()), service)
+	body := usercontroller.CreateGetBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), service)
 
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("1000").Once()

@@ -63,7 +63,7 @@ func TestPostController_FetchUserIdTask_FailsOnValidationFail(t *testing.T) {
 	}
 
 	postController := sessioncontroller.CreatePostController(
-		pipeline.CreatePipeline(executor.CreateDebugHttpExecutor()),
+		pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()),
 		nil,
 		nil,
 		validations,
@@ -98,7 +98,7 @@ func TestFetchUserIdTaskImpl_FailsOnServiceFailure(t *testing.T) {
 	var validations []uservalidation.Validation
 
 	postController := sessioncontroller.CreatePostController(
-		pipeline.CreatePipeline(executor.CreateDebugHttpExecutor()),
+		pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()),
 		nil,
 		service,
 		validations,
@@ -139,7 +139,7 @@ func TestFetchUserIdTaskImpl_FailsOnTokenFailure(t *testing.T) {
 	})).Return("", httpwrapper.CreateInternalError())
 
 	postController := sessioncontroller.CreatePostController(
-		pipeline.CreatePipeline(executor.CreateDebugHttpExecutor()),
+		pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()),
 		tokenHandler,
 		credentialService,
 		validations,
@@ -186,7 +186,7 @@ func TestFetchUserIdTaskImpl_SuccessReturnsToken(t *testing.T) {
 	})).Return("test token", nil)
 
 	postController := sessioncontroller.CreatePostController(
-		pipeline.CreatePipeline(executor.CreateDebugHttpExecutor()),
+		pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()),
 		tokenHandler,
 		credentialService,
 		validations,

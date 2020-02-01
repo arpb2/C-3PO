@@ -44,7 +44,7 @@ services:
             - .:/app/go
         ports:
             - "5555:8080"
-        command: go run cmd/main.go
+        command: go run cmd/c3po/main.go
 
 volumes:
     grafana_config:

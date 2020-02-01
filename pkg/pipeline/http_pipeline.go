@@ -6,7 +6,7 @@ import (
 	"github.com/saantiaguilera/go-pipeline"
 )
 
-func CreatePipeline(executor pipeline.Executor) api.HttpPipeline {
+func CreateHttpPipeline(executor pipeline.Executor) api.HttpPipeline {
 	pipe := pipeline.CreatePipeline(executor)
 
 	return &httpPipeline{

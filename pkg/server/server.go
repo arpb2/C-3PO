@@ -34,7 +34,7 @@ func CreateBinders() []engine.ControllerBinder {
 	traceDecorator := decorator.TraceRunnableDecorator
 
 	httpExecutor := executor.CreateHttpExecutor(traceDecorator)
-	httpPipeline := pipeline.CreatePipeline(httpExecutor)
+	httpPipeline := pipeline.CreateHttpPipeline(httpExecutor)
 
 	tokenHandler := jwt.CreateTokenHandler()
 

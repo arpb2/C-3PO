@@ -22,7 +22,7 @@ import (
 
 func createDeleteController() controller.Controller {
 	return usercontroller.CreateDeleteController(
-		pipeline.CreatePipeline(executor.CreateDebugHttpExecutor()),
+		pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()),
 		single.CreateMiddleware(
 			jwt.CreateTokenHandler(),
 		),
@@ -74,7 +74,7 @@ func TestUserDeleteControllerBody_500OnServiceDeleteError(t *testing.T) {
 	service := new(service.MockUserService)
 	service.On("DeleteUser", uint(1000)).Return(errors.New("whoops error")).Once()
 
-	body := usercontroller.CreateDeleteBody(pipeline.CreatePipeline(executor.CreateDebugHttpExecutor()), service)
+	body := usercontroller.CreateDeleteBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), service)
 
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("1000").Once()
@@ -97,7 +97,7 @@ func TestUserDeleteControllerBody_200OnUserDeletedOnService(t *testing.T) {
 	service := new(service.MockUserService)
 	service.On("DeleteUser", uint(1000)).Return(nil).Once()
 
-	body := usercontroller.CreateDeleteBody(pipeline.CreatePipeline(executor.CreateDebugHttpExecutor()), service)
+	body := usercontroller.CreateDeleteBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), service)
 
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetParameter", "user_id").Return("1000").Once()

@@ -25,7 +25,7 @@ import (
 
 func createGetController() controller.Controller {
 	return codecontroller.CreateGetController(
-		pipeline.CreatePipeline(executor.CreateDebugHttpExecutor()),
+		pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()),
 		teacher.CreateMiddleware(
 			jwt.CreateTokenHandler(),
 			teacherservice.CreateService(userservice.CreateService()),
@@ -121,7 +121,7 @@ func TestCodeGetControllerBody_500OnServiceReadError(t *testing.T) {
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
-	codecontroller.CreateGetBody(pipeline.CreatePipeline(executor.CreateDebugHttpExecutor()), codeService)(c)
+	codecontroller.CreateGetBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), codeService)(c)
 
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "internal_server_error.error_read.service.golden.json")
@@ -143,7 +143,7 @@ func TestCodeGetControllerBody_400OnNoCodeStoredInService(t *testing.T) {
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
-	codecontroller.CreateGetBody(pipeline.CreatePipeline(executor.CreateDebugHttpExecutor()), codeService)(c)
+	codecontroller.CreateGetBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), codeService)(c)
 
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "not_found.missing_code.read.service.golden.json")
@@ -181,7 +181,7 @@ func main() {
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
-	codecontroller.CreateGetBody(pipeline.CreatePipeline(executor.CreateDebugHttpExecutor()), codeService)(c)
+	codecontroller.CreateGetBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), codeService)(c)
 
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "ok.get_code.golden.json")
@@ -208,7 +208,7 @@ func TestCodeGetControllerBody_200OnEmptyCodeStoredOnService(t *testing.T) {
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
-	codecontroller.CreateGetBody(pipeline.CreatePipeline(executor.CreateDebugHttpExecutor()), codeService)(c)
+	codecontroller.CreateGetBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), codeService)(c)
 
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "ok.get_empty_code.golden.json")

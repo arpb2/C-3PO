@@ -21,6 +21,10 @@ func (g ginReader) ReadBody(obj interface{}) error {
 	return g.ShouldBindJSON(obj)
 }
 
+func (g ginReader) GetMethod() string {
+	return g.Request.Method
+}
+
 func (g ginReader) GetUrl() string {
 	return g.Request.URL.String()
 }
