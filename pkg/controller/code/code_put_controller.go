@@ -22,26 +22,25 @@ func CreatePutController(exec pipeline.HttpPipeline, authMiddleware http.Handler
 }
 
 func CreatePutBody(exec pipeline.HttpPipeline, codeService codeservice.Service) http.Handler {
+	fetchUserIdCommand := usercommand.CreateFetchUserIdCommand()
+	fetchCodeCommand := codecommand.CreateFetchCodeCommand()
+	fetchCodeIdCommand := codecommand.CreateFetchCodeIdCommand()
+	serviceCommand := codecommand.CreateReplaceCodeCommand(codeService)
+	renderCommand := codecommand.CreateRenderCodeCommand()
+
+	graph := gopipeline.CreateSequentialGroup(
+		gopipeline.CreateConcurrentStage(
+			fetchUserIdCommand,
+			fetchCodeCommand,
+			fetchCodeIdCommand,
+		),
+		gopipeline.CreateSequentialStage(
+			serviceCommand,
+			renderCommand,
+		),
+	)
+
 	return func(ctx *http.Context) {
-		fetchUserIdCommand := usercommand.CreateFetchUserIdCommand(ctx)
-		fetchCodeCommand := codecommand.CreateFetchCodeCommand(ctx)
-		fetchCodeIdCommand := codecommand.CreateFetchCodeIdCommand(ctx)
-		serviceCommand := codecommand.CreateReplaceCodeCommand(ctx, codeService,
-			fetchCodeIdCommand.OutputStream, fetchUserIdCommand.OutputStream, fetchCodeCommand.OutputStream)
-		renderCommand := codecommand.CreateRenderCodeCommand(ctx, serviceCommand.OutputStream)
-
-		graph := gopipeline.CreateSequentialGroup(
-			gopipeline.CreateConcurrentStage(
-				fetchUserIdCommand,
-				fetchCodeCommand,
-				fetchCodeIdCommand,
-			),
-			gopipeline.CreateSequentialStage(
-				serviceCommand,
-				renderCommand,
-			),
-		)
-
 		exec.Run(ctx, graph)
 	}
 }

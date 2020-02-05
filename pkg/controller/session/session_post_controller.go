@@ -24,21 +24,21 @@ func CreatePostController(executor pipeline.HttpPipeline,
 }
 
 func CreatePostBody(executor pipeline.HttpPipeline, tokenHandler auth.TokenHandler, service credentialservice.Service, validations []uservalidation.Validation) http.Handler {
+	fetchUserCommand := usercommand.CreateFetchAuthenticatedUserCommand()
+	validateParamsCommand := usercommand.CreateValidateParametersCommand(validations)
+	authenticateCommand := sessioncommand.CreateAuthenticateCommand(service)
+	createSessionCommand := sessioncommand.CreateCreateSessionCommand(tokenHandler)
+	renderCommand := sessioncommand.CreateRenderSessionCommand()
+
+	graph := gopipeline.CreateSequentialStage(
+		fetchUserCommand,
+		validateParamsCommand,
+		authenticateCommand,
+		createSessionCommand,
+		renderCommand,
+	)
+
 	return func(ctx *http.Context) {
-		fetchUserCommand := usercommand.CreateFetchAuthenticatedUserCommand(ctx)
-		validateParamsCommand := usercommand.CreateValidateParametersCommand(ctx, fetchUserCommand.OutputStream, validations)
-		authenticateCommand := sessioncommand.CreateAuthenticateCommand(ctx, service, validateParamsCommand.OutputStream)
-		createSessionCommand := sessioncommand.CreateCreateSessionCommand(ctx, tokenHandler, authenticateCommand.OutputStream)
-		renderCommand := sessioncommand.CreateRenderSessionCommand(ctx, createSessionCommand.OutputStream)
-
-		graph := gopipeline.CreateSequentialStage(
-			fetchUserCommand,
-			validateParamsCommand,
-			authenticateCommand,
-			createSessionCommand,
-			renderCommand,
-		)
-
 		executor.Run(ctx, graph)
 	}
 }

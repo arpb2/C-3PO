@@ -23,17 +23,17 @@ func CreateGetController(executor pipeline.HttpPipeline,
 }
 
 func CreateGetBody(exec pipeline.HttpPipeline, userService userservice.Service) http.Handler {
+	fetchUserIdCommand := usercommand.CreateFetchUserIdCommand()
+	serviceCommand := usercommand.CreateGetUserCommand(userService)
+	renderCommand := usercommand.CreateRenderUserCommand()
+
+	graph := gopipeline.CreateSequentialStage(
+		fetchUserIdCommand,
+		serviceCommand,
+		renderCommand,
+	)
+
 	return func(ctx *http.Context) {
-		fetchUserIdCommand := usercommand.CreateFetchUserIdCommand(ctx)
-		serviceCommand := usercommand.CreateGetUserCommand(ctx, userService, fetchUserIdCommand.OutputStream)
-		renderCommand := usercommand.CreateRenderUserCommand(ctx, serviceCommand.OutputStream)
-
-		graph := gopipeline.CreateSequentialStage(
-			fetchUserIdCommand,
-			serviceCommand,
-			renderCommand,
-		)
-
 		exec.Run(ctx, graph)
 	}
 }

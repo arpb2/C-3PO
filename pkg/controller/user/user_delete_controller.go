@@ -21,17 +21,17 @@ func CreateDeleteController(exec pipeline.HttpPipeline, authMiddleware http.Hand
 }
 
 func CreateDeleteBody(exec pipeline.HttpPipeline, userService userservice.Service) http.Handler {
+	fetchUserIdCommand := usercommand.CreateFetchUserIdCommand()
+	serviceCommand := usercommand.CreateDeleteUserCommand(userService)
+	renderCommand := usercommand.CreateRenderEmptyCommand()
+
+	graph := gopipeline.CreateSequentialStage(
+		fetchUserIdCommand,
+		serviceCommand,
+		renderCommand,
+	)
+
 	return func(ctx *http.Context) {
-		fetchUserIdCommand := usercommand.CreateFetchUserIdCommand(ctx)
-		serviceCommand := usercommand.CreateDeleteUserCommand(ctx, userService, fetchUserIdCommand.OutputStream)
-		renderCommand := usercommand.CreateRenderEmptyCommand(ctx, serviceCommand.OutputStream)
-
-		graph := gopipeline.CreateSequentialStage(
-			fetchUserIdCommand,
-			serviceCommand,
-			renderCommand,
-		)
-
 		exec.Run(ctx, graph)
 	}
 }

@@ -4,28 +4,29 @@ import (
 	"github.com/arpb2/C-3PO/api/http"
 	"github.com/arpb2/C-3PO/api/model"
 	userservice "github.com/arpb2/C-3PO/api/service/user"
+	"github.com/saantiaguilera/go-pipeline"
 )
 
 type updateUserCommand struct {
-	context           *http.Context
-	service           userservice.Service
-	userIdInputStream <-chan uint
-	userInputStream   <-chan *model.AuthenticatedUser
-
-	OutputStream chan *model.User
+	service userservice.Service
 }
 
 func (c *updateUserCommand) Name() string {
 	return "update_user_command"
 }
 
-func (c *updateUserCommand) Run() error {
-	defer close(c.OutputStream)
+func (c *updateUserCommand) Run(ctx pipeline.Context) error {
+	value, existsUser := ctx.Get(TagAuthenticatedUser)
+	userId, existsUserId := ctx.GetUInt(TagUserId)
 
-	authenticatedUser := <-c.userInputStream
-	authenticatedUser.Id = <-c.userIdInputStream
+	if !existsUser || !existsUserId {
+		return http.CreateInternalError()
+	}
 
-	user, err := c.service.UpdateUser(authenticatedUser)
+	authenticatedUser := value.(model.AuthenticatedUser)
+	authenticatedUser.Id = userId
+
+	user, err := c.service.UpdateUser(&authenticatedUser)
 
 	if err != nil {
 		return err
@@ -35,19 +36,12 @@ func (c *updateUserCommand) Run() error {
 		return http.CreateInternalError()
 	}
 
-	c.OutputStream <- user
+	ctx.Set(TagUser, *user)
 	return nil
 }
 
-func CreateUpdateUserCommand(ctx *http.Context,
-	service userservice.Service,
-	userIdInputStream <-chan uint,
-	userInputStream <-chan *model.AuthenticatedUser) *updateUserCommand {
+func CreateUpdateUserCommand(service userservice.Service) pipeline.Step {
 	return &updateUserCommand{
-		context:           ctx,
-		service:           service,
-		userIdInputStream: userIdInputStream,
-		userInputStream:   userInputStream,
-		OutputStream:      make(chan *model.User, 1),
+		service: service,
 	}
 }

@@ -3,27 +3,30 @@ package user
 import (
 	"net/http"
 
+	"github.com/arpb2/C-3PO/pkg/command"
+	"github.com/saantiaguilera/go-pipeline"
+
 	httpwrapper "github.com/arpb2/C-3PO/api/http"
-	"github.com/arpb2/C-3PO/api/model"
 )
 
-type renderUserCommand struct {
-	writer      httpwrapper.Writer
-	inputStream <-chan *model.User
-}
+type renderUserCommand struct{}
 
 func (c *renderUserCommand) Name() string {
 	return "render_user_command"
 }
 
-func (c *renderUserCommand) Run() error {
-	c.writer.WriteJson(http.StatusOK, *<-c.inputStream)
+func (c *renderUserCommand) Run(ctx pipeline.Context) error {
+	httpWriter, existsWriter := ctx.Get(command.TagHttpWriter)
+	user, existsUser := ctx.Get(TagUser)
+
+	if !existsWriter || !existsUser {
+		return httpwrapper.CreateInternalError()
+	}
+
+	httpWriter.(httpwrapper.Writer).WriteJson(http.StatusOK, user)
 	return nil
 }
 
-func CreateRenderUserCommand(writer httpwrapper.Writer, inputStream <-chan *model.User) *renderUserCommand {
-	return &renderUserCommand{
-		writer:      writer,
-		inputStream: inputStream,
-	}
+func CreateRenderUserCommand() pipeline.Step {
+	return &renderUserCommand{}
 }

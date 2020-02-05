@@ -2,26 +2,26 @@ package user
 
 import (
 	"github.com/arpb2/C-3PO/api/http"
-	"github.com/arpb2/C-3PO/api/model"
 	userservice "github.com/arpb2/C-3PO/api/service/user"
+	"github.com/saantiaguilera/go-pipeline"
 )
 
 type getUserCommand struct {
-	context     *http.Context
-	service     userservice.Service
-	inputStream <-chan uint
-
-	OutputStream chan *model.User
+	service userservice.Service
 }
 
 func (c *getUserCommand) Name() string {
 	return "get_user_command"
 }
 
-func (c *getUserCommand) Run() error {
-	defer close(c.OutputStream)
+func (c *getUserCommand) Run(ctx pipeline.Context) error {
+	userId, existsUserId := ctx.GetUInt(TagUserId)
 
-	user, err := c.service.GetUser(<-c.inputStream)
+	if !existsUserId {
+		return http.CreateInternalError()
+	}
+
+	user, err := c.service.GetUser(userId)
 
 	if err != nil {
 		return err
@@ -31,17 +31,12 @@ func (c *getUserCommand) Run() error {
 		return http.CreateNotFoundError()
 	}
 
-	c.OutputStream <- user
+	ctx.Set(TagUser, *user)
 	return nil
 }
 
-func CreateGetUserCommand(ctx *http.Context,
-	service userservice.Service,
-	inputStream <-chan uint) *getUserCommand {
+func CreateGetUserCommand(service userservice.Service) pipeline.Step {
 	return &getUserCommand{
-		context:      ctx,
-		service:      service,
-		inputStream:  inputStream,
-		OutputStream: make(chan *model.User, 1),
+		service: service,
 	}
 }

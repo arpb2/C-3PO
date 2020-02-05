@@ -22,29 +22,29 @@ func CreatePutController(exec pipeline.HttpPipeline, validations []uservalidatio
 }
 
 func CreatePutBody(exec pipeline.HttpPipeline, validations []uservalidation.Validation, userService userservice.Service) http.Handler {
-	return func(ctx *http.Context) {
-		fetchUserIdCommand := usercommand.CreateFetchUserIdCommand(ctx)
-		fetchUserCommand := usercommand.CreateFetchAuthenticatedUserCommand(ctx)
-		validateCommand := usercommand.CreateValidateParametersCommand(ctx, fetchUserCommand.OutputStream, validations)
-		serviceCommand := usercommand.CreateUpdateUserCommand(ctx, userService, fetchUserIdCommand.OutputStream, validateCommand.OutputStream)
-		renderCommand := usercommand.CreateRenderUserCommand(ctx, serviceCommand.OutputStream)
+	fetchUserIdCommand := usercommand.CreateFetchUserIdCommand()
+	fetchUserCommand := usercommand.CreateFetchAuthenticatedUserCommand()
+	validateCommand := usercommand.CreateValidateParametersCommand(validations)
+	serviceCommand := usercommand.CreateUpdateUserCommand(userService)
+	renderCommand := usercommand.CreateRenderUserCommand()
 
-		graph := gopipeline.CreateSequentialGroup(
-			gopipeline.CreateConcurrentGroup(
-				gopipeline.CreateSequentialStage(
-					fetchUserIdCommand,
-				),
-				gopipeline.CreateSequentialStage(
-					fetchUserCommand,
-					validateCommand,
-				),
+	graph := gopipeline.CreateSequentialGroup(
+		gopipeline.CreateConcurrentGroup(
+			gopipeline.CreateSequentialStage(
+				fetchUserIdCommand,
 			),
 			gopipeline.CreateSequentialStage(
-				serviceCommand,
-				renderCommand,
+				fetchUserCommand,
+				validateCommand,
 			),
-		)
+		),
+		gopipeline.CreateSequentialStage(
+			serviceCommand,
+			renderCommand,
+		),
+	)
 
+	return func(ctx *http.Context) {
 		exec.Run(ctx, graph)
 	}
 }

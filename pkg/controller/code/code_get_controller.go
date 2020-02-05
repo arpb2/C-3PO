@@ -22,23 +22,23 @@ func CreateGetController(exec pipeline.HttpPipeline, authMiddleware http.Handler
 }
 
 func CreateGetBody(exec pipeline.HttpPipeline, codeService codeservice.Service) http.Handler {
+	fetchUserIdCommand := usercommand.CreateFetchUserIdCommand()
+	fetchCodeIdCommand := codecommand.CreateFetchCodeIdCommand()
+	serviceCommand := codecommand.CreateGetCodeCommand(codeService)
+	renderCommand := codecommand.CreateRenderCodeCommand()
+
+	graph := gopipeline.CreateSequentialGroup(
+		gopipeline.CreateConcurrentStage(
+			fetchUserIdCommand,
+			fetchCodeIdCommand,
+		),
+		gopipeline.CreateSequentialStage(
+			serviceCommand,
+			renderCommand,
+		),
+	)
+
 	return func(ctx *http.Context) {
-		fetchUserIdCommand := usercommand.CreateFetchUserIdCommand(ctx)
-		fetchCodeIdCommand := codecommand.CreateFetchCodeIdCommand(ctx)
-		serviceCommand := codecommand.CreateGetCodeCommand(ctx, codeService, fetchUserIdCommand.OutputStream, fetchCodeIdCommand.OutputStream)
-		renderCommand := codecommand.CreateRenderCodeCommand(ctx, serviceCommand.OutputStream)
-
-		graph := gopipeline.CreateSequentialGroup(
-			gopipeline.CreateConcurrentStage(
-				fetchUserIdCommand,
-				fetchCodeIdCommand,
-			),
-			gopipeline.CreateSequentialStage(
-				serviceCommand,
-				renderCommand,
-			),
-		)
-
 		exec.Run(ctx, graph)
 	}
 }

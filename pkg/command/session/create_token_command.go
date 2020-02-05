@@ -4,24 +4,25 @@ import (
 	"github.com/arpb2/C-3PO/api/auth"
 	"github.com/arpb2/C-3PO/api/http"
 	"github.com/arpb2/C-3PO/api/model"
+	"github.com/arpb2/C-3PO/pkg/command/user"
+	"github.com/saantiaguilera/go-pipeline"
 )
 
 type createSessionCommand struct {
-	context      *http.Context
 	tokenHandler auth.TokenHandler
-	inputStream  <-chan *model.AuthenticatedUser
-
-	OutputStream chan *model.Session
 }
 
 func (c *createSessionCommand) Name() string {
 	return "create_token_command"
 }
 
-func (c *createSessionCommand) Run() error {
-	defer close(c.OutputStream)
+func (c *createSessionCommand) Run(ctx pipeline.Context) error {
+	userId, exists := ctx.GetUInt(user.TagUserId)
 
-	userId := (<-c.inputStream).Id
+	if !exists {
+		return http.CreateInternalError()
+	}
+
 	token, err := c.tokenHandler.Create(&auth.Token{
 		UserId: userId,
 	})
@@ -30,20 +31,15 @@ func (c *createSessionCommand) Run() error {
 		return err
 	}
 
-	c.OutputStream <- &model.Session{
+	ctx.Set(TagSession, model.Session{
 		UserId: userId,
 		Token:  token,
-	}
+	})
 	return nil
 }
 
-func CreateCreateSessionCommand(ctx *http.Context,
-	tokenHandler auth.TokenHandler,
-	inputStream <-chan *model.AuthenticatedUser) *createSessionCommand {
+func CreateCreateSessionCommand(tokenHandler auth.TokenHandler) pipeline.Step {
 	return &createSessionCommand{
-		context:      ctx,
 		tokenHandler: tokenHandler,
-		inputStream:  inputStream,
-		OutputStream: make(chan *model.Session, 1),
 	}
 }

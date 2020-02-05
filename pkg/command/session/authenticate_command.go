@@ -4,43 +4,39 @@ import (
 	"github.com/arpb2/C-3PO/api/http"
 	"github.com/arpb2/C-3PO/api/model"
 	credentialservice "github.com/arpb2/C-3PO/api/service/credential"
+	"github.com/arpb2/C-3PO/pkg/command/user"
+	"github.com/saantiaguilera/go-pipeline"
 )
 
 type authenticateCommand struct {
-	context     *http.Context
-	service     credentialservice.Service
-	inputStream chan *model.AuthenticatedUser
-
-	OutputStream chan *model.AuthenticatedUser
+	service credentialservice.Service
 }
 
 func (c *authenticateCommand) Name() string {
 	return "authenticate_command"
 }
 
-func (c *authenticateCommand) Run() error {
-	defer close(c.OutputStream)
+func (c *authenticateCommand) Run(ctx pipeline.Context) error {
+	value, exists := ctx.Get(user.TagAuthenticatedUser)
 
-	user := <-c.inputStream
+	if !exists {
+		return http.CreateInternalError()
+	}
 
-	userId, err := c.service.Retrieve(user.Email, user.Password)
+	authenticatedUser := value.(model.AuthenticatedUser)
+
+	userId, err := c.service.Retrieve(authenticatedUser.Email, authenticatedUser.Password)
 
 	if err != nil {
 		return err
 	}
 
-	user.Id = userId
-	c.OutputStream <- user
+	ctx.Set(user.TagUserId, userId)
 	return nil
 }
 
-func CreateAuthenticateCommand(ctx *http.Context,
-	service credentialservice.Service,
-	inputStream chan *model.AuthenticatedUser) *authenticateCommand {
+func CreateAuthenticateCommand(service credentialservice.Service) pipeline.Step {
 	return &authenticateCommand{
-		context:      ctx,
-		service:      service,
-		inputStream:  inputStream,
-		OutputStream: make(chan *model.AuthenticatedUser, 1),
+		service: service,
 	}
 }

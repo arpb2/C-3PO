@@ -2,27 +2,28 @@ package code
 
 import (
 	"github.com/arpb2/C-3PO/api/http"
-	"github.com/arpb2/C-3PO/api/model"
 	codeservice "github.com/arpb2/C-3PO/api/service/code"
+	usercommand "github.com/arpb2/C-3PO/pkg/command/user"
+	"github.com/saantiaguilera/go-pipeline"
 )
 
 type getCodeCommand struct {
-	context           *http.Context
-	service           codeservice.Service
-	userIdInputStream <-chan uint
-	codeIdInputStream <-chan uint
-
-	OutputStream chan *model.Code
+	service codeservice.Service
 }
 
 func (c *getCodeCommand) Name() string {
 	return "get_code_command"
 }
 
-func (c *getCodeCommand) Run() error {
-	defer close(c.OutputStream)
+func (c *getCodeCommand) Run(ctx pipeline.Context) error {
+	codeId, existsCodeId := ctx.GetUInt(TagCodeId)
+	userId, existsUserId := ctx.GetUInt(usercommand.TagUserId)
 
-	code, err := c.service.GetCode(<-c.userIdInputStream, <-c.codeIdInputStream)
+	if !existsCodeId || !existsUserId {
+		return http.CreateInternalError()
+	}
+
+	code, err := c.service.GetCode(userId, codeId)
 
 	if err != nil {
 		return err
@@ -32,19 +33,12 @@ func (c *getCodeCommand) Run() error {
 		return http.CreateNotFoundError()
 	}
 
-	c.OutputStream <- code
+	ctx.Set(TagCode, *code)
 	return nil
 }
 
-func CreateGetCodeCommand(ctx *http.Context,
-	service codeservice.Service,
-	userIdInputStream <-chan uint,
-	codeIdInputStream <-chan uint) *getCodeCommand {
+func CreateGetCodeCommand(service codeservice.Service) pipeline.Step {
 	return &getCodeCommand{
-		context:           ctx,
-		service:           service,
-		userIdInputStream: userIdInputStream,
-		codeIdInputStream: codeIdInputStream,
-		OutputStream:      make(chan *model.Code, 1),
+		service: service,
 	}
 }

@@ -3,33 +3,33 @@ package user
 import (
 	"github.com/arpb2/C-3PO/api/http"
 	"github.com/arpb2/C-3PO/api/model"
+	"github.com/arpb2/C-3PO/pkg/command"
+	"github.com/saantiaguilera/go-pipeline"
 )
 
-type fetchAuthenticatedUserCommand struct {
-	context *http.Context
-
-	OutputStream chan *model.AuthenticatedUser
-}
+type fetchAuthenticatedUserCommand struct{}
 
 func (c *fetchAuthenticatedUserCommand) Name() string {
 	return "fetch_user_command"
 }
 
-func (c *fetchAuthenticatedUserCommand) Run() error {
-	defer close(c.OutputStream)
+func (c *fetchAuthenticatedUserCommand) Run(ctx pipeline.Context) error {
+	httpReader, exists := ctx.Get(command.TagHttpReader)
+
+	if !exists {
+		return http.CreateInternalError()
+	}
+
 	var authenticatedUser model.AuthenticatedUser
 
-	if err := c.context.ReadBody(&authenticatedUser); err != nil {
+	if err := httpReader.(http.Reader).ReadBody(&authenticatedUser); err != nil {
 		return http.CreateBadRequestError("malformed body")
 	}
 
-	c.OutputStream <- &authenticatedUser
+	ctx.Set(TagAuthenticatedUser, authenticatedUser)
 	return nil
 }
 
-func CreateFetchAuthenticatedUserCommand(ctx *http.Context) *fetchAuthenticatedUserCommand {
-	return &fetchAuthenticatedUserCommand{
-		context:      ctx,
-		OutputStream: make(chan *model.AuthenticatedUser, 1),
-	}
+func CreateFetchAuthenticatedUserCommand() pipeline.Step {
+	return &fetchAuthenticatedUserCommand{}
 }

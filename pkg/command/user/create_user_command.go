@@ -4,24 +4,27 @@ import (
 	"github.com/arpb2/C-3PO/api/http"
 	"github.com/arpb2/C-3PO/api/model"
 	userservice "github.com/arpb2/C-3PO/api/service/user"
+	"github.com/saantiaguilera/go-pipeline"
 )
 
 type createUserCommand struct {
-	context     *http.Context
-	service     userservice.Service
-	inputStream <-chan *model.AuthenticatedUser
-
-	OutputStream chan *model.User
+	service userservice.Service
 }
 
 func (c *createUserCommand) Name() string {
 	return "create_user_command"
 }
 
-func (c *createUserCommand) Run() error {
-	defer close(c.OutputStream)
+func (c *createUserCommand) Run(ctx pipeline.Context) error {
+	value, exists := ctx.Get(TagAuthenticatedUser)
 
-	user, err := c.service.CreateUser(<-c.inputStream)
+	if !exists {
+		return http.CreateInternalError()
+	}
+
+	authenticatedUser := value.(model.AuthenticatedUser)
+
+	user, err := c.service.CreateUser(&authenticatedUser)
 
 	if err != nil {
 		return err
@@ -31,17 +34,12 @@ func (c *createUserCommand) Run() error {
 		return http.CreateInternalError()
 	}
 
-	c.OutputStream <- user
+	ctx.Set(TagUser, *user)
 	return nil
 }
 
-func CreateCreateUserCommand(ctx *http.Context,
-	service userservice.Service,
-	inputStream <-chan *model.AuthenticatedUser) *createUserCommand {
+func CreateCreateUserCommand(service userservice.Service) pipeline.Step {
 	return &createUserCommand{
-		context:      ctx,
-		service:      service,
-		inputStream:  inputStream,
-		OutputStream: make(chan *model.User, 1),
+		service: service,
 	}
 }

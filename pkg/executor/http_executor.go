@@ -21,14 +21,14 @@ type httpExecutor struct {
 	Decorators []decorator.RunnableDecorator
 }
 
-func (e *httpExecutor) Run(runnable gopipeline.Runnable) error {
+func (e *httpExecutor) Run(runnable gopipeline.Runnable, ctx gopipeline.Context) error {
 	for _, decorator := range e.Decorators {
 		runnable = decorator(runnable)
 	}
 
 	var err error
 	_ = hystrix.Do(runnable.Name(), func() error {
-		err = runnable.Run()
+		err = runnable.Run(ctx)
 
 		var httpError httpwrapper.Error
 		if xerrors.As(err, &httpError) && httpError.Code < http.StatusInternalServerError {
@@ -46,6 +46,6 @@ func CreateDebugHttpExecutor() gopipeline.Executor {
 
 type httpDebugExecutor struct{}
 
-func (e *httpDebugExecutor) Run(runnable gopipeline.Runnable) error {
-	return runnable.Run()
+func (e *httpDebugExecutor) Run(runnable gopipeline.Runnable, ctx gopipeline.Context) error {
+	return runnable.Run(ctx)
 }

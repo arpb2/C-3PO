@@ -4,31 +4,32 @@ import (
 	"github.com/arpb2/C-3PO/api/http"
 	"github.com/arpb2/C-3PO/api/model"
 	uservalidation "github.com/arpb2/C-3PO/pkg/validation/user"
+	"github.com/saantiaguilera/go-pipeline"
 )
 
 type validateParametersCommand struct {
-	context     *http.Context
-	inputStream chan *model.AuthenticatedUser
 	validations []uservalidation.Validation
-
-	OutputStream chan *model.AuthenticatedUser
 }
 
 func (c *validateParametersCommand) Name() string {
 	return "validate_user_parameters_command"
 }
 
-func (c *validateParametersCommand) Run() error {
-	defer close(c.OutputStream)
-	user := <-c.inputStream
+func (c *validateParametersCommand) Run(ctx pipeline.Context) error {
+	value, exists := ctx.Get(TagAuthenticatedUser)
+
+	if !exists {
+		return http.CreateInternalError()
+	}
+
+	authenticatedUser := value.(model.AuthenticatedUser)
 
 	for _, requirement := range c.validations {
-		if err := requirement(user); err != nil {
+		if err := requirement(&authenticatedUser); err != nil {
 			return http.CreateBadRequestError(err.Error())
 		}
 	}
 
-	c.OutputStream <- user
 	return nil
 }
 
@@ -36,13 +37,8 @@ func (c *validateParametersCommand) Fallback(err error) error {
 	return err
 }
 
-func CreateValidateParametersCommand(ctx *http.Context,
-	userInput chan *model.AuthenticatedUser,
-	validations []uservalidation.Validation) *validateParametersCommand {
+func CreateValidateParametersCommand(validations []uservalidation.Validation) pipeline.Step {
 	return &validateParametersCommand{
-		context:      ctx,
-		inputStream:  userInput,
-		OutputStream: make(chan *model.AuthenticatedUser, 1),
-		validations:  validations,
+		validations: validations,
 	}
 }

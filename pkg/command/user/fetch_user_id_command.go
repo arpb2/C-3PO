@@ -3,21 +3,26 @@ package user
 import (
 	"strconv"
 
+	"github.com/arpb2/C-3PO/pkg/command"
+	"github.com/saantiaguilera/go-pipeline"
+
 	"github.com/arpb2/C-3PO/api/http"
 )
 
-type fetchUserIdCommand struct {
-	context      *http.Context
-	OutputStream chan uint
-}
+type fetchUserIdCommand struct{}
 
 func (c *fetchUserIdCommand) Name() string {
 	return "fetch_user_id_command"
 }
 
-func (c *fetchUserIdCommand) Run() error {
-	defer close(c.OutputStream)
-	userId := c.context.GetParameter("user_id")
+func (c *fetchUserIdCommand) Run(ctx pipeline.Context) error {
+	httpReader, exists := ctx.Get(command.TagHttpReader)
+
+	if !exists {
+		return http.CreateInternalError()
+	}
+
+	userId := httpReader.(http.Reader).GetParameter("user_id")
 
 	if userId == "" {
 		return http.CreateBadRequestError("'user_id' empty")
@@ -29,13 +34,10 @@ func (c *fetchUserIdCommand) Run() error {
 		return http.CreateBadRequestError("'user_id' malformed, expecting a positive number")
 	}
 
-	c.OutputStream <- uint(userIdUint)
+	ctx.Set(TagUserId, uint(userIdUint))
 	return nil
 }
 
-func CreateFetchUserIdCommand(ctx *http.Context) *fetchUserIdCommand {
-	return &fetchUserIdCommand{
-		context:      ctx,
-		OutputStream: make(chan uint, 1),
-	}
+func CreateFetchUserIdCommand() pipeline.Step {
+	return &fetchUserIdCommand{}
 }

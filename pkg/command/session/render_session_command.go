@@ -3,28 +3,30 @@ package session
 import (
 	"net/http"
 
-	"github.com/arpb2/C-3PO/api/model"
+	"github.com/arpb2/C-3PO/pkg/command"
+	"github.com/saantiaguilera/go-pipeline"
 
 	httpwrapper "github.com/arpb2/C-3PO/api/http"
 )
 
-type renderSessionCommand struct {
-	writer      httpwrapper.Writer
-	inputStream <-chan *model.Session
-}
+type renderSessionCommand struct{}
 
 func (c *renderSessionCommand) Name() string {
 	return "render_session_command"
 }
 
-func (c *renderSessionCommand) Run() error {
-	c.writer.WriteJson(http.StatusOK, *<-c.inputStream)
+func (c *renderSessionCommand) Run(ctx pipeline.Context) error {
+	httpWriter, existsWriter := ctx.Get(command.TagHttpWriter)
+	session, existsSession := ctx.Get(TagSession)
+
+	if !existsWriter || !existsSession {
+		return httpwrapper.CreateInternalError()
+	}
+
+	httpWriter.(httpwrapper.Writer).WriteJson(http.StatusOK, session)
 	return nil
 }
 
-func CreateRenderSessionCommand(writer httpwrapper.Writer, inputStream chan *model.Session) *renderSessionCommand {
-	return &renderSessionCommand{
-		writer:      writer,
-		inputStream: inputStream,
-	}
+func CreateRenderSessionCommand() pipeline.Step {
+	return &renderSessionCommand{}
 }

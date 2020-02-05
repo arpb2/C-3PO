@@ -3,40 +3,29 @@ package user
 import (
 	"github.com/arpb2/C-3PO/api/http"
 	userservice "github.com/arpb2/C-3PO/api/service/user"
+	"github.com/saantiaguilera/go-pipeline"
 )
 
 type deleteUserCommand struct {
-	context     *http.Context
-	service     userservice.Service
-	inputStream <-chan uint
-
-	OutputStream chan bool
+	service userservice.Service
 }
 
 func (c *deleteUserCommand) Name() string {
 	return "delete_user_command"
 }
 
-func (c *deleteUserCommand) Run() error {
-	defer close(c.OutputStream)
+func (c *deleteUserCommand) Run(ctx pipeline.Context) error {
+	userId, exists := ctx.GetUInt(TagUserId)
 
-	err := c.service.DeleteUser(<-c.inputStream)
-
-	if err != nil {
-		return err
+	if !exists {
+		return http.CreateInternalError()
 	}
 
-	c.OutputStream <- true
-	return nil
+	return c.service.DeleteUser(userId)
 }
 
-func CreateDeleteUserCommand(ctx *http.Context,
-	service userservice.Service,
-	inputStream <-chan uint) *deleteUserCommand {
+func CreateDeleteUserCommand(service userservice.Service) pipeline.Step {
 	return &deleteUserCommand{
-		context:      ctx,
-		service:      service,
-		inputStream:  inputStream,
-		OutputStream: make(chan bool, 1),
+		service: service,
 	}
 }
