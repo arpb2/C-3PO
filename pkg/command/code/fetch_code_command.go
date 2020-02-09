@@ -2,7 +2,7 @@ package code
 
 import (
 	"github.com/arpb2/C-3PO/api/http"
-	"github.com/arpb2/C-3PO/pkg/command"
+	httppipeline "github.com/arpb2/C-3PO/pkg/pipeline"
 	"github.com/saantiaguilera/go-pipeline"
 )
 
@@ -13,13 +13,15 @@ func (c *fetchCodeCommand) Name() string {
 }
 
 func (c *fetchCodeCommand) Run(ctx pipeline.Context) error {
-	httpReader, exists := ctx.Get(command.TagHttpReader)
+	ctxAware := httppipeline.CreateContextAware(ctx)
 
-	if !exists {
-		return http.CreateInternalError()
+	httpReader, err := ctxAware.GetReader()
+
+	if err != nil {
+		return err
 	}
 
-	code, exists := httpReader.(http.Reader).GetFormData("code")
+	code, exists := httpReader.GetFormData("code")
 
 	if !exists {
 		return http.CreateBadRequestError("'code' part not found")

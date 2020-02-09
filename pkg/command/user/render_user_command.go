@@ -3,7 +3,8 @@ package user
 import (
 	"net/http"
 
-	"github.com/arpb2/C-3PO/pkg/command"
+	httppipeline "github.com/arpb2/C-3PO/pkg/pipeline"
+
 	"github.com/saantiaguilera/go-pipeline"
 
 	httpwrapper "github.com/arpb2/C-3PO/api/http"
@@ -16,14 +17,16 @@ func (c *renderUserCommand) Name() string {
 }
 
 func (c *renderUserCommand) Run(ctx pipeline.Context) error {
-	httpWriter, existsWriter := ctx.Get(command.TagHttpWriter)
-	user, existsUser := ctx.Get(TagUser)
+	ctxAware := httppipeline.CreateContextAware(ctx)
 
-	if !existsWriter || !existsUser {
+	httpWriter, errWriter := ctxAware.GetWriter()
+	user, errUser := ctxAware.GetUser(TagUser)
+
+	if errWriter != nil || errUser != nil {
 		return httpwrapper.CreateInternalError()
 	}
 
-	httpWriter.(httpwrapper.Writer).WriteJson(http.StatusOK, user)
+	httpWriter.WriteJson(http.StatusOK, user)
 	return nil
 }
 

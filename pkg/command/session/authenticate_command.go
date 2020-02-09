@@ -1,10 +1,9 @@
 package session
 
 import (
-	"github.com/arpb2/C-3PO/api/http"
-	"github.com/arpb2/C-3PO/api/model"
 	credentialservice "github.com/arpb2/C-3PO/api/service/credential"
 	"github.com/arpb2/C-3PO/pkg/command/user"
+	httppipeline "github.com/arpb2/C-3PO/pkg/pipeline"
 	"github.com/saantiaguilera/go-pipeline"
 )
 
@@ -17,13 +16,13 @@ func (c *authenticateCommand) Name() string {
 }
 
 func (c *authenticateCommand) Run(ctx pipeline.Context) error {
-	value, exists := ctx.Get(user.TagAuthenticatedUser)
+	ctxAware := httppipeline.CreateContextAware(ctx)
 
-	if !exists {
-		return http.CreateInternalError()
+	authenticatedUser, err := ctxAware.GetAuthenticatedUser(user.TagAuthenticatedUser)
+
+	if err != nil {
+		return err
 	}
-
-	authenticatedUser := value.(model.AuthenticatedUser)
 
 	userId, err := c.service.Retrieve(authenticatedUser.Email, authenticatedUser.Password)
 

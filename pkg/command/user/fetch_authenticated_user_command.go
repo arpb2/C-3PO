@@ -3,7 +3,7 @@ package user
 import (
 	"github.com/arpb2/C-3PO/api/http"
 	"github.com/arpb2/C-3PO/api/model"
-	"github.com/arpb2/C-3PO/pkg/command"
+	httppipeline "github.com/arpb2/C-3PO/pkg/pipeline"
 	"github.com/saantiaguilera/go-pipeline"
 )
 
@@ -14,15 +14,16 @@ func (c *fetchAuthenticatedUserCommand) Name() string {
 }
 
 func (c *fetchAuthenticatedUserCommand) Run(ctx pipeline.Context) error {
-	httpReader, exists := ctx.Get(command.TagHttpReader)
+	ctxAware := httppipeline.CreateContextAware(ctx)
 
-	if !exists {
-		return http.CreateInternalError()
+	httpReader, err := ctxAware.GetReader()
+
+	if err != nil {
+		return err
 	}
 
 	var authenticatedUser model.AuthenticatedUser
-
-	if err := httpReader.(http.Reader).ReadBody(&authenticatedUser); err != nil {
+	if err := httpReader.ReadBody(&authenticatedUser); err != nil {
 		return http.CreateBadRequestError("malformed body")
 	}
 

@@ -3,7 +3,8 @@ package code
 import (
 	"net/http"
 
-	"github.com/arpb2/C-3PO/pkg/command"
+	httppipeline "github.com/arpb2/C-3PO/pkg/pipeline"
+
 	"github.com/saantiaguilera/go-pipeline"
 
 	httpwrapper "github.com/arpb2/C-3PO/api/http"
@@ -16,14 +17,16 @@ func (c *renderCodeCommand) Name() string {
 }
 
 func (c *renderCodeCommand) Run(ctx pipeline.Context) error {
-	httpWriter, existsWriter := ctx.Get(command.TagHttpWriter)
-	code, existsCode := ctx.Get(TagCode)
+	ctxAware := httppipeline.CreateContextAware(ctx)
 
-	if !existsWriter || !existsCode {
+	httpWriter, errWriter := ctxAware.GetWriter()
+	code, errCode := ctxAware.GetCode(TagCode)
+
+	if errWriter != nil || errCode != nil {
 		return httpwrapper.CreateInternalError()
 	}
 
-	httpWriter.(httpwrapper.Writer).WriteJson(http.StatusOK, code)
+	httpWriter.WriteJson(http.StatusOK, code)
 	return nil
 }
 

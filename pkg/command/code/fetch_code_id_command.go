@@ -3,7 +3,8 @@ package code
 import (
 	"strconv"
 
-	"github.com/arpb2/C-3PO/pkg/command"
+	httppipeline "github.com/arpb2/C-3PO/pkg/pipeline"
+
 	"github.com/saantiaguilera/go-pipeline"
 
 	"github.com/arpb2/C-3PO/api/http"
@@ -18,13 +19,15 @@ func (c *fetchCodeIdCommand) Name() string {
 }
 
 func (c *fetchCodeIdCommand) Run(ctx pipeline.Context) error {
-	httpReader, exists := ctx.Get(command.TagHttpReader)
+	ctxAware := httppipeline.CreateContextAware(ctx)
 
-	if !exists {
-		return http.CreateInternalError()
+	httpReader, err := ctxAware.GetReader()
+
+	if err != nil {
+		return err
 	}
 
-	codeId := httpReader.(http.Reader).GetParameter("code_id")
+	codeId := httpReader.GetParameter("code_id")
 
 	if codeId == "" {
 		return http.CreateBadRequestError("'code_id' empty")

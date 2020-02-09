@@ -3,7 +3,8 @@ package session
 import (
 	"net/http"
 
-	"github.com/arpb2/C-3PO/pkg/command"
+	httppipeline "github.com/arpb2/C-3PO/pkg/pipeline"
+
 	"github.com/saantiaguilera/go-pipeline"
 
 	httpwrapper "github.com/arpb2/C-3PO/api/http"
@@ -16,14 +17,16 @@ func (c *renderSessionCommand) Name() string {
 }
 
 func (c *renderSessionCommand) Run(ctx pipeline.Context) error {
-	httpWriter, existsWriter := ctx.Get(command.TagHttpWriter)
-	session, existsSession := ctx.Get(TagSession)
+	ctxAware := httppipeline.CreateContextAware(ctx)
 
-	if !existsWriter || !existsSession {
+	httpWriter, errWriter := ctxAware.GetWriter()
+	session, errSession := ctxAware.GetSession(TagSession)
+
+	if errWriter != nil || errSession != nil {
 		return httpwrapper.CreateInternalError()
 	}
 
-	httpWriter.(httpwrapper.Writer).WriteJson(http.StatusOK, session)
+	httpWriter.WriteJson(http.StatusOK, session)
 	return nil
 }
 

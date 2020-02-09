@@ -2,7 +2,7 @@ package user
 
 import (
 	"github.com/arpb2/C-3PO/api/http"
-	"github.com/arpb2/C-3PO/api/model"
+	httppipeline "github.com/arpb2/C-3PO/pkg/pipeline"
 	uservalidation "github.com/arpb2/C-3PO/pkg/validation/user"
 	"github.com/saantiaguilera/go-pipeline"
 )
@@ -16,13 +16,13 @@ func (c *validateParametersCommand) Name() string {
 }
 
 func (c *validateParametersCommand) Run(ctx pipeline.Context) error {
-	value, exists := ctx.Get(TagAuthenticatedUser)
+	ctxAware := httppipeline.CreateContextAware(ctx)
 
-	if !exists {
-		return http.CreateInternalError()
+	authenticatedUser, err := ctxAware.GetAuthenticatedUser(TagAuthenticatedUser)
+
+	if err != nil {
+		return err
 	}
-
-	authenticatedUser := value.(model.AuthenticatedUser)
 
 	for _, requirement := range c.validations {
 		if err := requirement(&authenticatedUser); err != nil {

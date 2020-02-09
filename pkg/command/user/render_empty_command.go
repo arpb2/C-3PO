@@ -3,10 +3,9 @@ package user
 import (
 	"net/http"
 
-	"github.com/arpb2/C-3PO/pkg/command"
-	"github.com/saantiaguilera/go-pipeline"
+	httppipeline "github.com/arpb2/C-3PO/pkg/pipeline"
 
-	httpwrapper "github.com/arpb2/C-3PO/api/http"
+	"github.com/saantiaguilera/go-pipeline"
 )
 
 type renderEmptyCommand struct{}
@@ -16,13 +15,15 @@ func (c *renderEmptyCommand) Name() string {
 }
 
 func (c *renderEmptyCommand) Run(ctx pipeline.Context) error {
-	httpWriter, existsWriter := ctx.Get(command.TagHttpWriter)
+	ctxAware := httppipeline.CreateContextAware(ctx)
 
-	if !existsWriter {
-		return httpwrapper.CreateInternalError()
+	httpWriter, err := ctxAware.GetWriter()
+
+	if err != nil {
+		return err
 	}
 
-	httpWriter.(httpwrapper.Writer).WriteStatus(http.StatusOK)
+	httpWriter.WriteStatus(http.StatusOK)
 	return nil
 }
 

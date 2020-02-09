@@ -3,7 +3,8 @@ package user
 import (
 	"strconv"
 
-	"github.com/arpb2/C-3PO/pkg/command"
+	httppipeline "github.com/arpb2/C-3PO/pkg/pipeline"
+
 	"github.com/saantiaguilera/go-pipeline"
 
 	"github.com/arpb2/C-3PO/api/http"
@@ -16,13 +17,15 @@ func (c *fetchUserIdCommand) Name() string {
 }
 
 func (c *fetchUserIdCommand) Run(ctx pipeline.Context) error {
-	httpReader, exists := ctx.Get(command.TagHttpReader)
+	ctxAware := httppipeline.CreateContextAware(ctx)
 
-	if !exists {
-		return http.CreateInternalError()
+	httpReader, err := ctxAware.GetReader()
+
+	if err != nil {
+		return err
 	}
 
-	userId := httpReader.(http.Reader).GetParameter("user_id")
+	userId := httpReader.GetParameter("user_id")
 
 	if userId == "" {
 		return http.CreateBadRequestError("'user_id' empty")

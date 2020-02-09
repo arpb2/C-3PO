@@ -2,8 +2,8 @@ package user
 
 import (
 	"github.com/arpb2/C-3PO/api/http"
-	"github.com/arpb2/C-3PO/api/model"
 	userservice "github.com/arpb2/C-3PO/api/service/user"
+	httppipeline "github.com/arpb2/C-3PO/pkg/pipeline"
 	"github.com/saantiaguilera/go-pipeline"
 )
 
@@ -16,14 +16,15 @@ func (c *updateUserCommand) Name() string {
 }
 
 func (c *updateUserCommand) Run(ctx pipeline.Context) error {
-	value, existsUser := ctx.Get(TagAuthenticatedUser)
+	ctxAware := httppipeline.CreateContextAware(ctx)
+
+	authenticatedUser, errAuthenticatedUser := ctxAware.GetAuthenticatedUser(TagAuthenticatedUser)
 	userId, existsUserId := ctx.GetUInt(TagUserId)
 
-	if !existsUser || !existsUserId {
+	if errAuthenticatedUser != nil || !existsUserId {
 		return http.CreateInternalError()
 	}
 
-	authenticatedUser := value.(model.AuthenticatedUser)
 	authenticatedUser.Id = userId
 
 	user, err := c.service.UpdateUser(&authenticatedUser)

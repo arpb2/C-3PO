@@ -3,7 +3,6 @@ package pipeline
 import (
 	"github.com/arpb2/C-3PO/api/http"
 	api "github.com/arpb2/C-3PO/api/pipeline"
-	"github.com/arpb2/C-3PO/pkg/command"
 	"github.com/saantiaguilera/go-pipeline"
 )
 
@@ -21,9 +20,9 @@ type httpPipeline struct {
 
 func (h *httpPipeline) Run(context *http.Context, stage pipeline.Stage) {
 	ctx := pipeline.CreateContext()
-	ctx.Set(command.TagHttpReader, context)
-	ctx.Set(command.TagHttpWriter, context)
-	ctx.Set(command.TagHttpMiddleware, context)
+	ctx.Set(TagHttpReader, context)
+	ctx.Set(TagHttpWriter, context)
+	ctx.Set(TagHttpMiddleware, context)
 
 	err := h.Pipeline.Run(stage, ctx)
 
