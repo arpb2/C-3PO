@@ -13,7 +13,7 @@ type createSessionCommand struct {
 }
 
 func (c *createSessionCommand) Name() string {
-	return "create_token_command"
+	return "create_session_command"
 }
 
 func (c *createSessionCommand) Run(ctx pipeline.Context) error {
