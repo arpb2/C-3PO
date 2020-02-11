@@ -25,7 +25,7 @@ func CreatePostController(executor pipeline.HttpPipeline,
 
 func CreatePostBody(executor pipeline.HttpPipeline, tokenHandler auth.TokenHandler, service credentialservice.Service, validations []uservalidation.Validation) http.Handler {
 	fetchUserCommand := usercommand.CreateFetchAuthenticatedUserCommand()
-	validateParamsCommand := usercommand.CreateValidateParametersCommand(validations)
+	validateParamsCommand := usercommand.CreateValidateUserParametersCommand(validations)
 	authenticateCommand := sessioncommand.CreateAuthenticateCommand(service)
 	createSessionCommand := sessioncommand.CreateCreateSessionCommand(tokenHandler)
 	renderCommand := sessioncommand.CreateRenderSessionCommand()

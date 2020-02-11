@@ -24,7 +24,7 @@ func CreatePutController(exec pipeline.HttpPipeline, validations []uservalidatio
 func CreatePutBody(exec pipeline.HttpPipeline, validations []uservalidation.Validation, userService userservice.Service) http.Handler {
 	fetchUserIdCommand := usercommand.CreateFetchUserIdCommand()
 	fetchUserCommand := usercommand.CreateFetchAuthenticatedUserCommand()
-	validateCommand := usercommand.CreateValidateParametersCommand(validations)
+	validateCommand := usercommand.CreateValidateUserParametersCommand(validations)
 	serviceCommand := usercommand.CreateUpdateUserCommand(userService)
 	renderCommand := usercommand.CreateRenderUserCommand()
 

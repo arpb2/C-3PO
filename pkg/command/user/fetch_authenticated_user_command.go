@@ -10,7 +10,7 @@ import (
 type fetchAuthenticatedUserCommand struct{}
 
 func (c *fetchAuthenticatedUserCommand) Name() string {
-	return "fetch_user_command"
+	return "fetch_authenticated_user_command"
 }
 
 func (c *fetchAuthenticatedUserCommand) Run(ctx pipeline.Context) error {

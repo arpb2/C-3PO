@@ -37,7 +37,7 @@ func (c *validateParametersCommand) Fallback(err error) error {
 	return err
 }
 
-func CreateValidateParametersCommand(validations []uservalidation.Validation) pipeline.Step {
+func CreateValidateUserParametersCommand(validations []uservalidation.Validation) pipeline.Step {
 	return &validateParametersCommand{
 		validations: validations,
 	}
