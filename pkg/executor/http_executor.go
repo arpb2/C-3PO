@@ -12,22 +12,32 @@ import (
 )
 
 func CreateHttpExecutor(decorators ...decorator.RunnableDecorator) gopipeline.Executor {
+	return CreateCircuitBreakerHttpExecutor(func(name string, run func() error) error {
+		return hystrix.Do(name, run, nil)
+	}, decorators...)
+}
+
+type CircuitBreaker func(name string, run func() error) error
+
+func CreateCircuitBreakerHttpExecutor(cb CircuitBreaker, decorators ...decorator.RunnableDecorator) gopipeline.Executor {
 	return &httpExecutor{
-		Decorators: decorators,
+		Decorators:     decorators,
+		CircuitBreaker: cb,
 	}
 }
 
 type httpExecutor struct {
-	Decorators []decorator.RunnableDecorator
+	Decorators     []decorator.RunnableDecorator
+	CircuitBreaker CircuitBreaker
 }
 
 func (e *httpExecutor) Run(runnable gopipeline.Runnable, ctx gopipeline.Context) error {
-	for _, decorator := range e.Decorators {
-		runnable = decorator(runnable)
+	for _, d := range e.Decorators {
+		runnable = d(runnable)
 	}
 
 	var err error
-	_ = hystrix.Do(runnable.Name(), func() error {
+	_ = e.CircuitBreaker(runnable.Name(), func() error {
 		err = runnable.Run(ctx)
 
 		var httpError httpwrapper.Error
@@ -35,7 +45,7 @@ func (e *httpExecutor) Run(runnable gopipeline.Runnable, ctx gopipeline.Context)
 			return nil
 		}
 		return err
-	}, nil)
+	})
 
 	return err
 }

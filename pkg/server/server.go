@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/arpb2/C-3PO/api/engine"
 	"github.com/arpb2/C-3PO/pkg/auth/jwt"
@@ -31,7 +32,7 @@ func StartApplication(engine engine.ServerEngine) error {
 }
 
 func CreateBinders() []engine.ControllerBinder {
-	traceDecorator := decorator.TraceRunnableDecorator
+	traceDecorator := decorator.CreateTraceDecorator(os.Stdout)
 
 	httpExecutor := executor.CreateHttpExecutor(traceDecorator)
 	httpPipeline := pipeline.CreateHttpPipeline(httpExecutor)

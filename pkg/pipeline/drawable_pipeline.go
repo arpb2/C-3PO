@@ -9,25 +9,24 @@ import (
 	"github.com/saantiaguilera/go-pipeline"
 )
 
-func CreateDrawablePipeline(writer io.WriteCloser) api.HttpPipeline {
+func CreateDrawablePipeline(writer io.WriteCloser, renderer pipeline.DiagramRenderer) api.HttpPipeline {
 	return &drawablePipeline{
-		Writer: writer,
+		Writer:   writer,
+		Renderer: renderer,
 	}
 }
 
 type drawablePipeline struct {
-	Writer io.WriteCloser
+	Writer   io.WriteCloser
+	Renderer pipeline.DiagramRenderer
 }
 
 func (h *drawablePipeline) Run(context *http.Context, stage pipeline.Stage) {
 	graphDiagram := pipeline.CreateUMLActivityGraphDiagram()
-	graphRenderer := pipeline.CreateUMLActivityRenderer(pipeline.UMLOptions{
-		Type: pipeline.UMLFormatSVG,
-	})
 
 	stage.Draw(graphDiagram)
 
-	err := graphRenderer.Render(graphDiagram, h.Writer)
+	err := h.Renderer.Render(graphDiagram, h.Writer)
 
 	if err != nil {
 		fmt.Print(err.Error())

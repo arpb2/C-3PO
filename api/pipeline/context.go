@@ -8,6 +8,7 @@ import (
 
 type Context interface {
 	pipeline.Context
+
 	http.PipelineContext
-	model.Context
+	model.PipelineContext
 }

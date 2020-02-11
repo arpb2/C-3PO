@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	gopipeline "github.com/saantiaguilera/go-pipeline"
+
 	"github.com/arpb2/C-3PO/api/controller"
 	"github.com/arpb2/C-3PO/api/http"
 	"github.com/arpb2/C-3PO/api/pipeline"
@@ -21,7 +23,11 @@ func createDrawablePipeline(fileName string) pipeline.HttpPipeline {
 		panic(err)
 	}
 
-	return pipeline2.CreateDrawablePipeline(file)
+	graphRenderer := gopipeline.CreateUMLActivityRenderer(gopipeline.UMLOptions{
+		Type: gopipeline.UMLFormatSVG,
+	})
+
+	return pipeline2.CreateDrawablePipeline(file, graphRenderer)
 }
 
 func getPipelinedControllers() []controller.Controller {
