@@ -65,29 +65,29 @@ func TestHealthGet(test *testing.T) {
 	assert.Equal(test, "pong", w.Body.String())
 }
 
-func TestCodeGetRegistered(test *testing.T) {
+func TestUserLevelGetRegistered(test *testing.T) {
 	engine := ginengine.New()
 	server.RegisterRoutes(engine, server.CreateBinders())
 
-	w := performRequest(engine, "GET", "/users/1/codes/1", "")
+	w := performRequest(engine, "GET", "/users/1/levels/1", "")
 
 	assert.NotEqual(test, 404, w.Code)
 }
 
-func TestCodePostRegistered(test *testing.T) {
+func TestUserLevelPostRegistered(test *testing.T) {
 	engine := ginengine.New()
 	server.RegisterRoutes(engine, server.CreateBinders())
 
-	w := performRequest(engine, "POST", "/users/1/codes", "")
+	w := performRequest(engine, "POST", "/users/1/levels", "")
 
 	assert.NotEqual(test, 404, w.Code)
 }
 
-func TestCodePutRegistered(test *testing.T) {
+func TestUserLevelPutRegistered(test *testing.T) {
 	engine := ginengine.New()
 	server.RegisterRoutes(engine, server.CreateBinders())
 
-	w := performRequest(engine, "PUT", "/users/1/codes/1", "")
+	w := performRequest(engine, "PUT", "/users/1/levels/1", "")
 
 	assert.NotEqual(test, 404, w.Code)
 }

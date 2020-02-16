@@ -6,19 +6,19 @@ import (
 
 	"github.com/arpb2/C-3PO/api/engine"
 	"github.com/arpb2/C-3PO/pkg/auth/jwt"
-	codebinder "github.com/arpb2/C-3PO/pkg/binder/code"
 	healthbinder "github.com/arpb2/C-3PO/pkg/binder/health"
 	sessionbinder "github.com/arpb2/C-3PO/pkg/binder/session"
 	userbinder "github.com/arpb2/C-3PO/pkg/binder/user"
+	userlevelbinder "github.com/arpb2/C-3PO/pkg/binder/user_level"
 	"github.com/arpb2/C-3PO/pkg/executor"
 	"github.com/arpb2/C-3PO/pkg/executor/decorator"
 	"github.com/arpb2/C-3PO/pkg/middleware/auth/single"
 	"github.com/arpb2/C-3PO/pkg/middleware/auth/teacher"
 	"github.com/arpb2/C-3PO/pkg/pipeline"
-	codeservice "github.com/arpb2/C-3PO/pkg/service/code"
 	credentialservice "github.com/arpb2/C-3PO/pkg/service/credential"
 	teacherservice "github.com/arpb2/C-3PO/pkg/service/teacher"
 	userservice "github.com/arpb2/C-3PO/pkg/service/user"
+	userlevelservice "github.com/arpb2/C-3PO/pkg/service/user_level"
 )
 
 func StartApplication(engine engine.ServerEngine) error {
@@ -41,7 +41,7 @@ func CreateBinders() []engine.ControllerBinder {
 
 	userService := userservice.CreateService()
 	teacherService := teacherservice.CreateService(userService)
-	codeService := codeservice.CreateService()
+	userLevelService := userlevelservice.CreateService()
 	credentialService := credentialservice.CreateService()
 
 	singleAuthMiddleware := single.CreateMiddleware(tokenHandler)
@@ -49,7 +49,7 @@ func CreateBinders() []engine.ControllerBinder {
 
 	return []engine.ControllerBinder{
 		healthbinder.CreateBinder(),
-		codebinder.CreateBinder(httpPipeline, teacherAuthMiddleware, codeService),
+		userlevelbinder.CreateBinder(httpPipeline, teacherAuthMiddleware, userLevelService),
 		userbinder.CreateBinder(httpPipeline, singleAuthMiddleware, userService),
 		sessionbinder.CreateBinder(httpPipeline, tokenHandler, credentialService),
 	}

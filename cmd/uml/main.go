@@ -9,9 +9,9 @@ import (
 	"github.com/arpb2/C-3PO/api/controller"
 	"github.com/arpb2/C-3PO/api/http"
 	"github.com/arpb2/C-3PO/api/pipeline"
-	"github.com/arpb2/C-3PO/pkg/controller/code"
 	"github.com/arpb2/C-3PO/pkg/controller/session"
 	"github.com/arpb2/C-3PO/pkg/controller/user"
+	"github.com/arpb2/C-3PO/pkg/controller/user_level"
 	pipeline2 "github.com/arpb2/C-3PO/pkg/pipeline"
 )
 
@@ -32,9 +32,9 @@ func createDrawablePipeline(fileName string) pipeline.HttpPipeline {
 
 func getPipelinedControllers() []controller.Controller {
 	return []controller.Controller{
-		code.CreateGetController(createDrawablePipeline("code_get_controller"), nil, nil),
-		code.CreatePostController(createDrawablePipeline("code_post_controller"), nil, nil),
-		code.CreatePutController(createDrawablePipeline("code_put_controller"), nil, nil),
+		user_level.CreateGetController(createDrawablePipeline("user_level_get_controller"), nil, nil),
+		user_level.CreatePostController(createDrawablePipeline("user_level_post_controller"), nil, nil),
+		user_level.CreatePutController(createDrawablePipeline("user_level_put_controller"), nil, nil),
 		session.CreatePostController(createDrawablePipeline("session_post_controller"), nil, nil, nil),
 		user.CreateGetController(createDrawablePipeline("user_get_controller"), nil, nil),
 		user.CreatePostController(createDrawablePipeline("user_post_controller"), nil, nil),
@@ -44,7 +44,7 @@ func getPipelinedControllers() []controller.Controller {
 }
 
 func main() {
-	for _, controller := range getPipelinedControllers() {
-		controller.Body(&http.Context{})
+	for _, c := range getPipelinedControllers() {
+		c.Body(&http.Context{})
 	}
 }

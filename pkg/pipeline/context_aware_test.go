@@ -176,34 +176,34 @@ func TestContextAware_GivenOneWithAUser_WhenGettingIt_ThenItReturnsItAndNoError(
 	assert.Nil(t, err)
 }
 
-func TestContextAware_GivenOneWithNoCode_WhenGettingIt_ThenItReturnsNilAndInternalError(t *testing.T) {
+func TestContextAware_GivenOneWithNoUserLevel_WhenGettingIt_ThenItReturnsNilAndInternalError(t *testing.T) {
 	ctx := gopipeline.CreateContext()
 	ctxAware := pipeline.CreateContextAware(ctx)
 
-	val, err := ctxAware.GetCode("tag")
+	val, err := ctxAware.GetUserLevel("tag")
 
-	assert.Equal(t, model.Code{}, val)
+	assert.Equal(t, model.UserLevel{}, val)
 	assert.Equal(t, http.CreateInternalError(), err)
 }
 
-func TestContextAware_GivenOneWithSomethingDifferentThanCode_WhenGettingIt_ThenItReturnsNilAndInternalError(t *testing.T) {
+func TestContextAware_GivenOneWithSomethingDifferentThanUserLevel_WhenGettingIt_ThenItReturnsNilAndInternalError(t *testing.T) {
 	ctx := gopipeline.CreateContext()
 	ctx.Set("tag", "string")
 	ctxAware := pipeline.CreateContextAware(ctx)
 
-	val, err := ctxAware.GetCode("tag")
+	val, err := ctxAware.GetUserLevel("tag")
 
-	assert.Equal(t, model.Code{}, val)
+	assert.Equal(t, model.UserLevel{}, val)
 	assert.Equal(t, http.CreateInternalError(), err)
 }
 
-func TestContextAware_GivenOneWithACode_WhenGettingIt_ThenItReturnsItAndNoError(t *testing.T) {
-	expectedVal := model.Code{}
+func TestContextAware_GivenOneWithAUserLevel_WhenGettingIt_ThenItReturnsItAndNoError(t *testing.T) {
+	expectedVal := model.UserLevel{}
 	ctx := gopipeline.CreateContext()
 	ctx.Set("tag", expectedVal)
 	ctxAware := pipeline.CreateContextAware(ctx)
 
-	val, err := ctxAware.GetCode("tag")
+	val, err := ctxAware.GetUserLevel("tag")
 
 	assert.Equal(t, expectedVal, val)
 	assert.Nil(t, err)

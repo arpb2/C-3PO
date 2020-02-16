@@ -87,18 +87,18 @@ func (c *context) GetUser(key pipeline.Tag) (model.User, error) {
 	return user, http.CreateInternalError()
 }
 
-func (c *context) GetCode(key pipeline.Tag) (model.Code, error) {
-	var code model.Code
+func (c *context) GetUserLevel(key pipeline.Tag) (model.UserLevel, error) {
+	var userLevel model.UserLevel
 	val, exists := c.Get(key)
 
 	if !exists {
-		return code, http.CreateInternalError()
+		return userLevel, http.CreateInternalError()
 	}
 
-	if code, ok := val.(model.Code); ok {
-		return code, nil
+	if userLevel, ok := val.(model.UserLevel); ok {
+		return userLevel, nil
 	}
-	return code, http.CreateInternalError()
+	return userLevel, http.CreateInternalError()
 }
 
 func (c *context) GetSession(key pipeline.Tag) (model.Session, error) {
