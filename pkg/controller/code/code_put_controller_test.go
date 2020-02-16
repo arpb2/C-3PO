@@ -45,8 +45,8 @@ func TestCodePutControllerPathIsAsExpected(t *testing.T) {
 func TestCodePutControllerBody_400OnEmptyUserId(t *testing.T) {
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetFormData", "code").Return("", true).Once()
-	reader.On("GetParameter", "code_id").Return("1000").Once()
-	reader.On("GetParameter", "user_id").Return("").Once()
+	reader.On("GetParameter", codecontroller.ParamCodeId).Return("1000").Once()
+	reader.On("GetParameter", codecontroller.ParamUserId).Return("").Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
@@ -62,8 +62,8 @@ func TestCodePutControllerBody_400OnEmptyUserId(t *testing.T) {
 func TestCodePutControllerBody_400OnMalformedUserId(t *testing.T) {
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetFormData", "code").Return("code", true).Maybe()
-	reader.On("GetParameter", "code_id").Return("1000").Maybe()
-	reader.On("GetParameter", "user_id").Return("not a number").Once()
+	reader.On("GetParameter", codecontroller.ParamCodeId).Return("1000").Maybe()
+	reader.On("GetParameter", codecontroller.ParamUserId).Return("not a number").Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
@@ -80,8 +80,8 @@ func TestCodePutControllerBody_400OnMalformedUserId(t *testing.T) {
 func TestCodePutControllerBody_400OnMalformedCodeId(t *testing.T) {
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetFormData", "code").Return("code", true).Maybe()
-	reader.On("GetParameter", "user_id").Return("1000").Once()
-	reader.On("GetParameter", "code_id").Return("not a number").Once()
+	reader.On("GetParameter", codecontroller.ParamUserId).Return("1000").Once()
+	reader.On("GetParameter", codecontroller.ParamCodeId).Return("not a number").Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
@@ -98,8 +98,8 @@ func TestCodePutControllerBody_400OnMalformedCodeId(t *testing.T) {
 func TestCodePutControllerBody_400OnEmptyCodeId(t *testing.T) {
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetFormData", "code").Return("code", true).Maybe()
-	reader.On("GetParameter", "user_id").Return("1000").Once()
-	reader.On("GetParameter", "code_id").Return("").Once()
+	reader.On("GetParameter", codecontroller.ParamUserId).Return("1000").Once()
+	reader.On("GetParameter", codecontroller.ParamCodeId).Return("").Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
@@ -115,8 +115,8 @@ func TestCodePutControllerBody_400OnEmptyCodeId(t *testing.T) {
 
 func TestCodePutControllerBody_400OnNoCode(t *testing.T) {
 	reader := new(testhttpwrapper.MockReader)
-	reader.On("GetParameter", "user_id").Return("1000").Once()
-	reader.On("GetParameter", "code_id").Return("1000").Once()
+	reader.On("GetParameter", codecontroller.ParamUserId).Return("1000").Once()
+	reader.On("GetParameter", codecontroller.ParamCodeId).Return("1000").Once()
 	reader.On("GetFormData", "code").Return("", false).Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
@@ -136,8 +136,8 @@ func TestCodePutControllerBody_500OnServiceWriteError(t *testing.T) {
 	codeService.On("GetCode", uint(1000), uint(1000)).Return(nil, errors.New("whoops error"))
 
 	reader := new(testhttpwrapper.MockReader)
-	reader.On("GetParameter", "user_id").Return("1000").Once()
-	reader.On("GetParameter", "code_id").Return("1000").Once()
+	reader.On("GetParameter", codecontroller.ParamUserId).Return("1000").Once()
+	reader.On("GetParameter", codecontroller.ParamCodeId).Return("1000").Once()
 	reader.On("GetFormData", "code").Return("sending some code", true).Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
@@ -173,8 +173,8 @@ func main() {
 	}, nil)
 
 	reader := new(testhttpwrapper.MockReader)
-	reader.On("GetParameter", "user_id").Return("1000").Once()
-	reader.On("GetParameter", "code_id").Return("1000").Once()
+	reader.On("GetParameter", codecontroller.ParamUserId).Return("1000").Once()
+	reader.On("GetParameter", codecontroller.ParamCodeId).Return("1000").Once()
 	reader.On("GetFormData", "code").Return(expectedCode, true).Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
@@ -200,8 +200,8 @@ func TestCodePutControllerBody_200OnEmptyCodeStoredOnService(t *testing.T) {
 	}, nil)
 
 	reader := new(testhttpwrapper.MockReader)
-	reader.On("GetParameter", "user_id").Return("1000").Once()
-	reader.On("GetParameter", "code_id").Return("1000").Once()
+	reader.On("GetParameter", codecontroller.ParamUserId).Return("1000").Once()
+	reader.On("GetParameter", codecontroller.ParamCodeId).Return("1000").Once()
 	reader.On("GetFormData", "code").Return(expectedCode, true).Once()
 
 	c, w := testhttpwrapper.CreateTestContext()

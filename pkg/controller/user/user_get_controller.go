@@ -1,6 +1,8 @@
 package user
 
 import (
+	"fmt"
+
 	"github.com/arpb2/C-3PO/api/controller"
 	"github.com/arpb2/C-3PO/api/http"
 	"github.com/arpb2/C-3PO/api/pipeline"
@@ -14,7 +16,7 @@ func CreateGetController(executor pipeline.HttpPipeline,
 	userService userservice.Service) controller.Controller {
 	return controller.Controller{
 		Method: "GET",
-		Path:   "/users/:user_id",
+		Path:   fmt.Sprintf("/users/:%s", ParamUserId),
 		Middleware: []http.Handler{
 			authMiddleware,
 		},

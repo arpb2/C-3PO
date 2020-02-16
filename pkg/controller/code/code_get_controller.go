@@ -1,6 +1,8 @@
 package code
 
 import (
+	"fmt"
+
 	"github.com/arpb2/C-3PO/api/controller"
 	"github.com/arpb2/C-3PO/api/http"
 	"github.com/arpb2/C-3PO/api/pipeline"
@@ -13,7 +15,7 @@ import (
 func CreateGetController(exec pipeline.HttpPipeline, authMiddleware http.Handler, codeService codeservice.Service) controller.Controller {
 	return controller.Controller{
 		Method: "GET",
-		Path:   "/users/:user_id/codes/:code_id",
+		Path:   fmt.Sprintf("/users/:%s/codes/:%s", ParamUserId, ParamCodeId),
 		Middleware: []http.Handler{
 			authMiddleware,
 		},
