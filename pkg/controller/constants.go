@@ -1,4 +1,4 @@
-package code
+package controller
 
 const (
 	ParamUserId = "user_id"

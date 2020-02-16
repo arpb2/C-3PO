@@ -3,6 +3,8 @@ package user
 import (
 	"fmt"
 
+	controller2 "github.com/arpb2/C-3PO/pkg/controller"
+
 	"github.com/arpb2/C-3PO/api/controller"
 	"github.com/arpb2/C-3PO/api/http"
 	"github.com/arpb2/C-3PO/api/pipeline"
@@ -15,7 +17,7 @@ import (
 func CreatePutController(exec pipeline.HttpPipeline, validations []uservalidation.Validation, authMiddleware http.Handler, userService userservice.Service) controller.Controller {
 	return controller.Controller{
 		Method: "PUT",
-		Path:   fmt.Sprintf("/users/:%s", ParamUserId),
+		Path:   fmt.Sprintf("/users/:%s", controller2.ParamUserId),
 		Middleware: []http.Handler{
 			authMiddleware,
 		},

@@ -1,7 +1,10 @@
 package code_test
 
 import (
+	"fmt"
 	"testing"
+
+	controllerparams "github.com/arpb2/C-3PO/pkg/controller"
 
 	"github.com/arpb2/C-3PO/api/controller"
 	codebinder "github.com/arpb2/C-3PO/pkg/binder/code"
@@ -39,9 +42,9 @@ func lookupController(method, path string) *controller.Controller {
 }
 
 func TestCreateBinder_RegistersRoutes(t *testing.T) {
-	assert.NotNil(t, lookupController("GET", "/users/:user_id/codes/:code_id"))
-	assert.NotNil(t, lookupController("POST", "/users/:user_id/codes"))
-	assert.NotNil(t, lookupController("PUT", "/users/:user_id/codes/:code_id"))
+	assert.NotNil(t, lookupController("GET", fmt.Sprintf("/users/:%s/codes/:%s", controllerparams.ParamUserId, controllerparams.ParamCodeId)))
+	assert.NotNil(t, lookupController("POST", fmt.Sprintf("/users/:%s/codes", controllerparams.ParamUserId)))
+	assert.NotNil(t, lookupController("PUT", fmt.Sprintf("/users/:%s/codes/:%s", controllerparams.ParamUserId, controllerparams.ParamCodeId)))
 }
 
 func TestCreateBinder_RegistersOnlyRoutes(t *testing.T) {

@@ -1,7 +1,10 @@
 package code
 
 import (
+	"fmt"
 	"strconv"
+
+	"github.com/arpb2/C-3PO/pkg/controller"
 
 	httppipeline "github.com/arpb2/C-3PO/pkg/pipeline"
 
@@ -15,7 +18,7 @@ type fetchCodeIdCommand struct {
 }
 
 func (c *fetchCodeIdCommand) Name() string {
-	return "fetch_code_id_command"
+	return fmt.Sprintf("fetch_%s_command", controller.ParamCodeId)
 }
 
 func (c *fetchCodeIdCommand) Run(ctx pipeline.Context) error {
@@ -27,16 +30,16 @@ func (c *fetchCodeIdCommand) Run(ctx pipeline.Context) error {
 		return err
 	}
 
-	codeId := httpReader.GetParameter("code_id")
+	codeId := httpReader.GetParameter(controller.ParamCodeId)
 
 	if codeId == "" {
-		return http.CreateBadRequestError("'code_id' empty")
+		return http.CreateBadRequestError(fmt.Sprintf("'%s' empty", controller.ParamCodeId))
 	}
 
 	codeIdUint, err := strconv.ParseUint(codeId, 10, 64)
 
 	if err != nil {
-		return http.CreateBadRequestError("'code_id' malformed, expecting a positive number")
+		return http.CreateBadRequestError(fmt.Sprintf("'%s' malformed, expecting a positive number", controller.ParamCodeId))
 	}
 
 	ctx.Set(TagCodeId, uint(codeIdUint))
