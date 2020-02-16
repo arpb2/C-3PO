@@ -2,6 +2,7 @@ package user_level
 
 import (
 	"github.com/arpb2/C-3PO/api/http"
+	"github.com/arpb2/C-3PO/api/model"
 	httppipeline "github.com/arpb2/C-3PO/pkg/pipeline"
 	"github.com/saantiaguilera/go-pipeline"
 )
@@ -9,7 +10,7 @@ import (
 type fetchCodeCommand struct{}
 
 func (c *fetchCodeCommand) Name() string {
-	return "fetch_code_command"
+	return "fetch_user_level_data_command"
 }
 
 func (c *fetchCodeCommand) Run(ctx pipeline.Context) error {
@@ -27,7 +28,16 @@ func (c *fetchCodeCommand) Run(ctx pipeline.Context) error {
 		return http.CreateBadRequestError("'code' part not found")
 	}
 
-	ctx.Set(TagCodeRaw, code)
+	workspace, exists := httpReader.GetFormData("workspace")
+
+	if !exists {
+		return http.CreateBadRequestError("'workspace' part not found")
+	}
+
+	ctx.Set(TagUserLevelData, model.UserLevelData{
+		Code:      code,
+		Workspace: workspace,
+	})
 	return nil
 }
 

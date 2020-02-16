@@ -33,7 +33,6 @@ func createDrawablePipeline(fileName string) pipeline.HttpPipeline {
 func getPipelinedControllers() []controller.Controller {
 	return []controller.Controller{
 		user_level.CreateGetController(createDrawablePipeline("user_level_get_controller"), nil, nil),
-		user_level.CreatePostController(createDrawablePipeline("user_level_post_controller"), nil, nil),
 		user_level.CreatePutController(createDrawablePipeline("user_level_put_controller"), nil, nil),
 		session.CreatePostController(createDrawablePipeline("session_post_controller"), nil, nil, nil),
 		user.CreateGetController(createDrawablePipeline("user_get_controller"), nil, nil),

@@ -48,6 +48,7 @@ func TestUserLevelPutControllerPathIsAsExpected(t *testing.T) {
 func TestUserLevelPutControllerBody_400OnEmptyUserId(t *testing.T) {
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetFormData", "code").Return("", true).Once()
+	reader.On("GetFormData", "workspace").Return("", true).Once()
 	reader.On("GetParameter", controller2.ParamLevelId).Return("1000").Once()
 	reader.On("GetParameter", controller2.ParamUserId).Return("").Once()
 
@@ -65,6 +66,7 @@ func TestUserLevelPutControllerBody_400OnEmptyUserId(t *testing.T) {
 func TestUserLevelPutControllerBody_400OnMalformedUserId(t *testing.T) {
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetFormData", "code").Return("code", true).Maybe()
+	reader.On("GetFormData", "workspace").Return("workspace", true).Maybe()
 	reader.On("GetParameter", controller2.ParamLevelId).Return("1000").Maybe()
 	reader.On("GetParameter", controller2.ParamUserId).Return("not a number").Once()
 
@@ -83,6 +85,7 @@ func TestUserLevelPutControllerBody_400OnMalformedUserId(t *testing.T) {
 func TestUserLevelPutControllerBody_400OnMalformedLevelId(t *testing.T) {
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetFormData", "code").Return("code", true).Maybe()
+	reader.On("GetFormData", "workspace").Return("workspace", true).Maybe()
 	reader.On("GetParameter", controller2.ParamUserId).Return("1000").Once()
 	reader.On("GetParameter", controller2.ParamLevelId).Return("not a number").Once()
 
@@ -101,6 +104,7 @@ func TestUserLevelPutControllerBody_400OnMalformedLevelId(t *testing.T) {
 func TestUserLevelPutControllerBody_400OnEmptyLevelId(t *testing.T) {
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetFormData", "code").Return("code", true).Maybe()
+	reader.On("GetFormData", "workspace").Return("workspace", true).Maybe()
 	reader.On("GetParameter", controller2.ParamUserId).Return("1000").Once()
 	reader.On("GetParameter", controller2.ParamLevelId).Return("").Once()
 
@@ -116,7 +120,7 @@ func TestUserLevelPutControllerBody_400OnEmptyLevelId(t *testing.T) {
 	assert.Equal(t, expected, actual)
 }
 
-func TestUserLevelPutControllerBody_400OnNoUserLevel(t *testing.T) {
+func TestUserLevelPutControllerBody_400OnNoCode(t *testing.T) {
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetParameter", controller2.ParamUserId).Return("1000").Once()
 	reader.On("GetParameter", controller2.ParamLevelId).Return("1000").Once()
@@ -134,9 +138,28 @@ func TestUserLevelPutControllerBody_400OnNoUserLevel(t *testing.T) {
 	assert.Equal(t, expected, actual)
 }
 
+func TestUserLevelPutControllerBody_400OnNoWorkspace(t *testing.T) {
+	reader := new(testhttpwrapper.MockReader)
+	reader.On("GetParameter", controller2.ParamUserId).Return("1000").Once()
+	reader.On("GetParameter", controller2.ParamLevelId).Return("1000").Once()
+	reader.On("GetFormData", "code").Return("code", true).Once()
+	reader.On("GetFormData", "workspace").Return("", false).Once()
+
+	c, w := testhttpwrapper.CreateTestContext()
+	c.Reader = reader
+
+	createPutController().Body(c)
+
+	actual := bytes.TrimSpace([]byte(w.Body.String()))
+	expected := golden.Get(t, actual, "bad_request.empty.workspace.golden.json")
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Equal(t, expected, actual)
+}
+
 func TestUserLevelPutControllerBody_500OnServiceWriteError(t *testing.T) {
 	userLevelService := new(service.MockUserLevelService)
-	userLevelService.On("GetUserLevel", uint(1000), uint(1000)).Return(nil, errors.New("whoops error"))
+	userLevelService.On("GetUserLevel", uint(1000), uint(1000)).Return(model.UserLevel{}, errors.New("whoops error"))
 
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetParameter", controller2.ParamUserId).Return("1000").Once()
@@ -169,10 +192,12 @@ func main() {
 }
 			`
 	userLevelService := new(service.MockUserLevelService)
-	userLevelService.On("GetUserLevel", uint(1000), uint(1000)).Return(&model.UserLevel{
+	userLevelService.On("GetUserLevel", uint(1000), uint(1000)).Return(model.UserLevel{
 		UserId:  1000,
 		LevelId: 1000,
-		Code:    expectedCode,
+		UserLevelData: &model.UserLevelData{
+			Code: expectedCode,
+		},
 	}, nil)
 
 	reader := new(testhttpwrapper.MockReader)
@@ -196,10 +221,12 @@ func main() {
 func TestUserLevelPutControllerBody_200OnEmptyUserLevelStoredOnService(t *testing.T) {
 	expectedCode := ""
 	userLevelService := new(service.MockUserLevelService)
-	userLevelService.On("GetUserLevel", uint(1000), uint(1000)).Return(&model.UserLevel{
+	userLevelService.On("GetUserLevel", uint(1000), uint(1000)).Return(model.UserLevel{
 		UserId:  1000,
 		LevelId: 1000,
-		Code:    expectedCode,
+		UserLevelData: &model.UserLevelData{
+			Code: expectedCode,
+		},
 	}, nil)
 
 	reader := new(testhttpwrapper.MockReader)

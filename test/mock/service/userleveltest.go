@@ -9,32 +9,18 @@ type MockUserLevelService struct {
 	mock.Mock
 }
 
-func (m MockUserLevelService) GetUserLevel(userId uint, codeId uint) (code *model.UserLevel, err error) {
-	args := m.Called(userId, codeId)
+func (m MockUserLevelService) GetUserLevel(userId uint, levelId uint) (result model.UserLevel, err error) {
+	args := m.Called(userId, levelId)
 
-	codeParam := args.Get(0)
-	if codeParam != nil {
-		code = codeParam.(*model.UserLevel)
-	}
-
+	result = args.Get(0).(model.UserLevel)
 	err = args.Error(1)
 	return
 }
 
-func (m MockUserLevelService) CreateUserLevel(userId uint, code string) (codeModel *model.UserLevel, err error) {
-	args := m.Called(userId, code)
+func (m MockUserLevelService) WriteUserLevel(userLevel model.UserLevel) (result model.UserLevel, err error) {
+	args := m.Called(userLevel)
 
-	codeParam := args.Get(0)
-	if codeParam != nil {
-		codeModel = codeParam.(*model.UserLevel)
-	}
-
+	result = args.Get(0).(model.UserLevel)
 	err = args.Error(1)
 	return
-}
-
-func (m MockUserLevelService) ReplaceUserLevel(code *model.UserLevel) error {
-	args := m.Called(code)
-
-	return args.Error(0)
 }

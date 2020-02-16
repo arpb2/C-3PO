@@ -29,7 +29,7 @@ func CreatePutBody(exec pipeline.HttpPipeline, userLevelService userlevelservice
 	fetchUserIdCommand := usercommand.CreateFetchUserIdCommand()
 	fetchCodeCommand := userlevelcommand.CreateFetchCodeCommand()
 	fetchLevelIdCommand := userlevelcommand.CreateFetchLevelIdCommand()
-	serviceCommand := userlevelcommand.CreateReplaceUserLevelCommand(userLevelService)
+	serviceCommand := userlevelcommand.CreateWriteUserLevelCommand(userLevelService)
 	renderCommand := userlevelcommand.CreateRenderUserLevelCommand()
 
 	graph := gopipeline.CreateSequentialGroup(

@@ -5,6 +5,7 @@ import (
 	"github.com/arpb2/C-3PO/api/model"
 	userlevelservice "github.com/arpb2/C-3PO/api/service/user_level"
 	usercommand "github.com/arpb2/C-3PO/pkg/command/user"
+	pipeline2 "github.com/arpb2/C-3PO/pkg/pipeline"
 	"github.com/saantiaguilera/go-pipeline"
 )
 
@@ -13,35 +14,37 @@ type replaceUserLevelCommand struct {
 }
 
 func (c *replaceUserLevelCommand) Name() string {
-	return "replace_user_level_command"
+	return "write_user_level_command"
 }
 
 func (c *replaceUserLevelCommand) Run(ctx pipeline.Context) error {
+	ctxAware := pipeline2.CreateContextAware(ctx)
+
 	levelId, existsLevelId := ctx.GetUInt(TagLevelId)
 	userId, existsUserId := ctx.GetUInt(usercommand.TagUserId)
-	codeRaw, existsCode := ctx.GetString(TagCodeRaw)
+	userLevelData, existsData := ctxAware.GetUserLevelData(TagUserLevelData)
 
-	if !existsLevelId || !existsUserId || !existsCode {
+	if !existsLevelId || !existsUserId || existsData != nil {
 		return http.CreateInternalError()
 	}
 
-	userLevel := &model.UserLevel{
-		LevelId: levelId,
-		UserId:  userId,
-		Code:    codeRaw,
+	userLevel := model.UserLevel{
+		LevelId:       levelId,
+		UserId:        userId,
+		UserLevelData: &userLevelData,
 	}
 
-	err := c.service.ReplaceUserLevel(userLevel)
+	userLevel, err := c.service.WriteUserLevel(userLevel)
 
 	if err != nil {
 		return err
 	}
 
-	ctx.Set(TagUserLevel, *userLevel)
+	ctx.Set(TagUserLevel, userLevel)
 	return nil
 }
 
-func CreateReplaceUserLevelCommand(service userlevelservice.Service) pipeline.Step {
+func CreateWriteUserLevelCommand(service userlevelservice.Service) pipeline.Step {
 	return &replaceUserLevelCommand{
 		service: service,
 	}

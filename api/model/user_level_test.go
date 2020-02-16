@@ -9,12 +9,15 @@ import (
 )
 
 func TestCode_ToJson(t *testing.T) {
-	expectedJson := `{"user_id":5,"level_id":1,"code":"some code written here"}`
+	expectedJson := `{"user_id":5,"level_id":1,"code":"some code written here","workspace":"test"}`
 
 	code := &model.UserLevel{
 		LevelId: uint(1),
 		UserId:  uint(5),
-		Code:    "some code written here",
+		UserLevelData: &model.UserLevelData{
+			Code:      "some code written here",
+			Workspace: "test",
+		},
 	}
 
 	data, err := json.Marshal(code)
@@ -27,10 +30,13 @@ func TestCode_FromJson(t *testing.T) {
 	expectedCode := &model.UserLevel{
 		LevelId: 1,
 		UserId:  5,
-		Code:    "some code written here",
+		UserLevelData: &model.UserLevelData{
+			Code:      "some code written here",
+			Workspace: "test",
+		},
 	}
 
-	data := `{"user_id":5,"level_id":1,"code":"some code written here"}`
+	data := `{"user_id":5,"level_id":1,"code":"some code written here","workspace":"test"}`
 	var code model.UserLevel
 
 	err := json.Unmarshal([]byte(data), &code)

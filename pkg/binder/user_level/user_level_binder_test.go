@@ -43,12 +43,11 @@ func lookupController(method, path string) *controller.Controller {
 
 func TestCreateBinder_RegistersRoutes(t *testing.T) {
 	assert.NotNil(t, lookupController("GET", fmt.Sprintf("/users/:%s/levels/:%s", controllerparams.ParamUserId, controllerparams.ParamLevelId)))
-	assert.NotNil(t, lookupController("POST", fmt.Sprintf("/users/:%s/levels", controllerparams.ParamUserId)))
 	assert.NotNil(t, lookupController("PUT", fmt.Sprintf("/users/:%s/levels/:%s", controllerparams.ParamUserId, controllerparams.ParamLevelId)))
 }
 
 func TestCreateBinder_RegistersOnlyRoutes(t *testing.T) {
 	registrable := bindControllers()
 
-	assert.Equal(t, 3, len(registrable.RegisteredControllers))
+	assert.Equal(t, 2, len(registrable.RegisteredControllers))
 }

@@ -16,7 +16,6 @@ type binder struct {
 
 func (b binder) BindControllers(controllerRegistrable engine.ControllerRegistrable) {
 	controllerRegistrable.Register(userlevelcontroller.CreateGetController(b.Executor, b.AuthMiddleware, b.UserLevelService))
-	controllerRegistrable.Register(userlevelcontroller.CreatePostController(b.Executor, b.AuthMiddleware, b.UserLevelService))
 	controllerRegistrable.Register(userlevelcontroller.CreatePutController(b.Executor, b.AuthMiddleware, b.UserLevelService))
 }
 

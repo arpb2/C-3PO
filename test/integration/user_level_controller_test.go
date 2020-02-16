@@ -12,6 +12,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/arpb2/C-3PO/api/model"
+
 	ginengine "github.com/arpb2/C-3PO/pkg/engine/gin"
 	"github.com/arpb2/C-3PO/pkg/server"
 	userlevelservice "github.com/arpb2/C-3PO/pkg/service/user_level"
@@ -43,7 +45,13 @@ func Test_Get(t *testing.T) {
 
 	// Add code to retrieve
 	code := "expected code"
-	createdCode, err := userlevelservice.CreateService().CreateUserLevel(uint(1000), code)
+	createdCode, err := userlevelservice.CreateService().WriteUserLevel(model.UserLevel{
+		UserId:  1000,
+		LevelId: 1,
+		UserLevelData: &model.UserLevelData{
+			Code: code,
+		},
+	})
 
 	assert.Nil(t, err)
 
@@ -74,43 +82,6 @@ func Test_Get(t *testing.T) {
 	assert.Equal(t, expected, actual)
 }
 
-func Test_Post(t *testing.T) {
-	// Ignite server
-	engine := ginengine.New()
-
-	defer engine.Shutdown()
-	go server.StartApplication(engine)
-
-	// CreateService request to perform
-	data := url.Values{}
-	data["code"] = []string{"some code i'm uploading"}
-	req, err := http.NewRequest("POST", "http://localhost:8080/users/1000/levels", strings.NewReader(data.Encode()))
-	assert.Nil(t, err)
-
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	req.Header.Set("Authorization", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEwMDB9.GVS-KC5nOCHybzzFIIH864u4KcGu-ZSd-96krqTUGWo")
-
-	// Perform request
-	dial(t)
-	resp, err := http.DefaultClient.Do(req)
-
-	// High level Assertions
-	assert.Nil(t, err)
-	assert.Equal(t, http.StatusOK, resp.StatusCode)
-
-	// ReadBody response body
-	defer resp.Body.Close()
-	bodyBytes, err := ioutil.ReadAll(resp.Body)
-
-	assert.Nil(t, err)
-
-	// Low level assertions
-	actual := bytes.TrimSpace(bodyBytes)
-	expected := golden.Get(t, actual, "ok.post_user_level.golden.json")
-
-	assert.Equal(t, expected, actual)
-}
-
 func Test_Put(t *testing.T) {
 	// Ignite server
 	engine := ginengine.New()
@@ -120,13 +91,20 @@ func Test_Put(t *testing.T) {
 
 	// Add code to replace
 	code := "test code"
-	userLevel, err := userlevelservice.CreateService().CreateUserLevel(uint(1000), code)
+	userLevel, err := userlevelservice.CreateService().WriteUserLevel(model.UserLevel{
+		UserId:  1000,
+		LevelId: 1,
+		UserLevelData: &model.UserLevelData{
+			Code: code,
+		},
+	})
 
 	assert.Nil(t, err)
 
 	// CreateService request to perform
 	data := url.Values{}
 	data["code"] = []string{"some code i'm replacing"}
+	data["workspace"] = []string{"some workspace i'm replacing"}
 	req, err := http.NewRequest("PUT", "http://localhost:8080/users/1000/levels/"+strconv.FormatUint(uint64(userLevel.LevelId), 10), strings.NewReader(data.Encode()))
 	assert.Nil(t, err)
 

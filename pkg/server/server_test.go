@@ -74,15 +74,6 @@ func TestUserLevelGetRegistered(test *testing.T) {
 	assert.NotEqual(test, 404, w.Code)
 }
 
-func TestUserLevelPostRegistered(test *testing.T) {
-	engine := ginengine.New()
-	server.RegisterRoutes(engine, server.CreateBinders())
-
-	w := performRequest(engine, "POST", "/users/1/levels", "")
-
-	assert.NotEqual(test, 404, w.Code)
-}
-
 func TestUserLevelPutRegistered(test *testing.T) {
 	engine := ginengine.New()
 	server.RegisterRoutes(engine, server.CreateBinders())

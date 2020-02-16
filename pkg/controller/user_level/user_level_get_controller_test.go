@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"testing"
 
+	http2 "github.com/arpb2/C-3PO/api/http"
+
 	controller2 "github.com/arpb2/C-3PO/pkg/controller"
 
 	"github.com/arpb2/C-3PO/pkg/pipeline"
@@ -115,7 +117,7 @@ func TestCodeGetControllerBody_400OnEmptyLevelId(t *testing.T) {
 
 func TestCodeGetControllerBody_500OnServiceReadError(t *testing.T) {
 	userLevelService := new(service.MockUserLevelService)
-	userLevelService.On("GetUserLevel", uint(1000), uint(1000)).Return(nil, errors.New("whoops error"))
+	userLevelService.On("GetUserLevel", uint(1000), uint(1000)).Return(model.UserLevel{}, errors.New("whoops error"))
 
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetParameter", controller2.ParamUserId).Return("1000").Once()
@@ -137,7 +139,7 @@ func TestCodeGetControllerBody_500OnServiceReadError(t *testing.T) {
 
 func TestCodeGetControllerBody_400OnNoCodeStoredInService(t *testing.T) {
 	userLevelService := new(service.MockUserLevelService)
-	userLevelService.On("GetUserLevel", uint(1000), uint(1000)).Return(nil, nil)
+	userLevelService.On("GetUserLevel", uint(1000), uint(1000)).Return(model.UserLevel{}, http2.CreateNotFoundError())
 
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetParameter", controller2.ParamUserId).Return("1000").Once()
@@ -171,10 +173,12 @@ func main() {
 			`
 
 	userLevelService := new(service.MockUserLevelService)
-	userLevelService.On("GetUserLevel", uint(1000), uint(1000)).Return(&model.UserLevel{
+	userLevelService.On("GetUserLevel", uint(1000), uint(1000)).Return(model.UserLevel{
 		UserId:  1000,
 		LevelId: 1000,
-		Code:    expectedCode,
+		UserLevelData: &model.UserLevelData{
+			Code: expectedCode,
+		},
 	}, nil)
 
 	reader := new(testhttpwrapper.MockReader)
@@ -198,10 +202,12 @@ func main() {
 func TestCodeGetControllerBody_200OnEmptyCodeStoredOnService(t *testing.T) {
 	expectedCode := ""
 	userLevelService := new(service.MockUserLevelService)
-	userLevelService.On("GetUserLevel", uint(1000), uint(1000)).Return(&model.UserLevel{
+	userLevelService.On("GetUserLevel", uint(1000), uint(1000)).Return(model.UserLevel{
 		UserId:  1000,
 		LevelId: 1000,
-		Code:    expectedCode,
+		UserLevelData: &model.UserLevelData{
+			Code: expectedCode,
+		},
 	}, nil)
 
 	reader := new(testhttpwrapper.MockReader)

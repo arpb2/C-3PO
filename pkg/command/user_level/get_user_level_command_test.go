@@ -47,7 +47,7 @@ func TestGetUserLevelCommand_GivenOneAndAFailingService_WhenRunning_ThenServiceE
 	ctx.Set(user.TagUserId, uint(1000))
 	expectedErr := errors.New("some error")
 	s := new(service.MockUserLevelService)
-	s.On("GetUserLevel", uint(1000), uint(1000)).Return(nil, expectedErr)
+	s.On("GetUserLevel", uint(1000), uint(1000)).Return(model.UserLevel{}, expectedErr)
 	cmd := user_level.CreateGetUserLevelCommand(s)
 
 	err := cmd.Run(ctx)
@@ -61,7 +61,7 @@ func TestGetUserLevelCommand_GivenOneAndAServiceWithNoCode_WhenRunning_Then404(t
 	ctx.Set(user_level.TagLevelId, uint(1000))
 	ctx.Set(user.TagUserId, uint(1000))
 	s := new(service.MockUserLevelService)
-	s.On("GetUserLevel", uint(1000), uint(1000)).Return(nil, nil)
+	s.On("GetUserLevel", uint(1000), uint(1000)).Return(model.UserLevel{}, http.CreateNotFoundError())
 	cmd := user_level.CreateGetUserLevelCommand(s)
 
 	err := cmd.Run(ctx)
@@ -76,7 +76,7 @@ func TestGetUserLevelCommand_GivenOne_WhenRunning_ThenContextHasCodeAndReturnsNo
 	ctx.Set(user.TagUserId, uint(1000))
 	expectedVal := model.UserLevel{}
 	s := new(service.MockUserLevelService)
-	s.On("GetUserLevel", uint(1000), uint(1000)).Return(&expectedVal, nil)
+	s.On("GetUserLevel", uint(1000), uint(1000)).Return(expectedVal, nil)
 	cmd := user_level.CreateGetUserLevelCommand(s)
 
 	err := cmd.Run(ctx)

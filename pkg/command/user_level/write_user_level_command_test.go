@@ -13,61 +13,67 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestReplaceUserLevelCommand_GivenOne_WhenCallingName_ThenItsTheExpected(t *testing.T) {
-	cmd := user_level.CreateReplaceUserLevelCommand(nil)
+func TestWriteUserLevelCommand_GivenOne_WhenCallingName_ThenItsTheExpected(t *testing.T) {
+	cmd := user_level.CreateWriteUserLevelCommand(nil)
 
 	name := cmd.Name()
 
-	assert.Equal(t, "replace_user_level_command", name)
+	assert.Equal(t, "write_user_level_command", name)
 }
 
-func TestReplaceUserLevelCommand_GivenOneAndAContextWithoutRawCode_WhenRunning_Then500(t *testing.T) {
+func TestWriteUserLevelCommand_GivenOneAndAContextWithoutRawCode_WhenRunning_Then500(t *testing.T) {
 	ctx := gopipeline.CreateContext()
 	ctx.Set(user.TagUserId, uint(1000))
 	ctx.Set(user_level.TagLevelId, uint(1000))
-	cmd := user_level.CreateReplaceUserLevelCommand(nil)
+	cmd := user_level.CreateWriteUserLevelCommand(nil)
 
 	err := cmd.Run(ctx)
 
 	assert.Equal(t, http.CreateInternalError(), err)
 }
 
-func TestReplaceUserLevelCommand_GivenOneAndAContextWithoutLevelId_WhenRunning_Then500(t *testing.T) {
+func TestWriteUserLevelCommand_GivenOneAndAContextWithoutLevelId_WhenRunning_Then500(t *testing.T) {
 	ctx := gopipeline.CreateContext()
 	ctx.Set(user.TagUserId, uint(1000))
-	ctx.Set(user_level.TagCodeRaw, "code")
-	cmd := user_level.CreateReplaceUserLevelCommand(nil)
+	ctx.Set(user_level.TagUserLevelData, model.UserLevelData{
+		Code: "code",
+	})
+	cmd := user_level.CreateWriteUserLevelCommand(nil)
 
 	err := cmd.Run(ctx)
 
 	assert.Equal(t, http.CreateInternalError(), err)
 }
 
-func TestReplaceUserLevelCommand_GivenOneAndAContextWithoutUserID_WhenRunning_Then500(t *testing.T) {
+func TestWriteUserLevelCommand_GivenOneAndAContextWithoutUserID_WhenRunning_Then500(t *testing.T) {
 	ctx := gopipeline.CreateContext()
-	ctx.Set(user_level.TagCodeRaw, "")
+	ctx.Set(user_level.TagUserLevelData, model.UserLevelData{})
 	ctx.Set(user_level.TagLevelId, uint(1000))
-	cmd := user_level.CreateReplaceUserLevelCommand(nil)
+	cmd := user_level.CreateWriteUserLevelCommand(nil)
 
 	err := cmd.Run(ctx)
 
 	assert.Equal(t, http.CreateInternalError(), err)
 }
 
-func TestReplaceUserLevelCommand_GivenOneAndAFailingService_WhenRunning_ThenServiceError(t *testing.T) {
+func TestWriteUserLevelCommand_GivenOneAndAFailingService_WhenRunning_ThenServiceError(t *testing.T) {
 	ctx := gopipeline.CreateContext()
-	ctx.Set(user_level.TagCodeRaw, "code")
+	ctx.Set(user_level.TagUserLevelData, model.UserLevelData{
+		Code: "code",
+	})
 	ctx.Set(user_level.TagLevelId, uint(1000))
 	ctx.Set(user.TagUserId, uint(1000))
 	expectedErr := errors.New("some error")
-	expectedCode := model.UserLevel{
-		Code:    "code",
+	expectedUserLevel := model.UserLevel{
+		UserLevelData: &model.UserLevelData{
+			Code: "code",
+		},
 		LevelId: uint(1000),
 		UserId:  uint(1000),
 	}
 	s := new(service.MockUserLevelService)
-	s.On("ReplaceUserLevel", &expectedCode).Return(expectedErr)
-	cmd := user_level.CreateReplaceUserLevelCommand(s)
+	s.On("WriteUserLevel", expectedUserLevel).Return(expectedUserLevel, expectedErr)
+	cmd := user_level.CreateWriteUserLevelCommand(s)
 
 	err := cmd.Run(ctx)
 
@@ -75,19 +81,23 @@ func TestReplaceUserLevelCommand_GivenOneAndAFailingService_WhenRunning_ThenServ
 	s.AssertExpectations(t)
 }
 
-func TestReplaceUserLevelCommand_GivenOne_WhenRunning_ThenContextHasCodeAndReturnsNoError(t *testing.T) {
+func TestWriteUserLevelCommand_GivenOne_WhenRunning_ThenContextHasCodeAndReturnsNoError(t *testing.T) {
 	ctx := gopipeline.CreateContext()
-	ctx.Set(user_level.TagCodeRaw, "code")
+	ctx.Set(user_level.TagUserLevelData, model.UserLevelData{
+		Code: "code",
+	})
 	ctx.Set(user_level.TagLevelId, uint(1000))
 	ctx.Set(user.TagUserId, uint(1000))
 	expectedVal := model.UserLevel{
-		Code:    "code",
+		UserLevelData: &model.UserLevelData{
+			Code: "code",
+		},
 		LevelId: uint(1000),
 		UserId:  uint(1000),
 	}
 	s := new(service.MockUserLevelService)
-	s.On("ReplaceUserLevel", &expectedVal).Return(nil)
-	cmd := user_level.CreateReplaceUserLevelCommand(s)
+	s.On("WriteUserLevel", expectedVal).Return(expectedVal, nil)
+	cmd := user_level.CreateWriteUserLevelCommand(s)
 
 	err := cmd.Run(ctx)
 	val, exists := ctx.Get(user_level.TagUserLevel)

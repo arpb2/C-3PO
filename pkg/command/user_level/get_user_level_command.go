@@ -29,11 +29,7 @@ func (c *getUserLevelCommand) Run(ctx pipeline.Context) error {
 		return err
 	}
 
-	if userLevel == nil {
-		return http.CreateNotFoundError()
-	}
-
-	ctx.Set(TagUserLevel, *userLevel)
+	ctx.Set(TagUserLevel, userLevel)
 	return nil
 }
 
