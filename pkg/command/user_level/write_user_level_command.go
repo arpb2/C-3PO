@@ -31,10 +31,10 @@ func (c *replaceUserLevelCommand) Run(ctx pipeline.Context) error {
 	userLevel := model.UserLevel{
 		LevelId:       levelId,
 		UserId:        userId,
-		UserLevelData: &userLevelData,
+		UserLevelData: userLevelData,
 	}
 
-	userLevel, err := c.service.WriteUserLevel(userLevel)
+	userLevel, err := c.service.StoreUserLevel(userLevel)
 
 	if err != nil {
 		return err

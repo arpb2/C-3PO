@@ -21,13 +21,13 @@ func CreatePostController(exec pipeline.HttpPipeline, validations []uservalidati
 func CreatePostBody(exec pipeline.HttpPipeline, validations []uservalidation.Validation, userService userservice.Service) http.Handler {
 	fetchUserCommand := usercommand.CreateFetchAuthenticatedUserCommand()
 	validateCommand := usercommand.CreateValidateUserParametersCommand(validations)
-	serviceCommand := usercommand.CreateCreateUserCommand(userService)
+	createUserCommand := usercommand.CreateCreateUserCommand(userService)
 	renderCommand := usercommand.CreateRenderUserCommand()
 
 	graph := gopipeline.CreateSequentialStage(
 		fetchUserCommand,
 		validateCommand,
-		serviceCommand,
+		createUserCommand,
 		renderCommand,
 	)
 

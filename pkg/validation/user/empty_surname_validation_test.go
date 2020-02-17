@@ -10,7 +10,7 @@ import (
 
 func TestEmptySurnameValidation_Error(t *testing.T) {
 	err := uservalidation.EmptySurname(&model.AuthenticatedUser{
-		User:     &model.User{},
+		User:     model.User{},
 		Password: "",
 	})
 
@@ -20,7 +20,7 @@ func TestEmptySurnameValidation_Error(t *testing.T) {
 
 func TestEmptySurnameValidation_Success(t *testing.T) {
 	err := uservalidation.EmptySurname(&model.AuthenticatedUser{
-		User: &model.User{
+		User: model.User{
 			Surname: "TestSurname",
 		},
 		Password: "",

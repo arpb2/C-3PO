@@ -27,17 +27,13 @@ func (c *updateUserCommand) Run(ctx pipeline.Context) error {
 
 	authenticatedUser.Id = userId
 
-	user, err := c.service.UpdateUser(&authenticatedUser)
+	user, err := c.service.UpdateUser(authenticatedUser.User)
 
 	if err != nil {
 		return err
 	}
 
-	if user == nil {
-		return http.CreateInternalError()
-	}
-
-	ctx.Set(TagUser, *user)
+	ctx.Set(TagUser, user)
 	return nil
 }
 

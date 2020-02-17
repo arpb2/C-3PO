@@ -1,7 +1,6 @@
 package user
 
 import (
-	"github.com/arpb2/C-3PO/api/http"
 	userservice "github.com/arpb2/C-3PO/api/service/user"
 	httppipeline "github.com/arpb2/C-3PO/pkg/pipeline"
 	"github.com/saantiaguilera/go-pipeline"
@@ -24,17 +23,13 @@ func (c *createUserCommand) Run(ctx pipeline.Context) error {
 		return err
 	}
 
-	user, err := c.service.CreateUser(&authenticatedUser)
+	user, err := c.service.CreateUser(authenticatedUser.User)
 
 	if err != nil {
 		return err
 	}
 
-	if user == nil {
-		return http.CreateInternalError()
-	}
-
-	ctx.Set(TagUser, *user)
+	ctx.Set(TagUser, user)
 	return nil
 }
 

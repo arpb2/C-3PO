@@ -65,14 +65,14 @@ func TestWriteUserLevelCommand_GivenOneAndAFailingService_WhenRunning_ThenServic
 	ctx.Set(user.TagUserId, uint(1000))
 	expectedErr := errors.New("some error")
 	expectedUserLevel := model.UserLevel{
-		UserLevelData: &model.UserLevelData{
+		UserLevelData: model.UserLevelData{
 			Code: "code",
 		},
 		LevelId: uint(1000),
 		UserId:  uint(1000),
 	}
 	s := new(service.MockUserLevelService)
-	s.On("WriteUserLevel", expectedUserLevel).Return(expectedUserLevel, expectedErr)
+	s.On("StoreUserLevel", expectedUserLevel).Return(expectedUserLevel, expectedErr)
 	cmd := user_level.CreateWriteUserLevelCommand(s)
 
 	err := cmd.Run(ctx)
@@ -89,14 +89,14 @@ func TestWriteUserLevelCommand_GivenOne_WhenRunning_ThenContextHasCodeAndReturns
 	ctx.Set(user_level.TagLevelId, uint(1000))
 	ctx.Set(user.TagUserId, uint(1000))
 	expectedVal := model.UserLevel{
-		UserLevelData: &model.UserLevelData{
+		UserLevelData: model.UserLevelData{
 			Code: "code",
 		},
 		LevelId: uint(1000),
 		UserId:  uint(1000),
 	}
 	s := new(service.MockUserLevelService)
-	s.On("WriteUserLevel", expectedVal).Return(expectedVal, nil)
+	s.On("StoreUserLevel", expectedVal).Return(expectedVal, nil)
 	cmd := user_level.CreateWriteUserLevelCommand(s)
 
 	err := cmd.Run(ctx)

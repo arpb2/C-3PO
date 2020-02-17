@@ -24,7 +24,7 @@ func (c *authenticateCommand) Run(ctx pipeline.Context) error {
 		return err
 	}
 
-	userId, err := c.service.Retrieve(authenticatedUser.Email, authenticatedUser.Password)
+	userId, err := c.service.GetUserId(authenticatedUser.Email, authenticatedUser.Password)
 
 	if err != nil {
 		return err

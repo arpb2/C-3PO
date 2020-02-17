@@ -33,11 +33,11 @@ func TestAuthenticateCommand_GivenOneAndAContextWithoutAuthenticatedUser_WhenRun
 func TestAuthenticateCommand_GivenOneAndAFailingService_WhenRunning_ThenServiceError(t *testing.T) {
 	ctx := gopipeline.CreateContext()
 	ctx.Set(user.TagAuthenticatedUser, model.AuthenticatedUser{
-		User: &model.User{},
+		User: model.User{},
 	})
 	expectedErr := errors.New("some error")
 	s := new(service.MockCredentialService)
-	s.On("Retrieve", "", "").Return(uint(0), expectedErr)
+	s.On("GetUserId", "", "").Return(uint(0), expectedErr)
 	cmd := session.CreateAuthenticateCommand(s)
 
 	err := cmd.Run(ctx)
@@ -49,11 +49,11 @@ func TestAuthenticateCommand_GivenOneAndAFailingService_WhenRunning_ThenServiceE
 func TestAuthenticateCommand_GivenOne_WhenRunning_ThenContextHasUserIDAndReturnsNoError(t *testing.T) {
 	ctx := gopipeline.CreateContext()
 	ctx.Set(user.TagAuthenticatedUser, model.AuthenticatedUser{
-		User: &model.User{},
+		User: model.User{},
 	})
 	expectedVal := uint(1000)
 	s := new(service.MockCredentialService)
-	s.On("Retrieve", "", "").Return(expectedVal, nil)
+	s.On("GetUserId", "", "").Return(expectedVal, nil)
 	cmd := session.CreateAuthenticateCommand(s)
 
 	err := cmd.Run(ctx)

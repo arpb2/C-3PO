@@ -23,15 +23,15 @@ type MockTeacherService struct {
 	mock.Mock
 }
 
-func (m MockTeacherService) GetUser(userId uint) (user *model.User, err error) {
+func (m MockTeacherService) GetUser(userId uint) (user model.User, err error) {
 	panic("implement me")
 }
 
-func (m MockTeacherService) CreateUser(authenticatedUser *model.AuthenticatedUser) (user *model.User, err error) {
+func (m MockTeacherService) CreateUser(user model.User) (result model.User, err error) {
 	panic("implement me")
 }
 
-func (m MockTeacherService) UpdateUser(authenticatedUser *model.AuthenticatedUser) (user *model.User, err error) {
+func (m MockTeacherService) UpdateUser(user model.User) (result model.User, err error) {
 	panic("implement me")
 }
 
@@ -39,12 +39,12 @@ func (m MockTeacherService) DeleteUser(userId uint) error {
 	panic("implement me")
 }
 
-func (m MockTeacherService) GetStudents(userId uint) (students *[]model.User, err error) {
+func (m MockTeacherService) GetStudents(userId uint) (students []model.User, err error) {
 	args := m.Called(userId)
 
 	firstArg := args.Get(0)
 	if firstArg != nil {
-		students = firstArg.(*[]model.User)
+		students = firstArg.([]model.User)
 	}
 
 	err = args.Error(1)
@@ -151,7 +151,7 @@ func Test_Multi_HandlingOfAuthentication_Authorized_SameUser(t *testing.T) {
 
 func Test_Multi_HandlingOfAuthentication_Authorized_Student(t *testing.T) {
 	service := new(MockTeacherService)
-	service.On("GetStudents", uint(1001)).Return(&[]model.User{
+	service.On("GetStudents", uint(1001)).Return([]model.User{
 		{
 			Id: 999,
 		},
@@ -184,7 +184,7 @@ func Test_Multi_HandlingOfAuthentication_Authorized_Student(t *testing.T) {
 
 func Test_Multi_HandlingOfAuthentication_Unauthorized_Student(t *testing.T) {
 	service := new(MockTeacherService)
-	service.On("GetStudents", uint(1002)).Return(&[]model.User{
+	service.On("GetStudents", uint(1002)).Return([]model.User{
 		{
 			Id: 1,
 		},
@@ -220,7 +220,7 @@ func Test_Multi_HandlingOfAuthentication_Unauthorized_Student(t *testing.T) {
 
 func Test_Multi_HandlingOfAuthentication_Service_Error(t *testing.T) {
 	service := new(MockTeacherService)
-	service.On("GetStudents", uint(1001)).Return(nil, errors.New("whoops this fails")).Once()
+	service.On("GetStudents", uint(1001)).Return([]model.User{}, errors.New("whoops this fails")).Once()
 
 	e := ginengine.New()
 	e.Register(controller.Controller{

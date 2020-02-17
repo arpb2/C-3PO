@@ -10,7 +10,7 @@ import (
 
 func TestEmptyEmailValidation_Error(t *testing.T) {
 	err := uservalidation.EmptyEmail(&model.AuthenticatedUser{
-		User:     &model.User{},
+		User:     model.User{},
 		Password: "",
 	})
 
@@ -20,7 +20,7 @@ func TestEmptyEmailValidation_Error(t *testing.T) {
 
 func TestEmptyEmailValidation_Success(t *testing.T) {
 	err := uservalidation.EmptyEmail(&model.AuthenticatedUser{
-		User: &model.User{
+		User: model.User{
 			Email: "test@email.com",
 		},
 		Password: "",

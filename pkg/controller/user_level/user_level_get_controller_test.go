@@ -176,7 +176,7 @@ func main() {
 	userLevelService.On("GetUserLevel", uint(1000), uint(1000)).Return(model.UserLevel{
 		UserId:  1000,
 		LevelId: 1000,
-		UserLevelData: &model.UserLevelData{
+		UserLevelData: model.UserLevelData{
 			Code: expectedCode,
 		},
 	}, nil)
@@ -205,7 +205,7 @@ func TestCodeGetControllerBody_200OnEmptyCodeStoredOnService(t *testing.T) {
 	userLevelService.On("GetUserLevel", uint(1000), uint(1000)).Return(model.UserLevel{
 		UserId:  1000,
 		LevelId: 1000,
-		UserLevelData: &model.UserLevelData{
+		UserLevelData: model.UserLevelData{
 			Code: expectedCode,
 		},
 	}, nil)

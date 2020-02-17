@@ -16,6 +16,6 @@ type teacherService struct {
 	userservice.Service
 }
 
-func (t teacherService) GetStudents(userId uint) (students *[]model.User, err error) {
+func (t teacherService) GetStudents(userId uint) (students []model.User, err error) {
 	panic("implement me")
 }

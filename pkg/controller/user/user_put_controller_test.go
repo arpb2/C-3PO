@@ -106,7 +106,7 @@ func TestUserPutControllerBody_500OnServiceCreateError(t *testing.T) {
 	service := new(service.MockUserService)
 	service.On("UpdateUser", mock.MatchedBy(func(obj interface{}) bool {
 		return true
-	})).Return(&model.User{
+	})).Return(model.User{
 		Id:      1234,
 		Email:   "test@email.com",
 		Name:    "test name",
@@ -120,7 +120,7 @@ func TestUserPutControllerBody_500OnServiceCreateError(t *testing.T) {
 	reader.On("ReadBody", mock.MatchedBy(func(obj interface{}) bool {
 		return true
 	})).Run(func(args mock.Arguments) {
-		args.Get(0).(*model.AuthenticatedUser).User = &model.User{
+		args.Get(0).(*model.AuthenticatedUser).User = model.User{
 			Email:   "test@email.com",
 			Name:    "test name",
 			Surname: "test surname",
@@ -142,41 +142,6 @@ func TestUserPutControllerBody_500OnServiceCreateError(t *testing.T) {
 	service.AssertExpectations(t)
 }
 
-func TestUserPutControllerBody_500OnNoUserStoredInService(t *testing.T) {
-	service := new(service.MockUserService)
-	service.On("UpdateUser", mock.MatchedBy(func(obj interface{}) bool {
-		return true
-	})).Return(nil, nil).Once()
-
-	body := usercontroller.CreatePutBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), []uservalidation.Validation{}, service)
-
-	reader := new(testhttpwrapper.MockReader)
-	reader.On("GetParameter", controller2.ParamUserId).Return("1000").Once()
-	reader.On("ReadBody", mock.MatchedBy(func(obj interface{}) bool {
-		return true
-	})).Run(func(args mock.Arguments) {
-		args.Get(0).(*model.AuthenticatedUser).User = &model.User{
-			Email:   "test@email.com",
-			Name:    "test name",
-			Surname: "test surname",
-		}
-		args.Get(0).(*model.AuthenticatedUser).Password = "test password"
-	}).Return(nil).Once()
-
-	c, w := testhttpwrapper.CreateTestContext()
-	c.Reader = reader
-
-	body(c)
-
-	actual := bytes.TrimSpace([]byte(w.Body.String()))
-	expected := golden.Get(t, actual, "internal_error.missing_user.update.service.golden.json")
-
-	assert.Equal(t, http.StatusInternalServerError, w.Code)
-	assert.Equal(t, expected, actual)
-	reader.AssertExpectations(t)
-	service.AssertExpectations(t)
-}
-
 func TestUserPutControllerBody_400OnIdSpecified(t *testing.T) {
 	service := new(service.MockUserService)
 
@@ -187,7 +152,7 @@ func TestUserPutControllerBody_400OnIdSpecified(t *testing.T) {
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetParameter", controller2.ParamUserId).Return("1000").Once()
 	reader.On("ReadBody", mock.MatchedBy(func(obj *model.AuthenticatedUser) bool {
-		obj.User = &model.User{
+		obj.User = model.User{
 			Id: 1000,
 		}
 		return true
@@ -208,7 +173,7 @@ func TestUserPutControllerBody_400OnIdSpecified(t *testing.T) {
 }
 
 func TestUserPutControllerBody_200OnUserStoredOnService(t *testing.T) {
-	expectedUser := &model.User{
+	expectedUser := model.User{
 		Id:      1000,
 		Email:   "test@email.com",
 		Name:    "TestName",
@@ -226,7 +191,7 @@ func TestUserPutControllerBody_200OnUserStoredOnService(t *testing.T) {
 	reader.On("ReadBody", mock.MatchedBy(func(obj *model.AuthenticatedUser) bool {
 		return true
 	})).Run(func(args mock.Arguments) {
-		args.Get(0).(*model.AuthenticatedUser).User = &model.User{
+		args.Get(0).(*model.AuthenticatedUser).User = model.User{
 			Email:   "test@email.com",
 			Name:    "test name",
 			Surname: "test surname",

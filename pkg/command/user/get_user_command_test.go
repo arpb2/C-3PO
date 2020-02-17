@@ -50,7 +50,7 @@ func TestGetUserCommand_GivenOneAndANoUserCreatedService_WhenRunning_Then404(t *
 	ctx.Set(user.TagUserId, expectedVal)
 	expectedErr := http.CreateNotFoundError()
 	s := new(service.MockUserService)
-	s.On("GetUser", expectedVal).Return(nil, nil)
+	s.On("GetUser", expectedVal).Return(model.User{}, http.CreateNotFoundError())
 	cmd := user.CreateGetUserCommand(s)
 
 	err := cmd.Run(ctx)
@@ -64,7 +64,7 @@ func TestGetUserCommand_GivenOne_WhenRunning_ThenContextHasUserAndReturnsNoError
 	ctx := gopipeline.CreateContext()
 	ctx.Set(user.TagUserId, uint(1000))
 	s := new(service.MockUserService)
-	s.On("GetUser", uint(1000)).Return(&expectedVal, nil)
+	s.On("GetUser", uint(1000)).Return(expectedVal, nil)
 	cmd := user.CreateGetUserCommand(s)
 
 	err := cmd.Run(ctx)

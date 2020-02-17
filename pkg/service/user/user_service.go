@@ -11,15 +11,15 @@ func CreateService() userservice.Service {
 
 type userService struct{}
 
-func (u userService) GetUser(userId uint) (user *model.User, err error) {
+func (u userService) GetUser(userId uint) (user model.User, err error) {
 	panic("implement me")
 }
 
-func (u userService) CreateUser(authenticatedUser *model.AuthenticatedUser) (user *model.User, err error) {
+func (u userService) CreateUser(user model.User) (result model.User, err error) {
 	panic("implement me")
 }
 
-func (u userService) UpdateUser(authenticatedUser *model.AuthenticatedUser) (user *model.User, err error) {
+func (u userService) UpdateUser(user model.User) (result model.User, err error) {
 	panic("implement me")
 }
 

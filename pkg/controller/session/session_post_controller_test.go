@@ -43,7 +43,7 @@ func TestPostController_FetchUserIdTask_FailsOnValidationFail(t *testing.T) {
 
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("ReadBody", mock.MatchedBy(func(obj *model.AuthenticatedUser) bool {
-		obj.User = &model.User{
+		obj.User = model.User{
 			Email: "test@email.com",
 		}
 		obj.Password = "test password"
@@ -85,7 +85,7 @@ func TestFetchUserIdTaskImpl_FailsOnServiceFailure(t *testing.T) {
 
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("ReadBody", mock.MatchedBy(func(obj *model.AuthenticatedUser) bool {
-		obj.User = &model.User{
+		obj.User = model.User{
 			Email: "test@email.com",
 		}
 		obj.Password = "testpassword"
@@ -93,7 +93,7 @@ func TestFetchUserIdTaskImpl_FailsOnServiceFailure(t *testing.T) {
 	})).Return(nil).Once()
 
 	service := new(service.MockCredentialService)
-	service.On("Retrieve", "test@email.com", "testpassword").Return(uint(0), httpwrapper.CreateInternalError()).Once()
+	service.On("GetUserId", "test@email.com", "testpassword").Return(uint(0), httpwrapper.CreateInternalError()).Once()
 
 	var validations []uservalidation.Validation
 
@@ -121,7 +121,7 @@ func TestFetchUserIdTaskImpl_FailsOnTokenFailure(t *testing.T) {
 
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("ReadBody", mock.MatchedBy(func(obj *model.AuthenticatedUser) bool {
-		obj.User = &model.User{
+		obj.User = model.User{
 			Email: "test@email.com",
 		}
 		obj.Password = "testpassword"
@@ -131,7 +131,7 @@ func TestFetchUserIdTaskImpl_FailsOnTokenFailure(t *testing.T) {
 	var validations []uservalidation.Validation
 
 	credentialService := new(service.MockCredentialService)
-	credentialService.On("Retrieve", "test@email.com", "testpassword").Return(uint(1000), nil)
+	credentialService.On("GetUserId", "test@email.com", "testpassword").Return(uint(1000), nil)
 
 	tokenHandler := new(testauth.MockTokenHandler)
 	tokenHandler.On("Create", mock.MatchedBy(func(tkn *auth.Token) bool {
@@ -168,7 +168,7 @@ func TestFetchUserIdTaskImpl_SuccessReturnsToken(t *testing.T) {
 
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("ReadBody", mock.MatchedBy(func(obj *model.AuthenticatedUser) bool {
-		obj.User = &model.User{
+		obj.User = model.User{
 			Email: "test@email.com",
 		}
 		obj.Password = "test password"
@@ -178,7 +178,7 @@ func TestFetchUserIdTaskImpl_SuccessReturnsToken(t *testing.T) {
 	var validations []uservalidation.Validation
 
 	credentialService := new(service.MockCredentialService)
-	credentialService.On("Retrieve", "test@email.com", "test password").Return(uint(1000), nil)
+	credentialService.On("GetUserId", "test@email.com", "test password").Return(uint(1000), nil)
 
 	tokenHandler := new(testauth.MockTokenHandler)
 	tokenHandler.On("Create", mock.MatchedBy(func(tkn *auth.Token) bool {

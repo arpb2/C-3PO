@@ -35,22 +35,7 @@ func TestCreateUserCommand_GivenOneAndAFailingService_WhenRunning_ThenServiceErr
 	ctx.Set(user.TagAuthenticatedUser, expectedVal)
 	expectedErr := errors.New("some error")
 	s := new(service.MockUserService)
-	s.On("CreateUser", &expectedVal).Return(nil, expectedErr)
-	cmd := user.CreateCreateUserCommand(s)
-
-	err := cmd.Run(ctx)
-
-	assert.Equal(t, expectedErr, err)
-	s.AssertExpectations(t)
-}
-
-func TestCreateUserCommand_GivenOneAndANoUserCreatedService_WhenRunning_ThenInternalError(t *testing.T) {
-	expectedVal := model.AuthenticatedUser{}
-	ctx := gopipeline.CreateContext()
-	ctx.Set(user.TagAuthenticatedUser, expectedVal)
-	expectedErr := http.CreateInternalError()
-	s := new(service.MockUserService)
-	s.On("CreateUser", &expectedVal).Return(nil, nil)
+	s.On("CreateUser", expectedVal.User).Return(expectedVal.User, expectedErr)
 	cmd := user.CreateCreateUserCommand(s)
 
 	err := cmd.Run(ctx)
@@ -60,13 +45,11 @@ func TestCreateUserCommand_GivenOneAndANoUserCreatedService_WhenRunning_ThenInte
 }
 
 func TestCreateUserCommand_GivenOne_WhenRunning_ThenContextHasUserAndReturnsNoError(t *testing.T) {
-	expectedVal := model.AuthenticatedUser{
-		User: &model.User{},
-	}
+	expectedVal := model.AuthenticatedUser{}
 	ctx := gopipeline.CreateContext()
 	ctx.Set(user.TagAuthenticatedUser, expectedVal)
 	s := new(service.MockUserService)
-	s.On("CreateUser", &expectedVal).Return(&expectedVal, nil)
+	s.On("CreateUser", expectedVal.User).Return(expectedVal.User, nil)
 	cmd := user.CreateCreateUserCommand(s)
 
 	err := cmd.Run(ctx)
@@ -74,6 +57,6 @@ func TestCreateUserCommand_GivenOne_WhenRunning_ThenContextHasUserAndReturnsNoEr
 
 	assert.Nil(t, err)
 	assert.True(t, exists)
-	assert.Equal(t, *expectedVal.User, val)
+	assert.Equal(t, expectedVal.User, val)
 	s.AssertExpectations(t)
 }

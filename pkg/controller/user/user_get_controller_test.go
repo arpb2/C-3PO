@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"testing"
 
+	http2 "github.com/arpb2/C-3PO/api/http"
+
 	controller2 "github.com/arpb2/C-3PO/pkg/controller"
 
 	"github.com/arpb2/C-3PO/pkg/pipeline"
@@ -99,7 +101,7 @@ func TestUserGetControllerBody_500OnServiceReadError(t *testing.T) {
 
 func TestUserGetControllerBody_400OnNoUserStoredInService(t *testing.T) {
 	service := new(service.MockUserService)
-	service.On("GetUser", uint(1000)).Return(nil, nil).Once()
+	service.On("GetUser", uint(1000)).Return(model.User{}, http2.CreateNotFoundError()).Once()
 
 	body := usercontroller.CreateGetBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), service)
 
@@ -121,7 +123,7 @@ func TestUserGetControllerBody_400OnNoUserStoredInService(t *testing.T) {
 }
 
 func TestUserGetControllerBody_200OnUserStoredOnService(t *testing.T) {
-	expectedUser := &model.User{
+	expectedUser := model.User{
 		Id:      1000,
 		Email:   "test@email.com",
 		Name:    "TestName",

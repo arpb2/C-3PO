@@ -9,38 +9,30 @@ type MockUserService struct {
 	mock.Mock
 }
 
-func (m MockUserService) GetUser(userId uint) (user *model.User, err error) {
+func (m MockUserService) GetUser(userId uint) (user model.User, err error) {
 	args := m.Called(userId)
 
 	firstParam := args.Get(0)
 	if firstParam != nil {
-		user = firstParam.(*model.User)
+		user = firstParam.(model.User)
 	}
 
 	err = args.Error(1)
 	return
 }
 
-func (m MockUserService) CreateUser(authenticatedUser *model.AuthenticatedUser) (user *model.User, err error) {
-	args := m.Called(authenticatedUser)
+func (m MockUserService) CreateUser(user model.User) (result model.User, err error) {
+	args := m.Called(user)
 
-	firstParam := args.Get(0)
-	if firstParam != nil {
-		user = firstParam.(*model.AuthenticatedUser).User
-	}
-
+	result = args.Get(0).(model.User)
 	err = args.Error(1)
 	return
 }
 
-func (m MockUserService) UpdateUser(authenticatedUser *model.AuthenticatedUser) (user *model.User, err error) {
-	args := m.Called(authenticatedUser)
+func (m MockUserService) UpdateUser(user model.User) (result model.User, err error) {
+	args := m.Called(user)
 
-	firstParam := args.Get(0)
-	if firstParam != nil {
-		user = firstParam.(*model.User)
-	}
-
+	result = args.Get(0).(model.User)
 	err = args.Error(1)
 	return
 }

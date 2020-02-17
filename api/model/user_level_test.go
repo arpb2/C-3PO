@@ -14,7 +14,7 @@ func TestCode_ToJson(t *testing.T) {
 	code := &model.UserLevel{
 		LevelId: uint(1),
 		UserId:  uint(5),
-		UserLevelData: &model.UserLevelData{
+		UserLevelData: model.UserLevelData{
 			Code:      "some code written here",
 			Workspace: "test",
 		},
@@ -30,7 +30,7 @@ func TestCode_FromJson(t *testing.T) {
 	expectedCode := &model.UserLevel{
 		LevelId: 1,
 		UserId:  5,
-		UserLevelData: &model.UserLevelData{
+		UserLevelData: model.UserLevelData{
 			Code:      "some code written here",
 			Workspace: "test",
 		},

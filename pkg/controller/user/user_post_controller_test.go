@@ -55,7 +55,7 @@ func TestUserPostControllerBody_500OnServiceCreateError(t *testing.T) {
 	service := new(service.MockUserService)
 	service.On("CreateUser", mock.MatchedBy(func(obj interface{}) bool {
 		return true
-	})).Return(&model.AuthenticatedUser{}, errors.New("whoops error")).Once()
+	})).Return(model.User{}, errors.New("whoops error")).Once()
 
 	body := usercontroller.CreatePostBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), []uservalidation.Validation{}, service)
 
@@ -78,36 +78,9 @@ func TestUserPostControllerBody_500OnServiceCreateError(t *testing.T) {
 	service.AssertExpectations(t)
 }
 
-func TestUserPostControllerBody_500OnNoUserStoredInService(t *testing.T) {
-	service := new(service.MockUserService)
-	service.On("CreateUser", mock.MatchedBy(func(obj interface{}) bool {
-		return true
-	})).Return(nil, nil).Once()
-
-	body := usercontroller.CreatePostBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), []uservalidation.Validation{}, service)
-
-	reader := new(testhttpwrapper.MockReader)
-	reader.On("ReadBody", mock.MatchedBy(func(obj interface{}) bool {
-		return true
-	})).Return(nil).Once()
-
-	c, w := testhttpwrapper.CreateTestContext()
-	c.Reader = reader
-
-	body(c)
-
-	actual := bytes.TrimSpace([]byte(w.Body.String()))
-	expected := golden.Get(t, actual, "internal_error.missing_user.write.service.golden.json")
-
-	assert.Equal(t, http.StatusInternalServerError, w.Code)
-	assert.Equal(t, expected, actual)
-	reader.AssertExpectations(t)
-	service.AssertExpectations(t)
-}
-
 func TestUserPostControllerBody_200OnUserStoredOnService(t *testing.T) {
 	expectedUser := &model.AuthenticatedUser{
-		User: &model.User{
+		User: model.User{
 			Id:      1000,
 			Email:   "test@email.com",
 			Name:    "TestName",
@@ -118,7 +91,7 @@ func TestUserPostControllerBody_200OnUserStoredOnService(t *testing.T) {
 	service := new(service.MockUserService)
 	service.On("CreateUser", mock.MatchedBy(func(obj interface{}) bool {
 		return true
-	})).Return(expectedUser, nil).Once()
+	})).Return(expectedUser.User, nil).Once()
 
 	body := usercontroller.CreatePostBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), []uservalidation.Validation{}, service)
 

@@ -45,10 +45,10 @@ func Test_Get(t *testing.T) {
 
 	// Add code to retrieve
 	code := "expected code"
-	createdCode, err := userlevelservice.CreateService().WriteUserLevel(model.UserLevel{
+	createdCode, err := userlevelservice.CreateService().StoreUserLevel(model.UserLevel{
 		UserId:  1000,
 		LevelId: 1,
-		UserLevelData: &model.UserLevelData{
+		UserLevelData: model.UserLevelData{
 			Code: code,
 		},
 	})
@@ -91,10 +91,10 @@ func Test_Put(t *testing.T) {
 
 	// Add code to replace
 	code := "test code"
-	userLevel, err := userlevelservice.CreateService().WriteUserLevel(model.UserLevel{
+	userLevel, err := userlevelservice.CreateService().StoreUserLevel(model.UserLevel{
 		UserId:  1000,
 		LevelId: 1,
-		UserLevelData: &model.UserLevelData{
+		UserLevelData: model.UserLevelData{
 			Code: code,
 		},
 	})

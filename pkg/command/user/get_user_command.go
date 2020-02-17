@@ -27,11 +27,7 @@ func (c *getUserCommand) Run(ctx pipeline.Context) error {
 		return err
 	}
 
-	if user == nil {
-		return http.CreateNotFoundError()
-	}
-
-	ctx.Set(TagUser, *user)
+	ctx.Set(TagUser, user)
 	return nil
 }
 

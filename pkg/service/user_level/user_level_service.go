@@ -22,7 +22,7 @@ func (c *userLevelService) GetUserLevel(userId uint, levelId uint) (userLevel mo
 	return val, nil
 }
 
-func (c *userLevelService) WriteUserLevel(data model.UserLevel) (result model.UserLevel, err error) {
+func (c *userLevelService) StoreUserLevel(data model.UserLevel) (result model.UserLevel, err error) {
 	inMemory[data.UserId] = map[uint]model.UserLevel{}
 	inMemory[data.UserId][data.LevelId] = data
 	return inMemory[data.UserId][data.LevelId], nil

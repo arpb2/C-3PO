@@ -10,7 +10,7 @@ import (
 
 func TestSecurePasswordValidation_Error(t *testing.T) {
 	err := uservalidation.SecurePassword(&model.AuthenticatedUser{
-		User:     &model.User{},
+		User:     model.User{},
 		Password: "1234567",
 	})
 
@@ -20,7 +20,7 @@ func TestSecurePasswordValidation_Error(t *testing.T) {
 
 func TestSecurePasswordValidation_Success(t *testing.T) {
 	err := uservalidation.SecurePassword(&model.AuthenticatedUser{
-		User:     &model.User{},
+		User:     model.User{},
 		Password: "12345678",
 	})
 

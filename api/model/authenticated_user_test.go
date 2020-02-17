@@ -12,7 +12,7 @@ func TestAuthenticatedUser_ToJson(t *testing.T) {
 	expectedJson := `{"id":0,"email":"test@email.com","name":"test name","surname":"test surname","password":"test password"}`
 
 	user := &model.AuthenticatedUser{
-		User: &model.User{
+		User: model.User{
 			Id:      0,
 			Name:    "test name",
 			Surname: "test surname",
@@ -29,7 +29,7 @@ func TestAuthenticatedUser_ToJson(t *testing.T) {
 
 func TestAuthenticatedUser_FromJson(t *testing.T) {
 	expectedUser := &model.AuthenticatedUser{
-		User: &model.User{
+		User: model.User{
 			Id:      0,
 			Name:    "test name",
 			Surname: "test surname",

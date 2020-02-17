@@ -31,7 +31,7 @@ func (s teacherAuthenticationStrategy) Authenticate(token *auth.Token, userId st
 	}
 
 	if students != nil {
-		for _, student := range *students {
+		for _, student := range students {
 			if strconv.FormatUint(uint64(student.Id), 10) == userId {
 				return true, nil
 			}

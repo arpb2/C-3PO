@@ -10,7 +10,7 @@ import (
 
 func TestIdProvidedValidation_Error(t *testing.T) {
 	err := uservalidation.IdProvided(&model.AuthenticatedUser{
-		User: &model.User{
+		User: model.User{
 			Id: 1000,
 		},
 		Password: "",
@@ -22,7 +22,7 @@ func TestIdProvidedValidation_Error(t *testing.T) {
 
 func TestIdProvidedValidation_Success(t *testing.T) {
 	err := uservalidation.IdProvided(&model.AuthenticatedUser{
-		User:     &model.User{},
+		User:     model.User{},
 		Password: "",
 	})
 
