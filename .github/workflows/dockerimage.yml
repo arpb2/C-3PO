@@ -10,3 +10,20 @@ jobs:
     - name: Build
       run: docker build . --file Dockerfile --tag c3po:$(date +%s)
 
+    - name: Fmt
+      run: gofmt -l .  | if [ $(grep -c -o -E ".*") -gt 0 ]; then exit 1; fi
+
+    - name: Build
+      run: go build ./...
+
+    - name: Test
+      run: go test ./pkg/...
+
+    - name: Integration test
+      run: |
+        sudo rm /usr/local/bin/docker-compose
+        curl -L https://github.com/docker/compose/releases/download/1.24.1/docker-compose-`uname -s`-`uname -m` > docker-compose
+        chmod +x docker-compose
+        sudo mv docker-compose /usr/local/bin
+        docker-compose up --build -d
+        sudo docker-compose run go go test ./test/...

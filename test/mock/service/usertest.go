@@ -21,7 +21,7 @@ func (m MockUserService) GetUser(userId uint) (user model.User, err error) {
 	return
 }
 
-func (m MockUserService) CreateUser(user model.User) (result model.User, err error) {
+func (m MockUserService) CreateUser(user model.AuthenticatedUser) (result model.User, err error) {
 	args := m.Called(user)
 
 	result = args.Get(0).(model.User)
@@ -29,7 +29,7 @@ func (m MockUserService) CreateUser(user model.User) (result model.User, err err
 	return
 }
 
-func (m MockUserService) UpdateUser(user model.User) (result model.User, err error) {
+func (m MockUserService) UpdateUser(user model.AuthenticatedUser) (result model.User, err error) {
 	args := m.Called(user)
 
 	result = args.Get(0).(model.User)

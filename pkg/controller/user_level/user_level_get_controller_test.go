@@ -19,9 +19,6 @@ import (
 	userlevelcontroller "github.com/arpb2/C-3PO/pkg/controller/user_level"
 	"github.com/arpb2/C-3PO/pkg/executor"
 	"github.com/arpb2/C-3PO/pkg/middleware/auth/teacher"
-	teacherservice "github.com/arpb2/C-3PO/pkg/service/teacher"
-	userservice "github.com/arpb2/C-3PO/pkg/service/user"
-	userlevelservice "github.com/arpb2/C-3PO/pkg/service/user_level"
 	"github.com/arpb2/C-3PO/test/mock/golden"
 	testhttpwrapper "github.com/arpb2/C-3PO/test/mock/http"
 	"github.com/arpb2/C-3PO/test/mock/service"
@@ -33,9 +30,9 @@ func createGetController() controller.Controller {
 		pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()),
 		teacher.CreateMiddleware(
 			jwt.CreateTokenHandler(),
-			teacherservice.CreateService(userservice.CreateService()),
+			nil,
 		),
-		userlevelservice.CreateService(),
+		nil,
 	)
 }
 

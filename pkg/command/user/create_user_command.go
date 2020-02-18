@@ -23,7 +23,7 @@ func (c *createUserCommand) Run(ctx pipeline.Context) error {
 		return err
 	}
 
-	user, err := c.service.CreateUser(authenticatedUser.User)
+	user, err := c.service.CreateUser(authenticatedUser)
 
 	if err != nil {
 		return err

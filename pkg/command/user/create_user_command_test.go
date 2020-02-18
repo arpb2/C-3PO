@@ -35,7 +35,7 @@ func TestCreateUserCommand_GivenOneAndAFailingService_WhenRunning_ThenServiceErr
 	ctx.Set(user.TagAuthenticatedUser, expectedVal)
 	expectedErr := errors.New("some error")
 	s := new(service.MockUserService)
-	s.On("CreateUser", expectedVal.User).Return(expectedVal.User, expectedErr)
+	s.On("CreateUser", expectedVal).Return(expectedVal.User, expectedErr)
 	cmd := user.CreateCreateUserCommand(s)
 
 	err := cmd.Run(ctx)
@@ -49,7 +49,7 @@ func TestCreateUserCommand_GivenOne_WhenRunning_ThenContextHasUserAndReturnsNoEr
 	ctx := gopipeline.CreateContext()
 	ctx.Set(user.TagAuthenticatedUser, expectedVal)
 	s := new(service.MockUserService)
-	s.On("CreateUser", expectedVal.User).Return(expectedVal.User, nil)
+	s.On("CreateUser", expectedVal).Return(expectedVal.User, nil)
 	cmd := user.CreateCreateUserCommand(s)
 
 	err := cmd.Run(ctx)

@@ -19,7 +19,6 @@ import (
 	usercontroller "github.com/arpb2/C-3PO/pkg/controller/user"
 	"github.com/arpb2/C-3PO/pkg/executor"
 	"github.com/arpb2/C-3PO/pkg/middleware/auth/single"
-	userservice "github.com/arpb2/C-3PO/pkg/service/user"
 	"github.com/arpb2/C-3PO/test/mock/golden"
 	testhttpwrapper "github.com/arpb2/C-3PO/test/mock/http"
 	"github.com/arpb2/C-3PO/test/mock/service"
@@ -32,7 +31,7 @@ func createGetController() controller.Controller {
 		single.CreateMiddleware(
 			jwt.CreateTokenHandler(),
 		),
-		userservice.CreateService(),
+		nil,
 	)
 }
 

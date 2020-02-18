@@ -12,7 +12,6 @@ import (
 	"github.com/arpb2/C-3PO/api/model"
 	usercontroller "github.com/arpb2/C-3PO/pkg/controller/user"
 	"github.com/arpb2/C-3PO/pkg/executor"
-	userservice "github.com/arpb2/C-3PO/pkg/service/user"
 	uservalidation "github.com/arpb2/C-3PO/pkg/validation/user"
 	"github.com/arpb2/C-3PO/test/mock/golden"
 	testhttpwrapper "github.com/arpb2/C-3PO/test/mock/http"
@@ -22,7 +21,7 @@ import (
 )
 
 func createPostController() controller.Controller {
-	return usercontroller.CreatePostController(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), []uservalidation.Validation{}, userservice.CreateService())
+	return usercontroller.CreatePostController(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), []uservalidation.Validation{}, nil)
 }
 
 func TestUserPostControllerMethodIsPOST(t *testing.T) {

@@ -15,13 +15,4 @@ ENV IGNORE_GO_GET="false"
 WORKDIR /go/src/github.com/arpb2/C-3PO
 COPY . ./
 
-RUN echo "Checking go fmt formatting" && \
-  gofmt -l .  | if [ $(grep -c -o -E ".*") -gt 0 ]; then exit 1; fi
-
-RUN echo "Running go build" && \
-  go build ./...
-
-RUN echo "Running go test" && \
-  go test ./...
-
 CMD [ "go", "run", "cmd/c3po/main.go" ]

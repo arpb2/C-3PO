@@ -6,9 +6,14 @@
 bin/
 coverage/
 
+.docker/
+
 # Folders
 _obj
 _test
+
+# Ent ignores
+ent/example_test.go
 
 # Architecture specific extensions/prefixes
 *.[568vq]

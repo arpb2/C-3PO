@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"testing"
 
@@ -43,12 +44,16 @@ func (server FailingServerEngineMock) Shutdown() error {
 }
 
 func TestStartApplicationSuccess(t *testing.T) {
+	os.Setenv("MYSQL_DSN", "root:password@tcp(localhost:3306)/db")
+	defer os.Unsetenv("MYSQL_DSN")
 	err := server.StartApplication(&ServerEngineMock{})
 
 	assert.Nil(t, err)
 }
 
 func TestStartApplicationFailureIsHandled(t *testing.T) {
+	os.Setenv("MYSQL_DSN", "root:password@tcp(localhost:3306)/db")
+	defer os.Unsetenv("MYSQL_DSN")
 	err := server.StartApplication(&FailingServerEngineMock{})
 
 	assert.NotNil(t, err)
@@ -56,8 +61,13 @@ func TestStartApplicationFailureIsHandled(t *testing.T) {
 }
 
 func TestHealthGet(test *testing.T) {
+	os.Setenv("MYSQL_DSN", "root:password@tcp(localhost:3306)/db")
+	defer os.Unsetenv("MYSQL_DSN")
+
 	engine := ginengine.New()
-	server.RegisterRoutes(engine, server.CreateBinders())
+	binders, deferClose := server.CreateBinders()
+	defer deferClose()
+	server.RegisterRoutes(engine, binders)
 
 	w := performRequest(engine, "GET", "/ping", "")
 
@@ -66,8 +76,13 @@ func TestHealthGet(test *testing.T) {
 }
 
 func TestUserLevelGetRegistered(test *testing.T) {
+	os.Setenv("MYSQL_DSN", "root:password@tcp(localhost:3306)/db")
+	defer os.Unsetenv("MYSQL_DSN")
+
 	engine := ginengine.New()
-	server.RegisterRoutes(engine, server.CreateBinders())
+	binders, deferClose := server.CreateBinders()
+	defer deferClose()
+	server.RegisterRoutes(engine, binders)
 
 	w := performRequest(engine, "GET", "/users/1/levels/1", "")
 
@@ -75,8 +90,13 @@ func TestUserLevelGetRegistered(test *testing.T) {
 }
 
 func TestUserLevelPutRegistered(test *testing.T) {
+	os.Setenv("MYSQL_DSN", "root:password@tcp(localhost:3306)/db")
+	defer os.Unsetenv("MYSQL_DSN")
+
 	engine := ginengine.New()
-	server.RegisterRoutes(engine, server.CreateBinders())
+	binders, deferClose := server.CreateBinders()
+	defer deferClose()
+	server.RegisterRoutes(engine, binders)
 
 	w := performRequest(engine, "PUT", "/users/1/levels/1", "")
 
@@ -84,8 +104,13 @@ func TestUserLevelPutRegistered(test *testing.T) {
 }
 
 func TestUserGetRegistered(test *testing.T) {
+	os.Setenv("MYSQL_DSN", "root:password@tcp(localhost:3306)/db")
+	defer os.Unsetenv("MYSQL_DSN")
+
 	engine := ginengine.New()
-	server.RegisterRoutes(engine, server.CreateBinders())
+	binders, deferClose := server.CreateBinders()
+	defer deferClose()
+	server.RegisterRoutes(engine, binders)
 
 	w := performRequest(engine, "GET", "/users/1", "")
 
@@ -93,8 +118,13 @@ func TestUserGetRegistered(test *testing.T) {
 }
 
 func TestUserPostRegistered(test *testing.T) {
+	os.Setenv("MYSQL_DSN", "root:password@tcp(localhost:3306)/db")
+	defer os.Unsetenv("MYSQL_DSN")
+
 	engine := ginengine.New()
-	server.RegisterRoutes(engine, server.CreateBinders())
+	binders, deferClose := server.CreateBinders()
+	defer deferClose()
+	server.RegisterRoutes(engine, binders)
 
 	w := performRequest(engine, "POST", "/users", "")
 
@@ -102,8 +132,13 @@ func TestUserPostRegistered(test *testing.T) {
 }
 
 func TestUserPutRegistered(test *testing.T) {
+	os.Setenv("MYSQL_DSN", "root:password@tcp(localhost:3306)/db")
+	defer os.Unsetenv("MYSQL_DSN")
+
 	engine := ginengine.New()
-	server.RegisterRoutes(engine, server.CreateBinders())
+	binders, deferClose := server.CreateBinders()
+	defer deferClose()
+	server.RegisterRoutes(engine, binders)
 
 	w := performRequest(engine, "PUT", "/users/1", "")
 
@@ -111,8 +146,13 @@ func TestUserPutRegistered(test *testing.T) {
 }
 
 func TestUserDeleteRegistered(test *testing.T) {
+	os.Setenv("MYSQL_DSN", "root:password@tcp(localhost:3306)/db")
+	defer os.Unsetenv("MYSQL_DSN")
+
 	engine := ginengine.New()
-	server.RegisterRoutes(engine, server.CreateBinders())
+	binders, deferClose := server.CreateBinders()
+	defer deferClose()
+	server.RegisterRoutes(engine, binders)
 
 	w := performRequest(engine, "DELETE", "/users/1", "")
 
@@ -120,8 +160,13 @@ func TestUserDeleteRegistered(test *testing.T) {
 }
 
 func TestSessionPostRegistered(test *testing.T) {
+	os.Setenv("MYSQL_DSN", "root:password@tcp(localhost:3306)/db")
+	defer os.Unsetenv("MYSQL_DSN")
+
 	engine := ginengine.New()
-	server.RegisterRoutes(engine, server.CreateBinders())
+	binders, deferClose := server.CreateBinders()
+	defer deferClose()
+	server.RegisterRoutes(engine, binders)
 
 	w := performRequest(engine, "POST", "/session", "")
 

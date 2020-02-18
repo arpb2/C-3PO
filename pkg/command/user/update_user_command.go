@@ -27,7 +27,7 @@ func (c *updateUserCommand) Run(ctx pipeline.Context) error {
 
 	authenticatedUser.Id = userId
 
-	user, err := c.service.UpdateUser(authenticatedUser.User)
+	user, err := c.service.UpdateUser(authenticatedUser)
 
 	if err != nil {
 		return err

@@ -51,7 +51,7 @@ func TestUpdateUserCommand_GivenOneAndAFailingService_WhenRunning_ThenServiceErr
 	ctx.Set(user.TagAuthenticatedUser, expectedVal)
 	expectedErr := errors.New("some error")
 	s := new(service.MockUserService)
-	s.On("UpdateUser", expectedVal.User).Return(expectedVal.User, expectedErr)
+	s.On("UpdateUser", expectedVal).Return(expectedVal.User, expectedErr)
 	cmd := user.CreateUpdateUserCommand(s)
 
 	err := cmd.Run(ctx)
@@ -70,7 +70,7 @@ func TestUpdateUserCommand_GivenOne_WhenRunning_ThenContextHasUserAndReturnsNoEr
 	ctx.Set(user.TagUserId, uint(1000))
 	ctx.Set(user.TagAuthenticatedUser, expectedVal)
 	s := new(service.MockUserService)
-	s.On("UpdateUser", expectedVal.User).Return(expectedVal.User, nil)
+	s.On("UpdateUser", expectedVal).Return(expectedVal.User, nil)
 	cmd := user.CreateUpdateUserCommand(s)
 
 	err := cmd.Run(ctx)
