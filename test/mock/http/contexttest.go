@@ -3,8 +3,8 @@ package http
 import (
 	"net/http/httptest"
 
-	"github.com/arpb2/C-3PO/api/http"
-	internal "github.com/arpb2/C-3PO/pkg/http/gin"
+	"github.com/arpb2/C-3PO/pkg/domain/http"
+	internal "github.com/arpb2/C-3PO/pkg/infra/http/gin"
 	"github.com/gin-gonic/gin"
 )
 

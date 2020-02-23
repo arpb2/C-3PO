@@ -2,17 +2,17 @@ package main
 
 import (
 	"fmt"
+	controller2 "github.com/arpb2/C-3PO/pkg/presentation/session/controller"
+	controller3 "github.com/arpb2/C-3PO/pkg/presentation/user/controller"
+	controller4 "github.com/arpb2/C-3PO/pkg/presentation/user_level/controller"
 	"os"
 
 	gopipeline "github.com/saantiaguilera/go-pipeline"
 
-	"github.com/arpb2/C-3PO/api/controller"
-	"github.com/arpb2/C-3PO/api/http"
-	"github.com/arpb2/C-3PO/api/pipeline"
-	"github.com/arpb2/C-3PO/pkg/controller/session"
-	"github.com/arpb2/C-3PO/pkg/controller/user"
-	"github.com/arpb2/C-3PO/pkg/controller/user_level"
-	pipeline2 "github.com/arpb2/C-3PO/pkg/pipeline"
+	"github.com/arpb2/C-3PO/pkg/domain/controller"
+	"github.com/arpb2/C-3PO/pkg/domain/http"
+	"github.com/arpb2/C-3PO/pkg/domain/pipeline"
+	pipeline2 "github.com/arpb2/C-3PO/pkg/infra/pipeline"
 )
 
 func createDrawablePipeline(fileName string) pipeline.HttpPipeline {
@@ -32,13 +32,13 @@ func createDrawablePipeline(fileName string) pipeline.HttpPipeline {
 
 func getPipelinedControllers() []controller.Controller {
 	return []controller.Controller{
-		user_level.CreateGetController(createDrawablePipeline("user_level_get_controller"), nil, nil),
-		user_level.CreatePutController(createDrawablePipeline("user_level_put_controller"), nil, nil),
-		session.CreatePostController(createDrawablePipeline("session_post_controller"), nil, nil, nil),
-		user.CreateGetController(createDrawablePipeline("user_get_controller"), nil, nil),
-		user.CreatePostController(createDrawablePipeline("user_post_controller"), nil, nil),
-		user.CreatePutController(createDrawablePipeline("user_put_controller"), nil, nil, nil),
-		user.CreateDeleteController(createDrawablePipeline("user_delete_controller"), nil, nil),
+		controller4.CreateGetController(createDrawablePipeline("user_level_get_controller"), nil, nil),
+		controller4.CreatePutController(createDrawablePipeline("user_level_put_controller"), nil, nil),
+		controller2.CreatePostController(createDrawablePipeline("session_post_controller"), nil, nil, nil),
+		controller3.CreateGetController(createDrawablePipeline("user_get_controller"), nil, nil),
+		controller3.CreatePostController(createDrawablePipeline("user_post_controller"), nil, nil),
+		controller3.CreatePutController(createDrawablePipeline("user_put_controller"), nil, nil, nil),
+		controller3.CreateDeleteController(createDrawablePipeline("user_delete_controller"), nil, nil),
 	}
 }
 

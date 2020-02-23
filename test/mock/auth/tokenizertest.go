@@ -1,7 +1,7 @@
 package auth
 
 import (
-	"github.com/arpb2/C-3PO/api/auth"
+	"github.com/arpb2/C-3PO/pkg/domain/auth"
 	"github.com/stretchr/testify/mock"
 )
 

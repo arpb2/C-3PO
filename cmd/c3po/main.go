@@ -1,8 +1,8 @@
 package main
 
 import (
-	engine "github.com/arpb2/C-3PO/pkg/engine/gin"
-	"github.com/arpb2/C-3PO/pkg/server"
+	engine "github.com/arpb2/C-3PO/pkg/infra/engine/gin"
+	"github.com/arpb2/C-3PO/pkg/infra/server"
 )
 
 func main() {

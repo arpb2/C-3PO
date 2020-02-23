@@ -1,7 +1,7 @@
 package service
 
 import (
-	"github.com/arpb2/C-3PO/api/model"
+	"github.com/arpb2/C-3PO/pkg/domain/model"
 	"github.com/stretchr/testify/mock"
 )
 
