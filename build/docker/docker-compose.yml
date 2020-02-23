@@ -5,10 +5,10 @@ services:
         image: hopsoft/graphite-statsd
         volumes:
             - type: "bind"
-              source: ./build/statsd/statsd.config.js
+              source: ../statsd/statsd.config.js
               target: /opt/statsd/config.js
             - type: "bind"
-              source: ./build/graphite/graphite.storage-schemas.conf
+              source: ../graphite/graphite.storage-schemas.conf
               target: /opt/graphite/conf/storage-schemas.conf
         ports:
             - "8090:80"
@@ -52,8 +52,8 @@ services:
         environment:
             - MYSQL_DSN=santi:santipassword@tcp(database:3380)/testdb # TODO remove from here before going live, pass from env
         build:
-            context: .
-            dockerfile: Dockerfile
+            context: ../..
+            dockerfile: build/docker/Dockerfile
         volumes:
             - .:/app/go
         ports:

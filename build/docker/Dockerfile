@@ -13,6 +13,6 @@ ENV PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 ENV IGNORE_GO_GET="false"
 
 WORKDIR /go/src/github.com/arpb2/C-3PO
-COPY . ./
+COPY . .
 
 CMD [ "go", "run", "cmd/c3po/main.go" ]
