@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	controller3 "github.com/arpb2/C-3PO/pkg/presentation/user_level/controller"
 	"net/http"
 	"testing"
+
+	controller3 "github.com/arpb2/C-3PO/pkg/presentation/user_level/controller"
 
 	http2 "github.com/arpb2/C-3PO/pkg/domain/http"
 

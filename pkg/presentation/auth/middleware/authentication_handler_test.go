@@ -2,11 +2,12 @@ package middleware_test
 
 import (
 	"errors"
-	"github.com/arpb2/C-3PO/pkg/presentation/auth/middleware"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/arpb2/C-3PO/pkg/presentation/auth/middleware"
 
 	internalauth "github.com/arpb2/C-3PO/pkg/data/jwt"
 	"github.com/arpb2/C-3PO/pkg/domain/auth"
@@ -36,7 +37,7 @@ func performRequest(r http.Handler, method, path, body string, headers map[strin
 }
 
 func Test_HandlingOfAuthentication_NoHeader(t *testing.T) {
-	e := ginengine.New()
+	e := ginengine.CreateEngine()
 	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test",
@@ -57,7 +58,7 @@ func Test_HandlingOfAuthentication_NoHeader(t *testing.T) {
 }
 
 func Test_HandlingOfAuthentication_BadHeader(t *testing.T) {
-	e := ginengine.New()
+	e := ginengine.CreateEngine()
 	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test",
@@ -80,7 +81,7 @@ func Test_HandlingOfAuthentication_BadHeader(t *testing.T) {
 }
 
 func Test_HandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
-	e := ginengine.New()
+	e := ginengine.CreateEngine()
 	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test/:user_id",
@@ -104,7 +105,7 @@ func Test_HandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
 }
 
 func Test_HandlingOfAuthentication_Authorized_SameUser(t *testing.T) {
-	e := ginengine.New()
+	e := ginengine.CreateEngine()
 	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test/:user_id",
@@ -133,7 +134,7 @@ func TestStrategy_Error_Halts(t *testing.T) {
 		return token.UserId == uint(1000)
 	}), "1001").Return(false, errors.New("whoops this fails")).Once()
 
-	e := ginengine.New()
+	e := ginengine.CreateEngine()
 	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test/:user_id",
@@ -163,7 +164,7 @@ func TestStrategy_Unauthorized_Halts(t *testing.T) {
 		return token.UserId == uint(1000)
 	}), "1001").Return(false, nil).Once()
 
-	e := ginengine.New()
+	e := ginengine.CreateEngine()
 	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test/:user_id",
@@ -193,7 +194,7 @@ func TestStrategy_Authorized_Continues(t *testing.T) {
 		return token.UserId == uint(1000)
 	}), "1001").Return(true, nil).Once()
 
-	e := ginengine.New()
+	e := ginengine.CreateEngine()
 	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test/:user_id",

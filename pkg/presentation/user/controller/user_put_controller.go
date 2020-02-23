@@ -2,6 +2,7 @@ package controller
 
 import (
 	"fmt"
+
 	"github.com/arpb2/C-3PO/pkg/presentation/user/command"
 	"github.com/arpb2/C-3PO/pkg/presentation/user/validation"
 
@@ -12,18 +13,18 @@ import (
 	gopipeline "github.com/saantiaguilera/go-pipeline"
 )
 
-func CreatePutController(exec pipeline.HttpPipeline, validations []validation.Validation, authMiddleware http.Handler, userService userservice.Service) controller.Controller {
+func CreatePutController(exec pipeline.HttpPipeline, authMiddleware http.Handler, userService userservice.Service, validations []validation.Validation) controller.Controller {
 	return controller.Controller{
 		Method: "PUT",
 		Path:   fmt.Sprintf("/users/:%s", controller.ParamUserId),
 		Middleware: []http.Handler{
 			authMiddleware,
 		},
-		Body: CreatePutBody(exec, validations, userService),
+		Body: CreatePutBody(exec, userService, validations),
 	}
 }
 
-func CreatePutBody(exec pipeline.HttpPipeline, validations []validation.Validation, userService userservice.Service) http.Handler {
+func CreatePutBody(exec pipeline.HttpPipeline, userService userservice.Service, validations []validation.Validation) http.Handler {
 	fetchUserIdCommand := command.CreateFetchUserIdCommand()
 	fetchUserCommand := command.CreateFetchAuthenticatedUserCommand()
 	validateCommand := command.CreateValidateUserParametersCommand(validations)

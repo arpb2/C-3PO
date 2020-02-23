@@ -33,10 +33,6 @@ func (c *validateParametersCommand) Run(ctx pipeline.Context) error {
 	return nil
 }
 
-func (c *validateParametersCommand) Fallback(err error) error {
-	return err
-}
-
 func CreateValidateUserParametersCommand(validations []validation.Validation) pipeline.Step {
 	return &validateParametersCommand{
 		validations: validations,

@@ -1,8 +1,9 @@
 package validation_test
 
 import (
-	"github.com/arpb2/C-3PO/pkg/presentation/user/validation"
 	"testing"
+
+	"github.com/arpb2/C-3PO/pkg/presentation/user/validation"
 
 	"github.com/arpb2/C-3PO/pkg/domain/model"
 	"github.com/stretchr/testify/assert"

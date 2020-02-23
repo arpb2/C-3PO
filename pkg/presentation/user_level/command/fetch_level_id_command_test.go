@@ -2,9 +2,10 @@ package command_test
 
 import (
 	"fmt"
+	"testing"
+
 	controller2 "github.com/arpb2/C-3PO/pkg/domain/controller"
 	"github.com/arpb2/C-3PO/pkg/presentation/user_level/command"
-	"testing"
 
 	"github.com/arpb2/C-3PO/pkg/domain/http"
 	"github.com/arpb2/C-3PO/pkg/infra/pipeline"

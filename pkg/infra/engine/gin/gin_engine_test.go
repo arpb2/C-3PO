@@ -24,7 +24,7 @@ func TestGetPortReturns8080(t *testing.T) {
 }
 
 func TestRegisterMiddleware(t *testing.T) {
-	e := ginengine.New()
+	e := ginengine.CreateEngine()
 	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test",

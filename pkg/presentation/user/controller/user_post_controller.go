@@ -10,15 +10,15 @@ import (
 	gopipeline "github.com/saantiaguilera/go-pipeline"
 )
 
-func CreatePostController(exec pipeline.HttpPipeline, validations []validation.Validation, userService userservice.Service) controller.Controller {
+func CreatePostController(exec pipeline.HttpPipeline, userService userservice.Service, validations []validation.Validation) controller.Controller {
 	return controller.Controller{
 		Method: "POST",
 		Path:   "/users",
-		Body:   CreatePostBody(exec, validations, userService),
+		Body:   CreatePostBody(exec, userService, validations),
 	}
 }
 
-func CreatePostBody(exec pipeline.HttpPipeline, validations []validation.Validation, userService userservice.Service) http.Handler {
+func CreatePostBody(exec pipeline.HttpPipeline, userService userservice.Service, validations []validation.Validation) http.Handler {
 	fetchUserCommand := command.CreateFetchAuthenticatedUserCommand()
 	validateCommand := command.CreateValidateUserParametersCommand(validations)
 	createUserCommand := command.CreateCreateUserCommand(userService)

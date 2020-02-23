@@ -11,8 +11,6 @@ type ServerEngine interface {
 	http.Handler
 
 	Run() error
-
-	Shutdown() error
 }
 
 type ControllerRegistrable interface {

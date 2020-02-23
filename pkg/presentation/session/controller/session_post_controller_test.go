@@ -2,10 +2,11 @@ package controller_test
 
 import (
 	"errors"
-	controller2 "github.com/arpb2/C-3PO/pkg/presentation/session/controller"
-	"github.com/arpb2/C-3PO/pkg/presentation/user/validation"
 	"net/http"
 	"testing"
+
+	controller2 "github.com/arpb2/C-3PO/pkg/presentation/session/controller"
+	"github.com/arpb2/C-3PO/pkg/presentation/user/validation"
 
 	"github.com/arpb2/C-3PO/pkg/infra/pipeline"
 

@@ -1,8 +1,9 @@
 package controller_test
 
 import (
-	"github.com/arpb2/C-3PO/pkg/presentation/health/controller"
 	"testing"
+
+	"github.com/arpb2/C-3PO/pkg/presentation/health/controller"
 
 	"github.com/arpb2/C-3PO/test/mock/http"
 	"github.com/stretchr/testify/assert"

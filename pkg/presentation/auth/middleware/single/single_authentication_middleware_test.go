@@ -26,7 +26,7 @@ func performRequest(r http.Handler, method, path, body string, headers map[strin
 }
 
 func Test_Single_HandlingOfAuthentication_NoHeader(t *testing.T) {
-	e := ginengine.New()
+	e := ginengine.CreateEngine()
 	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test",
@@ -45,7 +45,7 @@ func Test_Single_HandlingOfAuthentication_NoHeader(t *testing.T) {
 }
 
 func Test_Single_HandlingOfAuthentication_BadHeader(t *testing.T) {
-	e := ginengine.New()
+	e := ginengine.CreateEngine()
 	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test",
@@ -66,7 +66,7 @@ func Test_Single_HandlingOfAuthentication_BadHeader(t *testing.T) {
 }
 
 func Test_Single_HandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
-	e := ginengine.New()
+	e := ginengine.CreateEngine()
 	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test/:user_id",
@@ -88,7 +88,7 @@ func Test_Single_HandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
 }
 
 func Test_Single_HandlingOfAuthentication_Authorized_SameUser(t *testing.T) {
-	e := ginengine.New()
+	e := ginengine.CreateEngine()
 	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test/:user_id",

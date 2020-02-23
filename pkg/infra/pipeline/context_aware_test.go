@@ -241,3 +241,36 @@ func TestContextAware_GivenOneWithASession_WhenGettingIt_ThenItReturnsItAndNoErr
 	assert.Equal(t, expectedVal, val)
 	assert.Nil(t, err)
 }
+
+func TestContextAware_GivenOneWithNoUserLevelData_WhenGettingIt_ThenItReturnsNilAndInternalError(t *testing.T) {
+	ctx := gopipeline.CreateContext()
+	ctxAware := pipeline.CreateContextAware(ctx)
+
+	val, err := ctxAware.GetUserLevelData("tag")
+
+	assert.Equal(t, model.UserLevelData{}, val)
+	assert.Equal(t, http.CreateInternalError(), err)
+}
+
+func TestContextAware_GivenOneWithSomethingDifferentThanUserLevelData_WhenGettingIt_ThenItReturnsNilAndInternalError(t *testing.T) {
+	ctx := gopipeline.CreateContext()
+	ctx.Set("tag", "string")
+	ctxAware := pipeline.CreateContextAware(ctx)
+
+	val, err := ctxAware.GetUserLevelData("tag")
+
+	assert.Equal(t, model.UserLevelData{}, val)
+	assert.Equal(t, http.CreateInternalError(), err)
+}
+
+func TestContextAware_GivenOneWithAUserLevelData_WhenGettingIt_ThenItReturnsItAndNoError(t *testing.T) {
+	expectedVal := model.UserLevelData{}
+	ctx := gopipeline.CreateContext()
+	ctx.Set("tag", expectedVal)
+	ctxAware := pipeline.CreateContextAware(ctx)
+
+	val, err := ctxAware.GetUserLevelData("tag")
+
+	assert.Equal(t, expectedVal, val)
+	assert.Nil(t, err)
+}

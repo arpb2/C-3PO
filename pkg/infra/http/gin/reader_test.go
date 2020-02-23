@@ -26,6 +26,16 @@ func TestCreateReader_Url(t *testing.T) {
 	assert.Equal(t, "https://host/path", reader.GetUrl())
 }
 
+func TestCreateReader_Method(t *testing.T) {
+	ctx := new(gin.Context)
+	ctx.Request = &http.Request{
+		Method: "POST",
+	}
+	reader := ginwrapper.CreateReader(ctx)
+
+	assert.Equal(t, "POST", reader.GetMethod())
+}
+
 func TestCreateReader_GetHeader(t *testing.T) {
 	expectedKey := "test-key"
 	expectedValue := "test-value"

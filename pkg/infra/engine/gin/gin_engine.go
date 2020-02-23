@@ -1,15 +1,10 @@
 package gin
 
 import (
-	"context"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
-	"os/signal"
-	"syscall"
-	"time"
 
 	"github.com/arpb2/C-3PO/pkg/domain/controller"
 	"github.com/arpb2/C-3PO/pkg/domain/engine"
@@ -17,7 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func New() engine.ServerEngine {
+func CreateEngine() engine.ServerEngine {
 	return &serverEngine{
 		engine: gin.Default(),
 		port:   GetPort(),
@@ -48,33 +43,6 @@ func (server serverEngine) Run() error {
 	}
 
 	return server.ListenAndServe()
-}
-
-func (server serverEngine) Shutdown() error {
-	if server.Server == nil {
-		return errors.New("no server running")
-	}
-
-	quit := make(chan os.Signal)
-
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	<-quit
-	log.Println("Shutdown Server...")
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	if err := server.Server.Shutdown(ctx); err != nil {
-		log.Fatal("Server Shutdown:", err)
-	}
-
-	select {
-	case <-ctx.Done():
-		log.Println("timeout of 5 seconds.")
-	}
-
-	log.Println("Server exiting")
-
-	return nil
 }
 
 func (server serverEngine) Register(controller controller.Controller) {

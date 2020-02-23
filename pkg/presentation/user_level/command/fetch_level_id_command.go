@@ -2,8 +2,9 @@ package command
 
 import (
 	"fmt"
-	controller2 "github.com/arpb2/C-3PO/pkg/domain/controller"
 	"strconv"
+
+	controller2 "github.com/arpb2/C-3PO/pkg/domain/controller"
 
 	httppipeline "github.com/arpb2/C-3PO/pkg/infra/pipeline"
 

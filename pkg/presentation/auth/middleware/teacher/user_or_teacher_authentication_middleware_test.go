@@ -61,7 +61,7 @@ func performRequest(r http.Handler, method, path, body string, headers map[strin
 }
 
 func Test_Multi_HandlingOfAuthentication_NoHeader(t *testing.T) {
-	e := ginengine.New()
+	e := ginengine.CreateEngine()
 	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test",
@@ -80,7 +80,7 @@ func Test_Multi_HandlingOfAuthentication_NoHeader(t *testing.T) {
 }
 
 func Test_Multi_HandlingOfAuthentication_BadHeader(t *testing.T) {
-	e := ginengine.New()
+	e := ginengine.CreateEngine()
 	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test",
@@ -104,7 +104,7 @@ func Test_Multi_HandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
 	service := new(MockTeacherService)
 	service.On("GetStudents", uint(1000)).Return(nil, nil).Once()
 
-	e := ginengine.New()
+	e := ginengine.CreateEngine()
 	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test/:user_id",
@@ -128,7 +128,7 @@ func Test_Multi_HandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
 }
 
 func Test_Multi_HandlingOfAuthentication_Authorized_SameUser(t *testing.T) {
-	e := ginengine.New()
+	e := ginengine.CreateEngine()
 	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test/:user_id",
@@ -160,7 +160,7 @@ func Test_Multi_HandlingOfAuthentication_Authorized_Student(t *testing.T) {
 		},
 	}, nil).Once()
 
-	e := ginengine.New()
+	e := ginengine.CreateEngine()
 	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test/:user_id",
@@ -196,7 +196,7 @@ func Test_Multi_HandlingOfAuthentication_Unauthorized_Student(t *testing.T) {
 		},
 	}, nil).Once()
 
-	e := ginengine.New()
+	e := ginengine.CreateEngine()
 	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test/:user_id",
@@ -222,7 +222,7 @@ func Test_Multi_HandlingOfAuthentication_Service_Error(t *testing.T) {
 	service := new(MockTeacherService)
 	service.On("GetStudents", uint(1001)).Return([]model.User{}, errors.New("whoops this fails")).Once()
 
-	e := ginengine.New()
+	e := ginengine.CreateEngine()
 	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test/:user_id",

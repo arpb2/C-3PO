@@ -2,9 +2,10 @@ package command_test
 
 import (
 	"errors"
+	"testing"
+
 	"github.com/arpb2/C-3PO/pkg/presentation/session/command"
 	command2 "github.com/arpb2/C-3PO/pkg/presentation/user/command"
-	"testing"
 
 	auth2 "github.com/arpb2/C-3PO/pkg/domain/auth"
 	"github.com/arpb2/C-3PO/pkg/domain/http"

@@ -48,12 +48,10 @@ func HandleAuthentication(ctx *http.Context, tokenHandler auth.TokenHandler, str
 		}
 	}
 
-	go func(userId string, requestUrl string) {
-		if userId == "" {
-			fmt.Printf("Got an unauthorized because of no existing parameter 'user_id' in request "+
-				"'%s'. Maybe you are malforming the Controller?", requestUrl)
-		}
-	}(requestedUserId, ctx.GetUrl())
+	if len(requestedUserId) == 0 {
+		fmt.Printf("Got an unauthorized because of no existing parameter 'user_id' in request "+
+			"'%s'. Maybe you are malforming the Controller?", ctx.GetUrl())
+	}
 
 	ctx.AbortTransactionWithError(http.CreateUnauthorizedError())
 }

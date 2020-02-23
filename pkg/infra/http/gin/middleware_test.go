@@ -1,6 +1,7 @@
 package gin_test
 
 import (
+	"errors"
 	"net/http/httptest"
 	"testing"
 
@@ -10,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMiddleware_GivenOne_WhenAbortingWithError_ThenGinAbortWithErrorIsCalled(t *testing.T) {
+func TestMiddleware_GivenOne_WhenAbortingWith4xxError_ThenGinAbortWithErrorIsCalled(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	recorder := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(recorder)
@@ -19,6 +20,30 @@ func TestMiddleware_GivenOne_WhenAbortingWithError_ThenGinAbortWithErrorIsCalled
 	middleware.AbortTransactionWithError(http.CreateNotFoundError())
 
 	assert.Equal(t, 404, recorder.Code)
+}
+
+func TestMiddleware_GivenOne_WhenAbortingWithExternalError_ThenGinAbortWith500ErrorIsCalled(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	recorder := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(recorder)
+	middleware := this.CreateMiddleware(c)
+
+	middleware.AbortTransactionWithError(errors.New("some error"))
+
+	assert.Equal(t, 500, recorder.Code)
+}
+
+func TestMiddleware_GivenOne_WhenAbortingWith2xxError_ThenNothingHappens(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	recorder := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(recorder)
+	middleware := this.CreateMiddleware(c)
+
+	middleware.AbortTransactionWithError(http.Error{
+		Code: 250,
+	})
+
+	assert.Equal(t, 200, recorder.Code)
 }
 
 func TestMiddleware_GivenOne_WhenAborting_ThenGinAbortIsCalledAndEndsPrematurely(t *testing.T) {

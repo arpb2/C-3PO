@@ -1,8 +1,9 @@
 package teacher
 
 import (
-	"github.com/arpb2/C-3PO/pkg/presentation/auth/middleware"
 	"strconv"
+
+	"github.com/arpb2/C-3PO/pkg/presentation/auth/middleware"
 
 	"github.com/arpb2/C-3PO/pkg/domain/auth"
 	"github.com/arpb2/C-3PO/pkg/domain/http"

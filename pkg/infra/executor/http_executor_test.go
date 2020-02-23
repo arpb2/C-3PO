@@ -12,6 +12,21 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+func TestHttpExecutor_GivenAHystrixDecoratedOne_WhenRunning_ThenItRunsTheDecoration(t *testing.T) {
+	mockStep := new(pipeline2.MockStep)
+	mockStep.On("Name").Return("name")
+	mockStep.On("Run", mock.Anything).Return(nil)
+	decorator := func(runnable pipeline.Runnable) pipeline.Runnable {
+		return mockStep
+	}
+	exec := executor.CreateHttpExecutor(decorator)
+
+	err := exec.Run(pipeline2.MockStep{}, nil)
+
+	assert.Nil(t, err)
+	mockStep.AssertExpectations(t)
+}
+
 func TestHttpExecutor_GivenOneDecorated_WhenRunning_ItAppliesDecorators(t *testing.T) {
 	mockStep := new(pipeline2.MockStep)
 	mockStep.On("Name").Return("name")

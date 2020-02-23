@@ -3,172 +3,57 @@ package server_test
 import (
 	"errors"
 	"net/http"
-	"net/http/httptest"
-	"os"
-	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/mock"
+
 	"github.com/arpb2/C-3PO/pkg/domain/controller"
-	ginengine "github.com/arpb2/C-3PO/pkg/infra/engine/gin"
 	"github.com/arpb2/C-3PO/pkg/infra/server"
 	"github.com/stretchr/testify/assert"
 )
 
-func performRequest(r http.Handler, method, path, body string) *httptest.ResponseRecorder {
-	req, _ := http.NewRequest(method, path, strings.NewReader(body))
-	w := httptest.NewRecorder()
-	r.ServeHTTP(w, req)
-	return w
+type MockServerEngine struct {
+	mock.Mock
 }
 
-type ServerEngineMock struct{}
-
-func (server ServerEngineMock) ServeHTTP(writer http.ResponseWriter, request *http.Request) {}
-func (server ServerEngineMock) Run() error {
-	return nil
+func (s MockServerEngine) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
+	_ = s.Called(writer, request)
 }
-func (server ServerEngineMock) Register(controller controller.Controller) {}
-func (server ServerEngineMock) Shutdown() error {
-	return nil
+func (s MockServerEngine) Run() error {
+	args := s.Called()
+	return args.Error(0)
 }
-
-type FailingServerEngineMock struct{}
-
-func (server FailingServerEngineMock) ServeHTTP(writer http.ResponseWriter, request *http.Request) {}
-func (server FailingServerEngineMock) Run() error {
-	return errors.New("woops this fails")
-}
-func (server FailingServerEngineMock) Register(controller controller.Controller) {}
-func (server FailingServerEngineMock) Shutdown() error {
-	return nil
+func (s MockServerEngine) Register(controller controller.Controller) {
+	_ = s.Called(controller)
 }
 
 func TestStartApplicationSuccess(t *testing.T) {
-	os.Setenv("MYSQL_DSN", "root:password@tcp(localhost:3306)/db")
-	defer os.Unsetenv("MYSQL_DSN")
-	err := server.StartApplication(&ServerEngineMock{})
+	e := new(MockServerEngine)
+	e.On("Run").Return(nil)
+	err := server.StartApplication(e, []controller.Controller{})
 
 	assert.Nil(t, err)
+	e.AssertExpectations(t)
 }
 
 func TestStartApplicationFailureIsHandled(t *testing.T) {
-	os.Setenv("MYSQL_DSN", "root:password@tcp(localhost:3306)/db")
-	defer os.Unsetenv("MYSQL_DSN")
-	err := server.StartApplication(&FailingServerEngineMock{})
+	e := new(MockServerEngine)
+	e.On("Run").Return(errors.New("woops this fails"))
+	err := server.StartApplication(e, []controller.Controller{})
 
 	assert.NotNil(t, err)
 	assert.Equal(t, "woops this fails", err.Error())
+	e.AssertExpectations(t)
 }
 
-func TestHealthGet(test *testing.T) {
-	os.Setenv("MYSQL_DSN", "root:password@tcp(localhost:3306)/db")
-	defer os.Unsetenv("MYSQL_DSN")
+func TestStartWithRegistration(t *testing.T) {
+	e := new(MockServerEngine)
+	e.On("Register", controller.Controller{}).Once()
+	e.On("Run").Return(nil)
+	err := server.StartApplication(e, []controller.Controller{
+		{},
+	})
 
-	engine := ginengine.New()
-	binders, deferClose := server.CreateBinders()
-	defer deferClose()
-	server.RegisterRoutes(engine, binders)
-
-	w := performRequest(engine, "GET", "/ping", "")
-
-	assert.Equal(test, 200, w.Code)
-	assert.Equal(test, "pong", w.Body.String())
-}
-
-func TestUserLevelGetRegistered(test *testing.T) {
-	os.Setenv("MYSQL_DSN", "root:password@tcp(localhost:3306)/db")
-	defer os.Unsetenv("MYSQL_DSN")
-
-	engine := ginengine.New()
-	binders, deferClose := server.CreateBinders()
-	defer deferClose()
-	server.RegisterRoutes(engine, binders)
-
-	w := performRequest(engine, "GET", "/users/1/levels/1", "")
-
-	assert.NotEqual(test, 404, w.Code)
-}
-
-func TestUserLevelPutRegistered(test *testing.T) {
-	os.Setenv("MYSQL_DSN", "root:password@tcp(localhost:3306)/db")
-	defer os.Unsetenv("MYSQL_DSN")
-
-	engine := ginengine.New()
-	binders, deferClose := server.CreateBinders()
-	defer deferClose()
-	server.RegisterRoutes(engine, binders)
-
-	w := performRequest(engine, "PUT", "/users/1/levels/1", "")
-
-	assert.NotEqual(test, 404, w.Code)
-}
-
-func TestUserGetRegistered(test *testing.T) {
-	os.Setenv("MYSQL_DSN", "root:password@tcp(localhost:3306)/db")
-	defer os.Unsetenv("MYSQL_DSN")
-
-	engine := ginengine.New()
-	binders, deferClose := server.CreateBinders()
-	defer deferClose()
-	server.RegisterRoutes(engine, binders)
-
-	w := performRequest(engine, "GET", "/users/1", "")
-
-	assert.NotEqual(test, 404, w.Code)
-}
-
-func TestUserPostRegistered(test *testing.T) {
-	os.Setenv("MYSQL_DSN", "root:password@tcp(localhost:3306)/db")
-	defer os.Unsetenv("MYSQL_DSN")
-
-	engine := ginengine.New()
-	binders, deferClose := server.CreateBinders()
-	defer deferClose()
-	server.RegisterRoutes(engine, binders)
-
-	w := performRequest(engine, "POST", "/users", "")
-
-	assert.NotEqual(test, 404, w.Code)
-}
-
-func TestUserPutRegistered(test *testing.T) {
-	os.Setenv("MYSQL_DSN", "root:password@tcp(localhost:3306)/db")
-	defer os.Unsetenv("MYSQL_DSN")
-
-	engine := ginengine.New()
-	binders, deferClose := server.CreateBinders()
-	defer deferClose()
-	server.RegisterRoutes(engine, binders)
-
-	w := performRequest(engine, "PUT", "/users/1", "")
-
-	assert.NotEqual(test, 404, w.Code)
-}
-
-func TestUserDeleteRegistered(test *testing.T) {
-	os.Setenv("MYSQL_DSN", "root:password@tcp(localhost:3306)/db")
-	defer os.Unsetenv("MYSQL_DSN")
-
-	engine := ginengine.New()
-	binders, deferClose := server.CreateBinders()
-	defer deferClose()
-	server.RegisterRoutes(engine, binders)
-
-	w := performRequest(engine, "DELETE", "/users/1", "")
-
-	assert.NotEqual(test, 404, w.Code)
-}
-
-func TestSessionPostRegistered(test *testing.T) {
-	os.Setenv("MYSQL_DSN", "root:password@tcp(localhost:3306)/db")
-	defer os.Unsetenv("MYSQL_DSN")
-
-	engine := ginengine.New()
-	binders, deferClose := server.CreateBinders()
-	defer deferClose()
-	server.RegisterRoutes(engine, binders)
-
-	w := performRequest(engine, "POST", "/session", "")
-
-	assert.NotEqual(test, 404, w.Code)
+	assert.Nil(t, err)
+	e.AssertExpectations(t)
 }
