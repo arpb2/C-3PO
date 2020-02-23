@@ -8,7 +8,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Build
-      run: docker build . --file Dockerfile --tag c3po:$(date +%s)
+      run: docker build . --file build/docker/Dockerfile --tag c3po:$(date +%s)
 
     - name: Get dependencies
       run: |
