@@ -6,6 +6,8 @@ import (
 
 	"github.com/arpb2/C-3PO/pkg/ent"
 	"github.com/facebookincubator/ent/dialect/sql"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 func CreateMysqlClient(dsn string) (client *ent.Client, drv *sql.Driver) {

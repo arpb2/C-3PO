@@ -21,8 +21,6 @@ import (
 	"github.com/arpb2/C-3PO/pkg/middleware/auth/single"
 	"github.com/arpb2/C-3PO/pkg/middleware/auth/teacher"
 	"github.com/arpb2/C-3PO/pkg/pipeline"
-
-	_ "github.com/go-sql-driver/mysql"
 )
 
 func StartApplication(engine engine.ServerEngine) error {
