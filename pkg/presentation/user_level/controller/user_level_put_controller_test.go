@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"testing"
 
-	controller3 "github.com/arpb2/C-3PO/pkg/presentation/user_level/controller"
+	userlevelcontroller "github.com/arpb2/C-3PO/pkg/presentation/user_level/controller"
 
 	"github.com/arpb2/C-3PO/pkg/infra/pipeline"
 
@@ -23,7 +23,7 @@ import (
 )
 
 func createPutController() controller.Controller {
-	return controller3.CreatePutController(
+	return userlevelcontroller.CreatePutController(
 		pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()),
 		teacher.CreateMiddleware(
 			jwt.CreateTokenHandler([]byte("52bfd2de0a2e69dff4517518590ac32a46bd76606ec22a258f99584a6e70aca2")),
@@ -165,7 +165,7 @@ func TestUserLevelPutControllerBody_500OnServiceWriteError(t *testing.T) {
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
-	controller3.CreateGetBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), userLevelService)(c)
+	userlevelcontroller.CreateGetBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), userLevelService)(c)
 
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "internal_server_error.error_write.service.golden.json")
@@ -204,7 +204,7 @@ func main() {
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
-	controller3.CreateGetBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), userLevelService)(c)
+	userlevelcontroller.CreateGetBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), userLevelService)(c)
 
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "ok.replace_user_level.golden.json")
@@ -233,7 +233,7 @@ func TestUserLevelPutControllerBody_200OnEmptyUserLevelStoredOnService(t *testin
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
-	controller3.CreateGetBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), userLevelService)(c)
+	userlevelcontroller.CreateGetBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), userLevelService)(c)
 
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "ok.replace_empty_user_level.golden.json")

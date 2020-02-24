@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/arpb2/C-3PO/pkg/presentation/session/command"
-	command2 "github.com/arpb2/C-3PO/pkg/presentation/user/command"
+	usercommand "github.com/arpb2/C-3PO/pkg/presentation/user/command"
 
 	auth2 "github.com/arpb2/C-3PO/pkg/domain/auth"
 	"github.com/arpb2/C-3PO/pkg/domain/http"
@@ -34,7 +34,7 @@ func TestCreateTokenCommand_GivenOneAndAContextWithoutUserID_WhenRunning_Then500
 
 func TestCreateTokenCommand_GivenOneAndAFailingService_WhenRunning_ThenServiceError(t *testing.T) {
 	ctx := gopipeline.CreateContext()
-	ctx.Set(command2.TagUserId, uint(1000))
+	ctx.Set(usercommand.TagUserId, uint(1000))
 	expectedErr := errors.New("some error")
 	s := new(auth.MockTokenHandler)
 	s.On("Create", &auth2.Token{
@@ -54,7 +54,7 @@ func TestCreateTokenCommand_GivenOne_WhenRunning_ThenContextHasUserIDAndReturnsN
 		Token:  "token",
 	}
 	ctx := gopipeline.CreateContext()
-	ctx.Set(command2.TagUserId, expectedVal.UserId)
+	ctx.Set(usercommand.TagUserId, expectedVal.UserId)
 	s := new(auth.MockTokenHandler)
 	s.On("Create", &auth2.Token{
 		UserId: expectedVal.UserId,

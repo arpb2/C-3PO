@@ -78,9 +78,8 @@ func (c *userLevelService) StoreUserLevel(data model.UserLevel) (userLevel model
 			SetWorkspace(data.Workspace).
 			Save(ctx)
 	} else {
-		_, err = c.dbClient.UserLevel.
+		_, err = ul.
 			Update().
-			Where(userlevel.HasDeveloperWith(user.ID(data.UserId)), userlevel.HasLevelWith(level.ID(data.LevelId))).
 			SetUpdatedAt(time.Now()).
 			SetCode(data.Code).
 			SetWorkspace(data.Workspace).

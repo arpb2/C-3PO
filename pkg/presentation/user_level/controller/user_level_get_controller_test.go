@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"testing"
 
-	controller3 "github.com/arpb2/C-3PO/pkg/presentation/user_level/controller"
+	userlevelcontroller "github.com/arpb2/C-3PO/pkg/presentation/user_level/controller"
 
 	http2 "github.com/arpb2/C-3PO/pkg/domain/http"
 
@@ -25,7 +25,7 @@ import (
 )
 
 func createGetController() controller.Controller {
-	return controller3.CreateGetController(
+	return userlevelcontroller.CreateGetController(
 		pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()),
 		teacher.CreateMiddleware(
 			jwt.CreateTokenHandler([]byte("52bfd2de0a2e69dff4517518590ac32a46bd76606ec22a258f99584a6e70aca2")),
@@ -122,7 +122,7 @@ func TestCodeGetControllerBody_500OnServiceReadError(t *testing.T) {
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
-	controller3.CreateGetBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), userLevelService)(c)
+	userlevelcontroller.CreateGetBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), userLevelService)(c)
 
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "internal_server_error.error_read.service.golden.json")
@@ -144,7 +144,7 @@ func TestCodeGetControllerBody_400OnNoCodeStoredInService(t *testing.T) {
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
-	controller3.CreateGetBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), userLevelService)(c)
+	userlevelcontroller.CreateGetBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), userLevelService)(c)
 
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "not_found.missing_user_level.read.service.golden.json")
@@ -184,7 +184,7 @@ func main() {
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
-	controller3.CreateGetBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), userLevelService)(c)
+	userlevelcontroller.CreateGetBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), userLevelService)(c)
 
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "ok.get_user_level.golden.json")
@@ -213,7 +213,7 @@ func TestCodeGetControllerBody_200OnEmptyCodeStoredOnService(t *testing.T) {
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
-	controller3.CreateGetBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), userLevelService)(c)
+	userlevelcontroller.CreateGetBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), userLevelService)(c)
 
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "ok.get_empty_user_level.golden.json")

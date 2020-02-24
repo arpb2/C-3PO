@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"testing"
 
-	controller3 "github.com/arpb2/C-3PO/pkg/presentation/user/controller"
+	usercontroller "github.com/arpb2/C-3PO/pkg/presentation/user/controller"
 	"github.com/arpb2/C-3PO/pkg/presentation/user/validation"
 
 	"github.com/arpb2/C-3PO/pkg/infra/pipeline"
@@ -25,7 +25,7 @@ import (
 )
 
 func createPutController() controller.Controller {
-	return controller3.CreatePutController(
+	return usercontroller.CreatePutController(
 		pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()),
 		single.CreateMiddleware(
 			jwt.CreateTokenHandler([]byte("52bfd2de0a2e69dff4517518590ac32a46bd76606ec22a258f99584a6e70aca2")),
@@ -111,7 +111,7 @@ func TestUserPutControllerBody_500OnServiceCreateError(t *testing.T) {
 		Surname: "test surname",
 	}, errors.New("whoops error")).Once()
 
-	body := controller3.CreatePutBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), service, []validation.Validation{})
+	body := usercontroller.CreatePutBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), service, []validation.Validation{})
 
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetParameter", controller.ParamUserId).Return("1000").Once()
@@ -143,7 +143,7 @@ func TestUserPutControllerBody_500OnServiceCreateError(t *testing.T) {
 func TestUserPutControllerBody_400OnIdSpecified(t *testing.T) {
 	service := new(service.MockUserService)
 
-	body := controller3.CreatePutBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), service, []validation.Validation{
+	body := usercontroller.CreatePutBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), service, []validation.Validation{
 		validation.IdProvided,
 	})
 
@@ -182,7 +182,7 @@ func TestUserPutControllerBody_200OnUserStoredOnService(t *testing.T) {
 		return true
 	})).Return(expectedUser, nil).Once()
 
-	body := controller3.CreatePutBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), service, []validation.Validation{})
+	body := usercontroller.CreatePutBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), service, []validation.Validation{})
 
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetParameter", controller.ParamUserId).Return("1000").Once()
