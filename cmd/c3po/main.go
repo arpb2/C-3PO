@@ -24,6 +24,7 @@ import (
 	userlevel "github.com/arpb2/C-3PO/pkg/presentation/user_level/controller"
 
 	credentialservice "github.com/arpb2/C-3PO/pkg/data/mysql/service/credential"
+	levelservice "github.com/arpb2/C-3PO/pkg/data/mysql/service/level"
 	teacherservice "github.com/arpb2/C-3PO/pkg/data/mysql/service/teacher"
 	userservice "github.com/arpb2/C-3PO/pkg/data/mysql/service/user"
 	userlevelservice "github.com/arpb2/C-3PO/pkg/data/mysql/service/user_level"
@@ -65,6 +66,7 @@ func main() {
 
 	userService := userservice.CreateService(dbClient)
 	teacherService := teacherservice.CreateService(userService, dbClient)
+	levelService := levelservice.CreateService(dbClient)
 	userLevelService := userlevelservice.CreateService(dbClient)
 	credentialService := credentialservice.CreateService(dbClient)
 
@@ -106,8 +108,8 @@ func main() {
 		userlevel.CreateGetController(httpPipeline, teacherAuthMiddleware, userLevelService),
 		userlevel.CreatePutController(httpPipeline, teacherAuthMiddleware, userLevelService),
 
-		level.CreateGetController(),
-		level.CreatePutController(adminAuthMiddleware),
+		level.CreateGetController(httpPipeline, levelService),
+		level.CreatePutController(httpPipeline, adminAuthMiddleware, levelService),
 	}
 
 	if err := server.StartApplication(engine, controllers); err != nil {

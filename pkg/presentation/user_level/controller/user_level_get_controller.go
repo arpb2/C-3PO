@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/arpb2/C-3PO/pkg/presentation/user/command"
-	command2 "github.com/arpb2/C-3PO/pkg/presentation/user_level/command"
+	userlevelcommand "github.com/arpb2/C-3PO/pkg/presentation/user_level/command"
 
 	"github.com/arpb2/C-3PO/pkg/domain/controller"
 	"github.com/arpb2/C-3PO/pkg/domain/http"
@@ -26,9 +26,9 @@ func CreateGetController(exec pipeline.HttpPipeline, authMiddleware http.Handler
 
 func CreateGetBody(exec pipeline.HttpPipeline, userLevelService userlevelservice.Service) http.Handler {
 	fetchUserIdCommand := command.CreateFetchUserIdCommand()
-	fetchLevelIdCommand := command2.CreateFetchLevelIdCommand()
-	serviceCommand := command2.CreateGetUserLevelCommand(userLevelService)
-	renderCommand := command2.CreateRenderUserLevelCommand()
+	fetchLevelIdCommand := userlevelcommand.CreateFetchLevelIdCommand()
+	serviceCommand := userlevelcommand.CreateGetUserLevelCommand(userLevelService)
+	renderCommand := userlevelcommand.CreateRenderUserLevelCommand()
 
 	graph := gopipeline.CreateSequentialGroup(
 		gopipeline.CreateConcurrentStage(

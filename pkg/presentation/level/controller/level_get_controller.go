@@ -2,44 +2,35 @@ package controller
 
 import (
 	"fmt"
+
 	"github.com/arpb2/C-3PO/pkg/domain/controller"
 	"github.com/arpb2/C-3PO/pkg/domain/http"
+	"github.com/arpb2/C-3PO/pkg/domain/pipeline"
 	levelservice "github.com/arpb2/C-3PO/pkg/domain/service/level"
-	httpcodes "net/http"
-	"strconv"
+	"github.com/arpb2/C-3PO/pkg/presentation/level/command"
+	gopipeline "github.com/saantiaguilera/go-pipeline"
 )
 
-func CreateGetController(levelService levelservice.Service) controller.Controller {
+func CreateGetController(exec pipeline.HttpPipeline, levelService levelservice.Service) controller.Controller {
 	return controller.Controller{
 		Method: "GET",
 		Path:   fmt.Sprintf("/levels/:%s", controller.ParamLevelId),
-		Body:   CreateGetBody(levelService),
+		Body:   CreateGetBody(exec, levelService),
 	}
 }
 
-func CreateGetBody(levelService levelservice.Service) http.Handler {
+func CreateGetBody(exec pipeline.HttpPipeline, levelService levelservice.Service) http.Handler {
+	fetchLevelIdCommand := command.CreateFetchLevelIdCommand()
+	serviceCommand := command.CreateGetLevelCommand(levelService)
+	renderCommand := command.CreateRenderLevelCommand()
+
+	graph := gopipeline.CreateSequentialStage(
+		fetchLevelIdCommand,
+		serviceCommand,
+		renderCommand,
+	)
+
 	return func(ctx *http.Context) {
-		id := ctx.GetParameter(controller.ParamLevelId)
-
-		if id == "" {
-			ctx.AbortTransactionWithError(http.CreateBadRequestError(fmt.Sprintf("'%s' empty", controller.ParamLevelId)))
-			return
-		}
-
-		idUint, err := strconv.ParseUint(id, 10, 64)
-
-		if err != nil {
-			ctx.AbortTransactionWithError(http.CreateBadRequestError(fmt.Sprintf("'%s' malformed, expecting a positive number", controller.ParamLevelId)))
-			return
-		}
-
-		level, err := levelService.GetLevel(uint(idUint))
-
-		if err != nil {
-			ctx.AbortTransactionWithError(err)
-			return
-		}
-
-		ctx.WriteJson(httpcodes.StatusOK, level)
+		exec.Run(ctx, graph)
 	}
 }

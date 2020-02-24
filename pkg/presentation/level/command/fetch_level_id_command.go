@@ -4,9 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/arpb2/C-3PO/pkg/presentation/level/command"
-
-	ctrl "github.com/arpb2/C-3PO/pkg/domain/controller"
+	"github.com/arpb2/C-3PO/pkg/domain/controller"
 
 	httppipeline "github.com/arpb2/C-3PO/pkg/infra/pipeline"
 
@@ -15,12 +13,10 @@ import (
 	"github.com/arpb2/C-3PO/pkg/domain/http"
 )
 
-type fetchLevelIdCommand struct {
-	context *http.Context
-}
+type fetchLevelIdCommand struct{}
 
 func (c *fetchLevelIdCommand) Name() string {
-	return fmt.Sprintf("fetch_%s_command", ctrl.ParamLevelId)
+	return "fetch_level_id_command"
 }
 
 func (c *fetchLevelIdCommand) Run(ctx pipeline.Context) error {
@@ -32,19 +28,19 @@ func (c *fetchLevelIdCommand) Run(ctx pipeline.Context) error {
 		return err
 	}
 
-	levelId := httpReader.GetParameter(ctrl.ParamLevelId)
+	levelId := httpReader.GetParameter(controller.ParamLevelId)
 
 	if levelId == "" {
-		return http.CreateBadRequestError(fmt.Sprintf("'%s' empty", ctrl.ParamLevelId))
+		return http.CreateBadRequestError(fmt.Sprintf("'%s' empty", controller.ParamLevelId))
 	}
 
 	levelIdUint, err := strconv.ParseUint(levelId, 10, 64)
 
 	if err != nil {
-		return http.CreateBadRequestError(fmt.Sprintf("'%s' malformed, expecting a positive number", ctrl.ParamLevelId))
+		return http.CreateBadRequestError(fmt.Sprintf("'%s' malformed, expecting a positive number", controller.ParamLevelId))
 	}
 
-	ctx.Set(command.TagLevelId, uint(levelIdUint))
+	ctx.Set(TagLevelId, uint(levelIdUint))
 	return nil
 }
 

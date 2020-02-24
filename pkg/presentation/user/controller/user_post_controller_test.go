@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"testing"
 
-	controller2 "github.com/arpb2/C-3PO/pkg/presentation/user/controller"
+	usercontroller "github.com/arpb2/C-3PO/pkg/presentation/user/controller"
 	"github.com/arpb2/C-3PO/pkg/presentation/user/validation"
 
 	"github.com/arpb2/C-3PO/pkg/infra/pipeline"
@@ -22,7 +22,7 @@ import (
 )
 
 func createPostController() controller.Controller {
-	return controller2.CreatePostController(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), nil, []validation.Validation{})
+	return usercontroller.CreatePostController(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), nil, []validation.Validation{})
 }
 
 func TestUserPostControllerMethodIsPOST(t *testing.T) {
@@ -57,7 +57,7 @@ func TestUserPostControllerBody_500OnServiceCreateError(t *testing.T) {
 		return true
 	})).Return(model.User{}, errors.New("whoops error")).Once()
 
-	body := controller2.CreatePostBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), service, []validation.Validation{})
+	body := usercontroller.CreatePostBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), service, []validation.Validation{})
 
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("ReadBody", mock.MatchedBy(func(obj interface{}) bool {
@@ -93,7 +93,7 @@ func TestUserPostControllerBody_200OnUserStoredOnService(t *testing.T) {
 		return true
 	})).Return(expectedUser.User, nil).Once()
 
-	body := controller2.CreatePostBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), service, []validation.Validation{})
+	body := usercontroller.CreatePostBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), service, []validation.Validation{})
 
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("ReadBody", mock.MatchedBy(func(obj *model.AuthenticatedUser) bool {

@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/arpb2/C-3PO/pkg/presentation/session/command"
-	command2 "github.com/arpb2/C-3PO/pkg/presentation/user/command"
+	usercommand "github.com/arpb2/C-3PO/pkg/presentation/user/command"
 
 	"github.com/arpb2/C-3PO/pkg/domain/http"
 	"github.com/arpb2/C-3PO/pkg/domain/model"
@@ -33,7 +33,7 @@ func TestAuthenticateCommand_GivenOneAndAContextWithoutAuthenticatedUser_WhenRun
 
 func TestAuthenticateCommand_GivenOneAndAFailingService_WhenRunning_ThenServiceError(t *testing.T) {
 	ctx := gopipeline.CreateContext()
-	ctx.Set(command2.TagAuthenticatedUser, model.AuthenticatedUser{
+	ctx.Set(usercommand.TagAuthenticatedUser, model.AuthenticatedUser{
 		User: model.User{},
 	})
 	expectedErr := errors.New("some error")
@@ -49,7 +49,7 @@ func TestAuthenticateCommand_GivenOneAndAFailingService_WhenRunning_ThenServiceE
 
 func TestAuthenticateCommand_GivenOne_WhenRunning_ThenContextHasUserIDAndReturnsNoError(t *testing.T) {
 	ctx := gopipeline.CreateContext()
-	ctx.Set(command2.TagAuthenticatedUser, model.AuthenticatedUser{
+	ctx.Set(usercommand.TagAuthenticatedUser, model.AuthenticatedUser{
 		User: model.User{},
 	})
 	expectedVal := uint(1000)
@@ -58,7 +58,7 @@ func TestAuthenticateCommand_GivenOne_WhenRunning_ThenContextHasUserIDAndReturns
 	cmd := command.CreateAuthenticateCommand(s)
 
 	err := cmd.Run(ctx)
-	val, exists := ctx.Get(command2.TagUserId)
+	val, exists := ctx.Get(usercommand.TagUserId)
 
 	assert.Nil(t, err)
 	assert.True(t, exists)

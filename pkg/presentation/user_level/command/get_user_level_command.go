@@ -3,6 +3,7 @@ package command
 import (
 	"github.com/arpb2/C-3PO/pkg/domain/http"
 	userlevelservice "github.com/arpb2/C-3PO/pkg/domain/service/user_level"
+	levelcommand "github.com/arpb2/C-3PO/pkg/presentation/level/command"
 	"github.com/arpb2/C-3PO/pkg/presentation/user/command"
 	"github.com/saantiaguilera/go-pipeline"
 )
@@ -16,7 +17,7 @@ func (c *getUserLevelCommand) Name() string {
 }
 
 func (c *getUserLevelCommand) Run(ctx pipeline.Context) error {
-	levelId, existsLevelId := ctx.GetUInt(TagLevelId)
+	levelId, existsLevelId := ctx.GetUInt(levelcommand.TagLevelId)
 	userId, existsUserId := ctx.GetUInt(command.TagUserId)
 
 	if !existsLevelId || !existsUserId {

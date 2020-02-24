@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"testing"
 
-	controller3 "github.com/arpb2/C-3PO/pkg/presentation/user/controller"
+	usercontroller "github.com/arpb2/C-3PO/pkg/presentation/user/controller"
 
 	"github.com/arpb2/C-3PO/pkg/infra/pipeline"
 
@@ -22,7 +22,7 @@ import (
 )
 
 func createDeleteController() controller.Controller {
-	return controller3.CreateDeleteController(
+	return usercontroller.CreateDeleteController(
 		pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()),
 		single.CreateMiddleware(
 			jwt.CreateTokenHandler([]byte("52bfd2de0a2e69dff4517518590ac32a46bd76606ec22a258f99584a6e70aca2")),
@@ -75,7 +75,7 @@ func TestUserDeleteControllerBody_500OnServiceDeleteError(t *testing.T) {
 	service := new(service.MockUserService)
 	service.On("DeleteUser", uint(1000)).Return(errors.New("whoops error")).Once()
 
-	body := controller3.CreateDeleteBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), service)
+	body := usercontroller.CreateDeleteBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), service)
 
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetParameter", controller.ParamUserId).Return("1000").Once()
@@ -98,7 +98,7 @@ func TestUserDeleteControllerBody_200OnUserDeletedOnService(t *testing.T) {
 	service := new(service.MockUserService)
 	service.On("DeleteUser", uint(1000)).Return(nil).Once()
 
-	body := controller3.CreateDeleteBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), service)
+	body := usercontroller.CreateDeleteBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), service)
 
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetParameter", controller.ParamUserId).Return("1000").Once()

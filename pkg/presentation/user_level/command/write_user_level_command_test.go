@@ -4,8 +4,10 @@ import (
 	"errors"
 	"testing"
 
+	levelcommand "github.com/arpb2/C-3PO/pkg/presentation/level/command"
+
 	"github.com/arpb2/C-3PO/pkg/presentation/user/command"
-	command2 "github.com/arpb2/C-3PO/pkg/presentation/user_level/command"
+	userlevelcommand "github.com/arpb2/C-3PO/pkg/presentation/user_level/command"
 
 	"github.com/arpb2/C-3PO/pkg/domain/http"
 	"github.com/arpb2/C-3PO/pkg/domain/model"
@@ -15,7 +17,7 @@ import (
 )
 
 func TestWriteUserLevelCommand_GivenOne_WhenCallingName_ThenItsTheExpected(t *testing.T) {
-	cmd := command2.CreateWriteUserLevelCommand(nil)
+	cmd := userlevelcommand.CreateWriteUserLevelCommand(nil)
 
 	name := cmd.Name()
 
@@ -25,8 +27,8 @@ func TestWriteUserLevelCommand_GivenOne_WhenCallingName_ThenItsTheExpected(t *te
 func TestWriteUserLevelCommand_GivenOneAndAContextWithoutRawCode_WhenRunning_Then500(t *testing.T) {
 	ctx := gopipeline.CreateContext()
 	ctx.Set(command.TagUserId, uint(1000))
-	ctx.Set(command2.TagLevelId, uint(1000))
-	cmd := command2.CreateWriteUserLevelCommand(nil)
+	ctx.Set(levelcommand.TagLevelId, uint(1000))
+	cmd := userlevelcommand.CreateWriteUserLevelCommand(nil)
 
 	err := cmd.Run(ctx)
 
@@ -36,10 +38,10 @@ func TestWriteUserLevelCommand_GivenOneAndAContextWithoutRawCode_WhenRunning_The
 func TestWriteUserLevelCommand_GivenOneAndAContextWithoutLevelId_WhenRunning_Then500(t *testing.T) {
 	ctx := gopipeline.CreateContext()
 	ctx.Set(command.TagUserId, uint(1000))
-	ctx.Set(command2.TagUserLevelData, model.UserLevelData{
+	ctx.Set(userlevelcommand.TagUserLevelData, model.UserLevelData{
 		Code: "code",
 	})
-	cmd := command2.CreateWriteUserLevelCommand(nil)
+	cmd := userlevelcommand.CreateWriteUserLevelCommand(nil)
 
 	err := cmd.Run(ctx)
 
@@ -48,9 +50,9 @@ func TestWriteUserLevelCommand_GivenOneAndAContextWithoutLevelId_WhenRunning_The
 
 func TestWriteUserLevelCommand_GivenOneAndAContextWithoutUserID_WhenRunning_Then500(t *testing.T) {
 	ctx := gopipeline.CreateContext()
-	ctx.Set(command2.TagUserLevelData, model.UserLevelData{})
-	ctx.Set(command2.TagLevelId, uint(1000))
-	cmd := command2.CreateWriteUserLevelCommand(nil)
+	ctx.Set(userlevelcommand.TagUserLevelData, model.UserLevelData{})
+	ctx.Set(levelcommand.TagLevelId, uint(1000))
+	cmd := userlevelcommand.CreateWriteUserLevelCommand(nil)
 
 	err := cmd.Run(ctx)
 
@@ -59,10 +61,10 @@ func TestWriteUserLevelCommand_GivenOneAndAContextWithoutUserID_WhenRunning_Then
 
 func TestWriteUserLevelCommand_GivenOneAndAFailingService_WhenRunning_ThenServiceError(t *testing.T) {
 	ctx := gopipeline.CreateContext()
-	ctx.Set(command2.TagUserLevelData, model.UserLevelData{
+	ctx.Set(userlevelcommand.TagUserLevelData, model.UserLevelData{
 		Code: "code",
 	})
-	ctx.Set(command2.TagLevelId, uint(1000))
+	ctx.Set(levelcommand.TagLevelId, uint(1000))
 	ctx.Set(command.TagUserId, uint(1000))
 	expectedErr := errors.New("some error")
 	expectedUserLevel := model.UserLevel{
@@ -74,7 +76,7 @@ func TestWriteUserLevelCommand_GivenOneAndAFailingService_WhenRunning_ThenServic
 	}
 	s := new(service.MockUserLevelService)
 	s.On("StoreUserLevel", expectedUserLevel).Return(expectedUserLevel, expectedErr)
-	cmd := command2.CreateWriteUserLevelCommand(s)
+	cmd := userlevelcommand.CreateWriteUserLevelCommand(s)
 
 	err := cmd.Run(ctx)
 
@@ -84,10 +86,10 @@ func TestWriteUserLevelCommand_GivenOneAndAFailingService_WhenRunning_ThenServic
 
 func TestWriteUserLevelCommand_GivenOne_WhenRunning_ThenContextHasCodeAndReturnsNoError(t *testing.T) {
 	ctx := gopipeline.CreateContext()
-	ctx.Set(command2.TagUserLevelData, model.UserLevelData{
+	ctx.Set(userlevelcommand.TagUserLevelData, model.UserLevelData{
 		Code: "code",
 	})
-	ctx.Set(command2.TagLevelId, uint(1000))
+	ctx.Set(levelcommand.TagLevelId, uint(1000))
 	ctx.Set(command.TagUserId, uint(1000))
 	expectedVal := model.UserLevel{
 		UserLevelData: model.UserLevelData{
@@ -98,10 +100,10 @@ func TestWriteUserLevelCommand_GivenOne_WhenRunning_ThenContextHasCodeAndReturns
 	}
 	s := new(service.MockUserLevelService)
 	s.On("StoreUserLevel", expectedVal).Return(expectedVal, nil)
-	cmd := command2.CreateWriteUserLevelCommand(s)
+	cmd := userlevelcommand.CreateWriteUserLevelCommand(s)
 
 	err := cmd.Run(ctx)
-	val, exists := ctx.Get(command2.TagUserLevel)
+	val, exists := ctx.Get(userlevelcommand.TagUserLevel)
 
 	assert.Nil(t, err)
 	assert.True(t, exists)

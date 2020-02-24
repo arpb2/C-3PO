@@ -4,12 +4,15 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/arpb2/C-3PO/pkg/domain/model"
-	levelservice "github.com/arpb2/C-3PO/pkg/domain/service/level"
-	"github.com/arpb2/C-3PO/test/mock/golden"
-	servicemock "github.com/arpb2/C-3PO/test/mock/service"
 	httpcodes "net/http"
 	"testing"
+
+	"github.com/arpb2/C-3PO/pkg/domain/model"
+	levelservice "github.com/arpb2/C-3PO/pkg/domain/service/level"
+	"github.com/arpb2/C-3PO/pkg/infra/executor"
+	"github.com/arpb2/C-3PO/pkg/infra/pipeline"
+	"github.com/arpb2/C-3PO/test/mock/golden"
+	servicemock "github.com/arpb2/C-3PO/test/mock/service"
 
 	"github.com/arpb2/C-3PO/pkg/domain/controller"
 	level "github.com/arpb2/C-3PO/pkg/presentation/level/controller"
@@ -18,7 +21,7 @@ import (
 )
 
 func createGetController(service levelservice.Service) controller.Controller {
-	return level.CreateGetController(service)
+	return level.CreateGetController(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), service)
 }
 
 func TestGetController_IsGet(t *testing.T) {
@@ -36,7 +39,7 @@ func TestGetController_GivenNoId_WhenCalled_Then400(t *testing.T) {
 	c, w := httpmock.CreateTestContext()
 	c.Reader = reader
 
-	level.CreateGetController(nil).Body(c)
+	createGetController(nil).Body(c)
 
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "bad_request.empty.level_id.golden.json")

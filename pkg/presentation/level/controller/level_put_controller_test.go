@@ -4,13 +4,16 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	httpcodes "net/http"
+	"testing"
+
 	"github.com/arpb2/C-3PO/pkg/domain/model"
 	levelservice "github.com/arpb2/C-3PO/pkg/domain/service/level"
+	"github.com/arpb2/C-3PO/pkg/infra/executor"
+	"github.com/arpb2/C-3PO/pkg/infra/pipeline"
 	"github.com/arpb2/C-3PO/test/mock/golden"
 	servicemock "github.com/arpb2/C-3PO/test/mock/service"
 	"github.com/stretchr/testify/mock"
-	httpcodes "net/http"
-	"testing"
 
 	"github.com/arpb2/C-3PO/pkg/domain/controller"
 	"github.com/arpb2/C-3PO/pkg/domain/http"
@@ -20,9 +23,13 @@ import (
 )
 
 func createPutController(service levelservice.Service) controller.Controller {
-	return level.CreatePutController(func(ctx *http.Context) {
-		// Nothing
-	}, service)
+	return level.CreatePutController(
+		pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()),
+		func(ctx *http.Context) {
+			// Nothing
+		},
+		service,
+	)
 }
 
 func TestPutController_IsPut(t *testing.T) {
@@ -36,6 +43,7 @@ func TestPutControllerPath_IsLevels(t *testing.T) {
 func TestPutController_GivenNoId_WhenCalled_Then400(t *testing.T) {
 	reader := new(httpmock.MockReader)
 	reader.On("GetParameter", controller.ParamLevelId).Return("").Once()
+	reader.On("ReadBody", mock.Anything).Return(nil).Maybe()
 
 	c, w := httpmock.CreateTestContext()
 	c.Reader = reader
@@ -53,6 +61,7 @@ func TestPutController_GivenNoId_WhenCalled_Then400(t *testing.T) {
 func TestPutController_GivenNoUintId_WhenCalled_Then400(t *testing.T) {
 	reader := new(httpmock.MockReader)
 	reader.On("GetParameter", controller.ParamLevelId).Return("not uint").Once()
+	reader.On("ReadBody", mock.Anything).Return(nil).Maybe()
 
 	c, w := httpmock.CreateTestContext()
 	c.Reader = reader
@@ -69,7 +78,7 @@ func TestPutController_GivenNoUintId_WhenCalled_Then400(t *testing.T) {
 
 func TestPutController_GivenNoBody_WhenCalled_Then400(t *testing.T) {
 	reader := new(httpmock.MockReader)
-	reader.On("GetParameter", controller.ParamLevelId).Return("1000").Once()
+	reader.On("GetParameter", controller.ParamLevelId).Return("1000").Maybe()
 	reader.On("ReadBody", mock.Anything).Return(errors.New("error")).Once()
 
 	c, w := httpmock.CreateTestContext()

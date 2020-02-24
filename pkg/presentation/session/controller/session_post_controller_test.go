@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"testing"
 
-	controller2 "github.com/arpb2/C-3PO/pkg/presentation/session/controller"
+	sessioncontroller "github.com/arpb2/C-3PO/pkg/presentation/session/controller"
 	"github.com/arpb2/C-3PO/pkg/presentation/user/validation"
 
 	"github.com/arpb2/C-3PO/pkg/infra/pipeline"
@@ -23,7 +23,7 @@ import (
 )
 
 func createPostController() controller.Controller {
-	return controller2.CreatePostController(
+	return sessioncontroller.CreatePostController(
 		nil,
 		nil,
 		nil,
@@ -63,7 +63,7 @@ func TestPostController_FetchUserIdTask_FailsOnValidationFail(t *testing.T) {
 		},
 	}
 
-	postController := controller2.CreatePostController(
+	postController := sessioncontroller.CreatePostController(
 		pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()),
 		nil,
 		nil,
@@ -98,7 +98,7 @@ func TestFetchUserIdTaskImpl_FailsOnServiceFailure(t *testing.T) {
 
 	var validations []validation.Validation
 
-	postController := controller2.CreatePostController(
+	postController := sessioncontroller.CreatePostController(
 		pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()),
 		nil,
 		service,
@@ -139,7 +139,7 @@ func TestFetchUserIdTaskImpl_FailsOnTokenFailure(t *testing.T) {
 		return tkn.UserId == uint(1000)
 	})).Return("", httpwrapper.CreateInternalError())
 
-	postController := controller2.CreatePostController(
+	postController := sessioncontroller.CreatePostController(
 		pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()),
 		tokenHandler,
 		credentialService,
@@ -186,7 +186,7 @@ func TestFetchUserIdTaskImpl_SuccessReturnsToken(t *testing.T) {
 		return tkn.UserId == uint(1000)
 	})).Return("test token", nil)
 
-	postController := controller2.CreatePostController(
+	postController := sessioncontroller.CreatePostController(
 		pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()),
 		tokenHandler,
 		credentialService,

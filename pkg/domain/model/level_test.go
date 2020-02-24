@@ -12,8 +12,8 @@ func TestLevel_ToJson(t *testing.T) {
 	expectedJson := `{"id":0,"name":"test name","description":"test description"}`
 
 	level := &model.Level{
-		Id:      0,
-		Name:    "test name",
+		Id:          0,
+		Name:        "test name",
 		Description: "test description",
 	}
 
@@ -25,8 +25,8 @@ func TestLevel_ToJson(t *testing.T) {
 
 func TestLevel_FromJson(t *testing.T) {
 	expectedLevel := &model.Level{
-		Id:      0,
-		Name:    "test name",
+		Id:          0,
+		Name:        "test name",
 		Description: "test description",
 	}
 

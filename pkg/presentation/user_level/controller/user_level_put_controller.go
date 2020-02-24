@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/arpb2/C-3PO/pkg/presentation/user/command"
-	command2 "github.com/arpb2/C-3PO/pkg/presentation/user_level/command"
+	userlevelcommand "github.com/arpb2/C-3PO/pkg/presentation/user_level/command"
 
 	"github.com/arpb2/C-3PO/pkg/domain/controller"
 	"github.com/arpb2/C-3PO/pkg/domain/http"
@@ -26,10 +26,10 @@ func CreatePutController(exec pipeline.HttpPipeline, authMiddleware http.Handler
 
 func CreatePutBody(exec pipeline.HttpPipeline, userLevelService userlevelservice.Service) http.Handler {
 	fetchUserIdCommand := command.CreateFetchUserIdCommand()
-	fetchCodeCommand := command2.CreateFetchCodeCommand()
-	fetchLevelIdCommand := command2.CreateFetchLevelIdCommand()
-	serviceCommand := command2.CreateWriteUserLevelCommand(userLevelService)
-	renderCommand := command2.CreateRenderUserLevelCommand()
+	fetchCodeCommand := userlevelcommand.CreateFetchCodeCommand()
+	fetchLevelIdCommand := userlevelcommand.CreateFetchLevelIdCommand()
+	serviceCommand := userlevelcommand.CreateWriteUserLevelCommand(userLevelService)
+	renderCommand := userlevelcommand.CreateRenderUserLevelCommand()
 
 	graph := gopipeline.CreateSequentialGroup(
 		gopipeline.CreateConcurrentStage(

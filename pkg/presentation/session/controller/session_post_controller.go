@@ -7,7 +7,7 @@ import (
 	"github.com/arpb2/C-3PO/pkg/domain/pipeline"
 	credentialservice "github.com/arpb2/C-3PO/pkg/domain/service/credential"
 	"github.com/arpb2/C-3PO/pkg/presentation/session/command"
-	command2 "github.com/arpb2/C-3PO/pkg/presentation/user/command"
+	usercommand "github.com/arpb2/C-3PO/pkg/presentation/user/command"
 	"github.com/arpb2/C-3PO/pkg/presentation/user/validation"
 	gopipeline "github.com/saantiaguilera/go-pipeline"
 )
@@ -24,8 +24,8 @@ func CreatePostController(executor pipeline.HttpPipeline,
 }
 
 func CreatePostBody(executor pipeline.HttpPipeline, tokenHandler auth.TokenHandler, service credentialservice.Service, validations []validation.Validation) http.Handler {
-	fetchUserCommand := command2.CreateFetchAuthenticatedUserCommand()
-	validateParamsCommand := command2.CreateValidateUserParametersCommand(validations)
+	fetchUserCommand := usercommand.CreateFetchAuthenticatedUserCommand()
+	validateParamsCommand := usercommand.CreateValidateUserParametersCommand(validations)
 	authenticateCommand := command.CreateAuthenticateCommand(service)
 	createSessionCommand := command.CreateCreateSessionCommand(tokenHandler)
 	renderCommand := command.CreateRenderSessionCommand()
