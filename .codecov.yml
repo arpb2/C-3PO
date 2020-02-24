@@ -18,6 +18,5 @@ comment:
 ignore:
   - "build/**/*" # Build configs
   - "cmd/**/*" # Commands
-  - "pkg/data/ent/*.go" # Ent generated files shouldn't be tracked
-  - "pkg/data/ent/**/*.go" # Ent generated files shouldn't be tracked
+  - "pkg/data/ent" # Ent generated files shouldn't be tracked
   - "test/**/*" # Test utilities
