@@ -3,7 +3,7 @@ package teacher
 import (
 	"strconv"
 
-	"github.com/arpb2/C-3PO/pkg/presentation/auth/middleware"
+	"github.com/arpb2/C-3PO/pkg/presentation/middleware/user"
 
 	"github.com/arpb2/C-3PO/pkg/domain/auth"
 	"github.com/arpb2/C-3PO/pkg/domain/http"
@@ -16,7 +16,7 @@ func CreateMiddleware(tokenHandler auth.TokenHandler, teacherService teacherserv
 	}
 
 	return func(ctx *http.Context) {
-		middleware.HandleAuthentication(ctx, tokenHandler, strategy)
+		user.HandleAuthentication(ctx, tokenHandler, strategy)
 	}
 }
 

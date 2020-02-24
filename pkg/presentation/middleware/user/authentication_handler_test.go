@@ -1,4 +1,4 @@
-package middleware_test
+package user_test
 
 import (
 	"errors"
@@ -7,7 +7,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/arpb2/C-3PO/pkg/presentation/auth/middleware"
+	"github.com/arpb2/C-3PO/pkg/presentation/middleware"
+
+	"github.com/arpb2/C-3PO/pkg/presentation/middleware/user"
 
 	internalauth "github.com/arpb2/C-3PO/pkg/data/jwt"
 	"github.com/arpb2/C-3PO/pkg/domain/auth"
@@ -43,7 +45,7 @@ func Test_HandlingOfAuthentication_NoHeader(t *testing.T) {
 		Path:   "/test",
 		Middleware: []httpwrapper.Handler{
 			func(context *httpwrapper.Context) {
-				middleware.HandleAuthentication(context, internalauth.CreateTokenHandler([]byte("52bfd2de0a2e69dff4517518590ac32a46bd76606ec22a258f99584a6e70aca2")))
+				user.HandleAuthentication(context, internalauth.CreateTokenHandler([]byte("52bfd2de0a2e69dff4517518590ac32a46bd76606ec22a258f99584a6e70aca2")))
 			},
 		},
 		Body: func(ctx *httpwrapper.Context) {
@@ -64,7 +66,7 @@ func Test_HandlingOfAuthentication_BadHeader(t *testing.T) {
 		Path:   "/test",
 		Middleware: []httpwrapper.Handler{
 			func(context *httpwrapper.Context) {
-				middleware.HandleAuthentication(context, internalauth.CreateTokenHandler([]byte("52bfd2de0a2e69dff4517518590ac32a46bd76606ec22a258f99584a6e70aca2")))
+				user.HandleAuthentication(context, internalauth.CreateTokenHandler([]byte("52bfd2de0a2e69dff4517518590ac32a46bd76606ec22a258f99584a6e70aca2")))
 			},
 		},
 		Body: func(ctx *httpwrapper.Context) {
@@ -73,7 +75,7 @@ func Test_HandlingOfAuthentication_BadHeader(t *testing.T) {
 	})
 
 	headers := map[string][]string{}
-	headers["Authorization"] = []string{"bad token"}
+	headers[middleware.HeaderAuthorization] = []string{"bad token"}
 	recorder := performRequest(e, "GET", "/test", "", headers)
 
 	assert.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -87,7 +89,7 @@ func Test_HandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
 		Path:   "/test/:user_id",
 		Middleware: []httpwrapper.Handler{
 			func(context *httpwrapper.Context) {
-				middleware.HandleAuthentication(context, internalauth.CreateTokenHandler([]byte("52bfd2de0a2e69dff4517518590ac32a46bd76606ec22a258f99584a6e70aca2")))
+				user.HandleAuthentication(context, internalauth.CreateTokenHandler([]byte("52bfd2de0a2e69dff4517518590ac32a46bd76606ec22a258f99584a6e70aca2")))
 			},
 		},
 		Body: func(ctx *httpwrapper.Context) {
@@ -97,7 +99,7 @@ func Test_HandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
 
 	headers := map[string][]string{}
 	// Token for user 1000
-	headers["Authorization"] = []string{"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEwMDB9.GVS-KC5nOCHybzzFIIH864u4KcGu-ZSd-96krqTUGWo"}
+	headers[middleware.HeaderAuthorization] = []string{"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEwMDB9.GVS-KC5nOCHybzzFIIH864u4KcGu-ZSd-96krqTUGWo"}
 	recorder := performRequest(e, "GET", "/test/1", "", headers)
 
 	assert.Equal(t, http.StatusUnauthorized, recorder.Code)
@@ -111,7 +113,7 @@ func Test_HandlingOfAuthentication_Authorized_SameUser(t *testing.T) {
 		Path:   "/test/:user_id",
 		Middleware: []httpwrapper.Handler{
 			func(context *httpwrapper.Context) {
-				middleware.HandleAuthentication(context, internalauth.CreateTokenHandler([]byte("52bfd2de0a2e69dff4517518590ac32a46bd76606ec22a258f99584a6e70aca2")))
+				user.HandleAuthentication(context, internalauth.CreateTokenHandler([]byte("52bfd2de0a2e69dff4517518590ac32a46bd76606ec22a258f99584a6e70aca2")))
 			},
 		},
 		Body: func(ctx *httpwrapper.Context) {
@@ -121,7 +123,7 @@ func Test_HandlingOfAuthentication_Authorized_SameUser(t *testing.T) {
 
 	headers := map[string][]string{}
 	// Token for user 1000
-	headers["Authorization"] = []string{"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEwMDB9.GVS-KC5nOCHybzzFIIH864u4KcGu-ZSd-96krqTUGWo"}
+	headers[middleware.HeaderAuthorization] = []string{"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEwMDB9.GVS-KC5nOCHybzzFIIH864u4KcGu-ZSd-96krqTUGWo"}
 	recorder := performRequest(e, "GET", "/test/1000", "", headers)
 
 	assert.Equal(t, http.StatusOK, recorder.Code)
@@ -140,7 +142,7 @@ func TestStrategy_Error_Halts(t *testing.T) {
 		Path:   "/test/:user_id",
 		Middleware: []httpwrapper.Handler{
 			func(context *httpwrapper.Context) {
-				middleware.HandleAuthentication(context, internalauth.CreateTokenHandler([]byte("52bfd2de0a2e69dff4517518590ac32a46bd76606ec22a258f99584a6e70aca2")), strategy)
+				user.HandleAuthentication(context, internalauth.CreateTokenHandler([]byte("52bfd2de0a2e69dff4517518590ac32a46bd76606ec22a258f99584a6e70aca2")), strategy)
 			},
 		},
 		Body: func(ctx *httpwrapper.Context) {
@@ -150,7 +152,7 @@ func TestStrategy_Error_Halts(t *testing.T) {
 
 	headers := map[string][]string{}
 	// Token for user 1000
-	headers["Authorization"] = []string{"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEwMDB9.GVS-KC5nOCHybzzFIIH864u4KcGu-ZSd-96krqTUGWo"}
+	headers[middleware.HeaderAuthorization] = []string{"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEwMDB9.GVS-KC5nOCHybzzFIIH864u4KcGu-ZSd-96krqTUGWo"}
 	recorder := performRequest(e, "GET", "/test/1001", "", headers)
 
 	assert.Equal(t, http.StatusInternalServerError, recorder.Code)
@@ -170,7 +172,7 @@ func TestStrategy_Unauthorized_Halts(t *testing.T) {
 		Path:   "/test/:user_id",
 		Middleware: []httpwrapper.Handler{
 			func(context *httpwrapper.Context) {
-				middleware.HandleAuthentication(context, internalauth.CreateTokenHandler([]byte("52bfd2de0a2e69dff4517518590ac32a46bd76606ec22a258f99584a6e70aca2")), strategy)
+				user.HandleAuthentication(context, internalauth.CreateTokenHandler([]byte("52bfd2de0a2e69dff4517518590ac32a46bd76606ec22a258f99584a6e70aca2")), strategy)
 			},
 		},
 		Body: func(ctx *httpwrapper.Context) {
@@ -180,7 +182,7 @@ func TestStrategy_Unauthorized_Halts(t *testing.T) {
 
 	headers := map[string][]string{}
 	// Token for user 1000
-	headers["Authorization"] = []string{"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEwMDB9.GVS-KC5nOCHybzzFIIH864u4KcGu-ZSd-96krqTUGWo"}
+	headers[middleware.HeaderAuthorization] = []string{"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEwMDB9.GVS-KC5nOCHybzzFIIH864u4KcGu-ZSd-96krqTUGWo"}
 	recorder := performRequest(e, "GET", "/test/1001", "", headers)
 
 	assert.Equal(t, http.StatusUnauthorized, recorder.Code)
@@ -200,7 +202,7 @@ func TestStrategy_Authorized_Continues(t *testing.T) {
 		Path:   "/test/:user_id",
 		Middleware: []httpwrapper.Handler{
 			func(context *httpwrapper.Context) {
-				middleware.HandleAuthentication(context, internalauth.CreateTokenHandler([]byte("52bfd2de0a2e69dff4517518590ac32a46bd76606ec22a258f99584a6e70aca2")), strategy)
+				user.HandleAuthentication(context, internalauth.CreateTokenHandler([]byte("52bfd2de0a2e69dff4517518590ac32a46bd76606ec22a258f99584a6e70aca2")), strategy)
 			},
 		},
 		Body: func(ctx *httpwrapper.Context) {
@@ -210,7 +212,7 @@ func TestStrategy_Authorized_Continues(t *testing.T) {
 
 	headers := map[string][]string{}
 	// Token for user 1000
-	headers["Authorization"] = []string{"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEwMDB9.GVS-KC5nOCHybzzFIIH864u4KcGu-ZSd-96krqTUGWo"}
+	headers[middleware.HeaderAuthorization] = []string{"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEwMDB9.GVS-KC5nOCHybzzFIIH864u4KcGu-ZSd-96krqTUGWo"}
 	recorder := performRequest(e, "GET", "/test/1001", "", headers)
 
 	assert.Equal(t, http.StatusOK, recorder.Code)
