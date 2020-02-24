@@ -7,15 +7,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
-    - name: Build
-      run: docker build . --file build/docker/Dockerfile --tag c3po:$(date +%s)
 
     - name: Get dependencies
       run: |
         go get -v -t -d ./...
         go get golang.org/x/tools/cmd/goimports
 
-    - name: Fmt
+    - name: Build image
+      run: docker build . --file build/docker/Dockerfile --tag c3po:$(date +%s)
+
+    - name: Format
       run: gofmt -l .  | if [ $(grep -c -o -E ".*") -gt 0 ]; then exit 1; fi
 
     - name: Imports
@@ -25,7 +26,7 @@ jobs:
     - name: Build
       run: go build -v ./...
 
-    - name: Test
+    - name: Unit test
       run: go test -race -coverprofile=coverage.txt -covermode=atomic ./pkg/...
 
     - name: Integration test
@@ -39,7 +40,7 @@ jobs:
         sudo docker-compose run go go test ./test/...
         cd -
 
-    - name: Upload coverage to Codecov
+    - name: Coverage
       uses: codecov/codecov-action@v1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
