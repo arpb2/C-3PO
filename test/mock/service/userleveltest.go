@@ -9,7 +9,7 @@ type MockUserLevelService struct {
 	mock.Mock
 }
 
-func (m MockUserLevelService) GetUserLevel(userId uint, levelId uint) (result model.UserLevel, err error) {
+func (m *MockUserLevelService) GetUserLevel(userId uint, levelId uint) (result model.UserLevel, err error) {
 	args := m.Called(userId, levelId)
 
 	result = args.Get(0).(model.UserLevel)
@@ -17,7 +17,7 @@ func (m MockUserLevelService) GetUserLevel(userId uint, levelId uint) (result mo
 	return
 }
 
-func (m MockUserLevelService) StoreUserLevel(userLevel model.UserLevel) (result model.UserLevel, err error) {
+func (m *MockUserLevelService) StoreUserLevel(userLevel model.UserLevel) (result model.UserLevel, err error) {
 	args := m.Called(userLevel)
 
 	result = args.Get(0).(model.UserLevel)

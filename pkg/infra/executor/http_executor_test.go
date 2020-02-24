@@ -21,7 +21,7 @@ func TestHttpExecutor_GivenAHystrixDecoratedOne_WhenRunning_ThenItRunsTheDecorat
 	}
 	exec := executor.CreateHttpExecutor(decorator)
 
-	err := exec.Run(pipeline2.MockStep{}, nil)
+	err := exec.Run(&pipeline2.MockStep{}, nil)
 
 	assert.Nil(t, err)
 	mockStep.AssertExpectations(t)
@@ -38,7 +38,7 @@ func TestHttpExecutor_GivenOneDecorated_WhenRunning_ItAppliesDecorators(t *testi
 		return run()
 	}, decorator)
 
-	err := exec.Run(pipeline2.MockStep{}, nil)
+	err := exec.Run(&pipeline2.MockStep{}, nil)
 
 	assert.Nil(t, err)
 	mockStep.AssertExpectations(t)
@@ -58,7 +58,7 @@ func TestHttpExecutor_GivenOne_WhenRunningAndErroringAnonymously_ThenCircuitBrea
 		return cbErr
 	}, decorator)
 
-	err := exec.Run(pipeline2.MockStep{}, nil)
+	err := exec.Run(&pipeline2.MockStep{}, nil)
 
 	assert.Equal(t, expectedErr, err)
 	assert.Equal(t, expectedErr, cbErr)
@@ -79,7 +79,7 @@ func TestHttpExecutor_GivenOne_WhenRunningAndErroring5xx_ThenCircuitBreakerGetsI
 		return cbErr
 	}, decorator)
 
-	err := exec.Run(pipeline2.MockStep{}, nil)
+	err := exec.Run(&pipeline2.MockStep{}, nil)
 
 	assert.Equal(t, expectedErr, err)
 	assert.Equal(t, expectedErr, cbErr)
@@ -100,7 +100,7 @@ func TestHttpExecutor_GivenOne_WhenRunningAndErroringWith4xx_ThenCircuitBreakerG
 		return cbErr
 	}, decorator)
 
-	err := exec.Run(pipeline2.MockStep{}, nil)
+	err := exec.Run(&pipeline2.MockStep{}, nil)
 
 	assert.Equal(t, expectedErr, err)
 	assert.Nil(t, cbErr)

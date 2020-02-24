@@ -6,23 +6,23 @@ type MockMiddleware struct {
 	mock.Mock
 }
 
-func (t MockMiddleware) IsAborted() bool {
+func (t *MockMiddleware) IsAborted() bool {
 	args := t.Called()
 	return args.Bool(0)
 }
 
-func (t MockMiddleware) NextHandler() {
+func (t *MockMiddleware) NextHandler() {
 	_ = t.Called()
 }
 
-func (t MockMiddleware) AbortTransaction() {
+func (t *MockMiddleware) AbortTransaction() {
 	_ = t.Called()
 }
 
-func (t MockMiddleware) AbortTransactionWithError(err error) {
+func (t *MockMiddleware) AbortTransactionWithError(err error) {
 	_ = t.Called(err)
 }
 
-func (t MockMiddleware) AbortTransactionWithStatus(code int, jsonObj interface{}) {
+func (t *MockMiddleware) AbortTransactionWithStatus(code int, jsonObj interface{}) {
 	_ = t.Called(code, jsonObj)
 }

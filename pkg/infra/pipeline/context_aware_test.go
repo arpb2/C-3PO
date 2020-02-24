@@ -33,7 +33,7 @@ func TestContextAware_GivenOneWithSomethingDifferentThanReader_WhenGettingIt_The
 }
 
 func TestContextAware_GivenOneWithAReader_WhenGettingIt_ThenItReturnsItAndNoError(t *testing.T) {
-	expectedVal := http2.MockReader{}
+	expectedVal := &http2.MockReader{}
 	ctx := gopipeline.CreateContext()
 	ctx.Set(pipeline.TagHttpReader, expectedVal)
 	ctxAware := pipeline.CreateContextAware(ctx)
@@ -66,7 +66,7 @@ func TestContextAware_GivenOneWithSomethingDifferentThanWriter_WhenGettingIt_The
 }
 
 func TestContextAware_GivenOneWithAWriter_WhenGettingIt_ThenItReturnsItAndNoError(t *testing.T) {
-	expectedVal := http2.MockWriter{}
+	expectedVal := &http2.MockWriter{}
 	ctx := gopipeline.CreateContext()
 	ctx.Set(pipeline.TagHttpWriter, expectedVal)
 	ctxAware := pipeline.CreateContextAware(ctx)
@@ -99,7 +99,7 @@ func TestContextAware_GivenOneWithSomethingDifferentThanMiddleware_WhenGettingIt
 }
 
 func TestContextAware_GivenOneWithAMiddleware_WhenGettingIt_ThenItReturnsItAndNoError(t *testing.T) {
-	expectedVal := http2.MockMiddleware{}
+	expectedVal := &http2.MockMiddleware{}
 	ctx := gopipeline.CreateContext()
 	ctx.Set(pipeline.TagHttpMiddleware, expectedVal)
 	ctxAware := pipeline.CreateContextAware(ctx)
