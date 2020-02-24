@@ -27,9 +27,9 @@ import (
 	userlevelservice "github.com/arpb2/C-3PO/pkg/data/mysql/service/user_level"
 )
 
-const(
-	envPort = "PORT"
-	envMysqlDSN = "MYSQL_DSN"
+const (
+	envPort      = "PORT"
+	envMysqlDSN  = "MYSQL_DSN"
 	envSecretJWT = "SECRET_JWT"
 
 	defaultPort = "8080"
