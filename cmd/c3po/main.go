@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -26,30 +27,38 @@ import (
 	userlevelservice "github.com/arpb2/C-3PO/pkg/data/mysql/service/user_level"
 )
 
+const(
+	envPort = "PORT"
+	envMysqlDSN = "MYSQL_DSN"
+	envSecretJWT = "SECRET_JWT"
+
+	defaultPort = "8080"
+)
+
+func assertEnv(env string) string {
+	v, exists := os.LookupEnv(env)
+	if !exists {
+		panic(fmt.Sprintf("No %s envvar found. Maybe you forgot to add it?", env))
+	}
+	return v
+}
+
 func main() {
-	var port = os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
+	var port = os.Getenv(envPort)
+	if len(port) == 0 {
+		port = defaultPort
 	}
 	engine := gin.CreateEngine(port)
 
 	traceDecorator := decorator.CreateTraceDecorator(os.Stdout)
 
-	mysqlDsn, exists := os.LookupEnv("MYSQL_DSN")
-	if !exists {
-		panic("No MYSQL_DSN envvar found. Maybe you forgot to add it?")
-	}
-	dbClient, driver := client.CreateMysqlClient(mysqlDsn)
+	dbClient, driver := client.CreateMysqlClient(assertEnv(envMysqlDSN))
 	defer driver.Close()
 
 	httpExecutor := executor.CreateHttpExecutor(traceDecorator)
 	httpPipeline := pipeline.CreateHttpPipeline(httpExecutor)
 
-	jwtSecret, exists := os.LookupEnv("SECRET_JWT")
-	if !exists {
-		panic("No SECRET_JWT envvar found. Maybe you forgot to add it?")
-	}
-	tokenHandler := jwt.CreateTokenHandler([]byte(jwtSecret))
+	tokenHandler := jwt.CreateTokenHandler([]byte(assertEnv(envSecretJWT)))
 
 	userService := userservice.CreateService(dbClient)
 	teacherService := teacherservice.CreateService(userService, dbClient)
