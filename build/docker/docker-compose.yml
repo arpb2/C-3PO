@@ -45,7 +45,7 @@ services:
             MYSQL_PASSWORD: santipassword # TODO remove from here before going live, pass from env
             MYSQL_DATABASE: testdb # TODO remove from here before going live, pass from env
         ports:
-            - '3380:3306'
+            - "3380:3306"
 
     go:
         restart: unless-stopped

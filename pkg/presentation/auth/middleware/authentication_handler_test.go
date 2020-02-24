@@ -22,7 +22,7 @@ type MockAuthenticationStrategy struct {
 	mock.Mock
 }
 
-func (s MockAuthenticationStrategy) Authenticate(token *auth.Token, userId string) (authorized bool, err error) {
+func (s *MockAuthenticationStrategy) Authenticate(token *auth.Token, userId string) (authorized bool, err error) {
 	args := s.Called(token, userId)
 	return args.Bool(0), args.Error(1)
 }

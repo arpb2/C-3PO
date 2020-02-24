@@ -23,23 +23,23 @@ type MockTeacherService struct {
 	mock.Mock
 }
 
-func (m MockTeacherService) GetUser(userId uint) (user model.User, err error) {
+func (m *MockTeacherService) GetUser(userId uint) (user model.User, err error) {
 	panic("implement me")
 }
 
-func (m MockTeacherService) CreateUser(user model.User) (result model.User, err error) {
+func (m *MockTeacherService) CreateUser(user model.User) (result model.User, err error) {
 	panic("implement me")
 }
 
-func (m MockTeacherService) UpdateUser(user model.User) (result model.User, err error) {
+func (m *MockTeacherService) UpdateUser(user model.User) (result model.User, err error) {
 	panic("implement me")
 }
 
-func (m MockTeacherService) DeleteUser(userId uint) error {
+func (m *MockTeacherService) DeleteUser(userId uint) error {
 	panic("implement me")
 }
 
-func (m MockTeacherService) GetStudents(userId uint) (students []model.User, err error) {
+func (m *MockTeacherService) GetStudents(userId uint) (students []model.User, err error) {
 	args := m.Called(userId)
 
 	firstArg := args.Get(0)
@@ -66,7 +66,7 @@ func Test_Multi_HandlingOfAuthentication_NoHeader(t *testing.T) {
 		Method: "GET",
 		Path:   "/test",
 		Middleware: []httpwrapper.Handler{
-			teacher.CreateMiddleware(MultiTokenHandler, MockTeacherService{}),
+			teacher.CreateMiddleware(MultiTokenHandler, &MockTeacherService{}),
 		},
 		Body: func(ctx *httpwrapper.Context) {
 			panic("Shouldn't reach here!")
@@ -85,7 +85,7 @@ func Test_Multi_HandlingOfAuthentication_BadHeader(t *testing.T) {
 		Method: "GET",
 		Path:   "/test",
 		Middleware: []httpwrapper.Handler{
-			teacher.CreateMiddleware(MultiTokenHandler, MockTeacherService{}),
+			teacher.CreateMiddleware(MultiTokenHandler, &MockTeacherService{}),
 		},
 		Body: func(ctx *httpwrapper.Context) {
 			panic("Shouldn't reach here!")
@@ -133,7 +133,7 @@ func Test_Multi_HandlingOfAuthentication_Authorized_SameUser(t *testing.T) {
 		Method: "GET",
 		Path:   "/test/:user_id",
 		Middleware: []httpwrapper.Handler{
-			teacher.CreateMiddleware(MultiTokenHandler, MockTeacherService{}),
+			teacher.CreateMiddleware(MultiTokenHandler, &MockTeacherService{}),
 		},
 		Body: func(ctx *httpwrapper.Context) {
 			ctx.WriteString(http.StatusOK, "Returned success")

@@ -16,14 +16,14 @@ type MockServerEngine struct {
 	mock.Mock
 }
 
-func (s MockServerEngine) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
+func (s *MockServerEngine) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 	_ = s.Called(writer, request)
 }
-func (s MockServerEngine) Run() error {
+func (s *MockServerEngine) Run() error {
 	args := s.Called()
 	return args.Error(0)
 }
-func (s MockServerEngine) Register(controller controller.Controller) {
+func (s *MockServerEngine) Register(controller controller.Controller) {
 	_ = s.Called(controller)
 }
 

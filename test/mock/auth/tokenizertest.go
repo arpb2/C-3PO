@@ -9,7 +9,7 @@ type MockTokenHandler struct {
 	mock.Mock
 }
 
-func (t MockTokenHandler) Create(token *auth.Token) (tokenStr string, err error) {
+func (t *MockTokenHandler) Create(token *auth.Token) (tokenStr string, err error) {
 	args := t.Called(token)
 
 	tokenStr = args.String(0)
@@ -19,7 +19,7 @@ func (t MockTokenHandler) Create(token *auth.Token) (tokenStr string, err error)
 	return
 }
 
-func (t MockTokenHandler) Retrieve(token string) (tkn *auth.Token, err error) {
+func (t *MockTokenHandler) Retrieve(token string) (tkn *auth.Token, err error) {
 	args := t.Called(token)
 
 	tokenParam := args.Get(0)

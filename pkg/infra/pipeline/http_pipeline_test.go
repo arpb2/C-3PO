@@ -14,9 +14,9 @@ import (
 func TestHttpPipeline_GivenOne_WhenRunning_ThenContextHasReader(t *testing.T) {
 	pipe := pipeline.CreateHttpPipeline(nil)
 	ctx := &http2.Context{
-		Reader:     http.MockReader{},
-		Writer:     http.MockWriter{},
-		Middleware: http.MockMiddleware{},
+		Reader:     &http.MockReader{},
+		Writer:     &http.MockWriter{},
+		Middleware: &http.MockMiddleware{},
 	}
 	stage := new(pipeline2.MockStage)
 	stage.On("Run", nil, mock.MatchedBy(func(obj gopipeline.Context) bool {
@@ -32,9 +32,9 @@ func TestHttpPipeline_GivenOne_WhenRunning_ThenContextHasReader(t *testing.T) {
 func TestHttpPipeline_GivenOne_WhenRunning_ThenContextHasWriter(t *testing.T) {
 	pipe := pipeline.CreateHttpPipeline(nil)
 	ctx := &http2.Context{
-		Reader:     http.MockReader{},
-		Writer:     http.MockWriter{},
-		Middleware: http.MockMiddleware{},
+		Reader:     &http.MockReader{},
+		Writer:     &http.MockWriter{},
+		Middleware: &http.MockMiddleware{},
 	}
 	stage := new(pipeline2.MockStage)
 	stage.On("Run", nil, mock.MatchedBy(func(obj gopipeline.Context) bool {
@@ -50,9 +50,9 @@ func TestHttpPipeline_GivenOne_WhenRunning_ThenContextHasWriter(t *testing.T) {
 func TestHttpPipeline_GivenOne_WhenRunning_ThenContextHasMiddleware(t *testing.T) {
 	pipe := pipeline.CreateHttpPipeline(nil)
 	ctx := &http2.Context{
-		Reader:     http.MockReader{},
-		Writer:     http.MockWriter{},
-		Middleware: http.MockMiddleware{},
+		Reader:     &http.MockReader{},
+		Writer:     &http.MockWriter{},
+		Middleware: &http.MockMiddleware{},
 	}
 	stage := new(pipeline2.MockStage)
 	stage.On("Run", nil, mock.MatchedBy(func(obj gopipeline.Context) bool {
@@ -73,8 +73,8 @@ func TestHttpPipeline_GivenOne_WhenRunningAndFailing_ThenContextAborts(t *testin
 	stage := new(pipeline2.MockStage)
 	stage.On("Run", nil, mock.Anything).Return(err)
 	ctx := &http2.Context{
-		Reader:     http.MockReader{},
-		Writer:     http.MockWriter{},
+		Reader:     &http.MockReader{},
+		Writer:     &http.MockWriter{},
 		Middleware: middleware,
 	}
 
