@@ -4,8 +4,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/arpb2/C-3PO/pkg/data/ent/client"
 	"github.com/arpb2/C-3PO/pkg/data/jwt"
+	"github.com/arpb2/C-3PO/pkg/data/mysql/client"
 	"github.com/arpb2/C-3PO/pkg/domain/controller"
 	"github.com/arpb2/C-3PO/pkg/infra/engine/gin"
 	"github.com/arpb2/C-3PO/pkg/infra/executor"
@@ -20,10 +20,10 @@ import (
 	"github.com/arpb2/C-3PO/pkg/presentation/user/validation"
 	userlevel "github.com/arpb2/C-3PO/pkg/presentation/user_level/controller"
 
-	credentialservice "github.com/arpb2/C-3PO/pkg/data/ent/service/credential"
-	teacherservice "github.com/arpb2/C-3PO/pkg/data/ent/service/teacher"
-	userservice "github.com/arpb2/C-3PO/pkg/data/ent/service/user"
-	userlevelservice "github.com/arpb2/C-3PO/pkg/data/ent/service/user_level"
+	credentialservice "github.com/arpb2/C-3PO/pkg/data/mysql/service/credential"
+	teacherservice "github.com/arpb2/C-3PO/pkg/data/mysql/service/teacher"
+	userservice "github.com/arpb2/C-3PO/pkg/data/mysql/service/user"
+	userlevelservice "github.com/arpb2/C-3PO/pkg/data/mysql/service/user_level"
 )
 
 func main() {
