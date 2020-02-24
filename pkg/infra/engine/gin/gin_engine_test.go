@@ -3,7 +3,6 @@ package gin_test
 import (
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"strings"
 	"testing"
 
@@ -13,18 +12,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetPortReturnsSpecificIfUsingEnvVar(t *testing.T) {
-	_ = os.Setenv("PORT", "1234")
-	assert.Equal(t, "1234", ginengine.GetPort())
-	_ = os.Unsetenv("PORT")
-}
-
-func TestGetPortReturns8080(t *testing.T) {
-	assert.Equal(t, "8080", ginengine.GetPort())
-}
-
 func TestRegisterMiddleware(t *testing.T) {
-	e := ginengine.CreateEngine()
+	e := ginengine.CreateEngine("8080")
 	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test",

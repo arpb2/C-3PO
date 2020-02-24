@@ -27,17 +27,29 @@ import (
 )
 
 func main() {
-	engine := gin.CreateEngine()
+	var port = os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	engine := gin.CreateEngine(port)
 
 	traceDecorator := decorator.CreateTraceDecorator(os.Stdout)
 
-	dbClient, driver := client.CreateMysqlClient(os.Getenv("MYSQL_DSN"))
+	mysqlDsn, exists := os.LookupEnv("MYSQL_DSN")
+	if !exists {
+		panic("No MYSQL_DSN envvar found. Maybe you forgot to add it?")
+	}
+	dbClient, driver := client.CreateMysqlClient(mysqlDsn)
 	defer driver.Close()
 
 	httpExecutor := executor.CreateHttpExecutor(traceDecorator)
 	httpPipeline := pipeline.CreateHttpPipeline(httpExecutor)
 
-	tokenHandler := jwt.CreateTokenHandler()
+	jwtSecret, exists := os.LookupEnv("SECRET_JWT")
+	if !exists {
+		panic("No SECRET_JWT envvar found. Maybe you forgot to add it?")
+	}
+	tokenHandler := jwt.CreateTokenHandler([]byte(jwtSecret))
 
 	userService := userservice.CreateService(dbClient)
 	teacherService := teacherservice.CreateService(userService, dbClient)

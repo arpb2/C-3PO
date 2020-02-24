@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"os"
 
 	"github.com/arpb2/C-3PO/pkg/domain/controller"
 	"github.com/arpb2/C-3PO/pkg/domain/engine"
@@ -12,10 +11,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func CreateEngine() engine.ServerEngine {
+func CreateEngine(port string) engine.ServerEngine {
 	return &serverEngine{
 		engine: gin.Default(),
-		port:   GetPort(),
+		port:   port,
 	}
 }
 
@@ -57,12 +56,4 @@ func (server serverEngine) Register(controller controller.Controller) {
 		controller.Path,
 		handlers...,
 	)
-}
-
-func GetPort() string {
-	var port = os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-	return port
 }

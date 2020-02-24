@@ -26,7 +26,7 @@ func createPutController() controller.Controller {
 	return controller3.CreatePutController(
 		pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()),
 		teacher.CreateMiddleware(
-			jwt.CreateTokenHandler(),
+			jwt.CreateTokenHandler([]byte("52bfd2de0a2e69dff4517518590ac32a46bd76606ec22a258f99584a6e70aca2")),
 			nil,
 		),
 		nil,

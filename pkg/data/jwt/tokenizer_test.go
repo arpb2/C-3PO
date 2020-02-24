@@ -14,7 +14,7 @@ import (
 var defaultSha = "52bfd2de0a2e69dff4517518590ac32a46bd76606ec22a258f99584a6e70aca2"
 
 var DefaultTokenHandler = TokenHandler{
-	Secret: FetchJwtSecret(),
+	Secret: []byte("52bfd2de0a2e69dff4517518590ac32a46bd76606ec22a258f99584a6e70aca2"),
 }
 
 func TestSecret_DefaultValue(t *testing.T) {
@@ -22,22 +22,9 @@ func TestSecret_DefaultValue(t *testing.T) {
 
 	assert.NoError(t, err)
 
-	secret := FetchJwtSecret()
+	secret := []byte("52bfd2de0a2e69dff4517518590ac32a46bd76606ec22a258f99584a6e70aca2")
 
 	assert.Equal(t, []byte(defaultSha), secret)
-}
-
-func TestSecret_UsesOsEnv(t *testing.T) {
-	value := "some secret value"
-	err := os.Setenv("JWT_SECRET", value)
-
-	assert.NoError(t, err)
-
-	defer os.Unsetenv("JWT_SECRET")
-
-	secret := FetchJwtSecret()
-
-	assert.Equal(t, []byte(value), secret)
 }
 
 var expectedToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEwMDB9.GVS-KC5nOCHybzzFIIH864u4KcGu-ZSd-96krqTUGWo"

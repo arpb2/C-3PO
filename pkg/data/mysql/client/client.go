@@ -16,6 +16,5 @@ func CreateMysqlClient(dsn string) (client *ent.Client, drv *sql.Driver) {
 		log.Fatalf("failed creating database client: %v", err)
 	}
 	client = ent.NewClient(ent.Driver(drv))
-	//_ = client.Schema.Create(context.Background())
 	return
 }

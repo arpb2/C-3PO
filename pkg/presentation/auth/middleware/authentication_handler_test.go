@@ -37,13 +37,13 @@ func performRequest(r http.Handler, method, path, body string, headers map[strin
 }
 
 func Test_HandlingOfAuthentication_NoHeader(t *testing.T) {
-	e := ginengine.CreateEngine()
+	e := ginengine.CreateEngine("8080")
 	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test",
 		Middleware: []httpwrapper.Handler{
 			func(context *httpwrapper.Context) {
-				middleware.HandleAuthentication(context, internalauth.CreateTokenHandler())
+				middleware.HandleAuthentication(context, internalauth.CreateTokenHandler([]byte("52bfd2de0a2e69dff4517518590ac32a46bd76606ec22a258f99584a6e70aca2")))
 			},
 		},
 		Body: func(ctx *httpwrapper.Context) {
@@ -58,13 +58,13 @@ func Test_HandlingOfAuthentication_NoHeader(t *testing.T) {
 }
 
 func Test_HandlingOfAuthentication_BadHeader(t *testing.T) {
-	e := ginengine.CreateEngine()
+	e := ginengine.CreateEngine("8080")
 	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test",
 		Middleware: []httpwrapper.Handler{
 			func(context *httpwrapper.Context) {
-				middleware.HandleAuthentication(context, internalauth.CreateTokenHandler())
+				middleware.HandleAuthentication(context, internalauth.CreateTokenHandler([]byte("52bfd2de0a2e69dff4517518590ac32a46bd76606ec22a258f99584a6e70aca2")))
 			},
 		},
 		Body: func(ctx *httpwrapper.Context) {
@@ -81,13 +81,13 @@ func Test_HandlingOfAuthentication_BadHeader(t *testing.T) {
 }
 
 func Test_HandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
-	e := ginengine.CreateEngine()
+	e := ginengine.CreateEngine("8080")
 	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test/:user_id",
 		Middleware: []httpwrapper.Handler{
 			func(context *httpwrapper.Context) {
-				middleware.HandleAuthentication(context, internalauth.CreateTokenHandler())
+				middleware.HandleAuthentication(context, internalauth.CreateTokenHandler([]byte("52bfd2de0a2e69dff4517518590ac32a46bd76606ec22a258f99584a6e70aca2")))
 			},
 		},
 		Body: func(ctx *httpwrapper.Context) {
@@ -105,13 +105,13 @@ func Test_HandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
 }
 
 func Test_HandlingOfAuthentication_Authorized_SameUser(t *testing.T) {
-	e := ginengine.CreateEngine()
+	e := ginengine.CreateEngine("8080")
 	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test/:user_id",
 		Middleware: []httpwrapper.Handler{
 			func(context *httpwrapper.Context) {
-				middleware.HandleAuthentication(context, internalauth.CreateTokenHandler())
+				middleware.HandleAuthentication(context, internalauth.CreateTokenHandler([]byte("52bfd2de0a2e69dff4517518590ac32a46bd76606ec22a258f99584a6e70aca2")))
 			},
 		},
 		Body: func(ctx *httpwrapper.Context) {
@@ -134,13 +134,13 @@ func TestStrategy_Error_Halts(t *testing.T) {
 		return token.UserId == uint(1000)
 	}), "1001").Return(false, errors.New("whoops this fails")).Once()
 
-	e := ginengine.CreateEngine()
+	e := ginengine.CreateEngine("8080")
 	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test/:user_id",
 		Middleware: []httpwrapper.Handler{
 			func(context *httpwrapper.Context) {
-				middleware.HandleAuthentication(context, internalauth.CreateTokenHandler(), strategy)
+				middleware.HandleAuthentication(context, internalauth.CreateTokenHandler([]byte("52bfd2de0a2e69dff4517518590ac32a46bd76606ec22a258f99584a6e70aca2")), strategy)
 			},
 		},
 		Body: func(ctx *httpwrapper.Context) {
@@ -164,13 +164,13 @@ func TestStrategy_Unauthorized_Halts(t *testing.T) {
 		return token.UserId == uint(1000)
 	}), "1001").Return(false, nil).Once()
 
-	e := ginengine.CreateEngine()
+	e := ginengine.CreateEngine("8080")
 	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test/:user_id",
 		Middleware: []httpwrapper.Handler{
 			func(context *httpwrapper.Context) {
-				middleware.HandleAuthentication(context, internalauth.CreateTokenHandler(), strategy)
+				middleware.HandleAuthentication(context, internalauth.CreateTokenHandler([]byte("52bfd2de0a2e69dff4517518590ac32a46bd76606ec22a258f99584a6e70aca2")), strategy)
 			},
 		},
 		Body: func(ctx *httpwrapper.Context) {
@@ -194,13 +194,13 @@ func TestStrategy_Authorized_Continues(t *testing.T) {
 		return token.UserId == uint(1000)
 	}), "1001").Return(true, nil).Once()
 
-	e := ginengine.CreateEngine()
+	e := ginengine.CreateEngine("8080")
 	e.Register(controller.Controller{
 		Method: "GET",
 		Path:   "/test/:user_id",
 		Middleware: []httpwrapper.Handler{
 			func(context *httpwrapper.Context) {
-				middleware.HandleAuthentication(context, internalauth.CreateTokenHandler(), strategy)
+				middleware.HandleAuthentication(context, internalauth.CreateTokenHandler([]byte("52bfd2de0a2e69dff4517518590ac32a46bd76606ec22a258f99584a6e70aca2")), strategy)
 			},
 		},
 		Body: func(ctx *httpwrapper.Context) {
