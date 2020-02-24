@@ -14,7 +14,7 @@ import (
 	"github.com/arpb2/C-3PO/pkg/data/jwt"
 	"github.com/arpb2/C-3PO/pkg/domain/controller"
 	"github.com/arpb2/C-3PO/pkg/infra/executor"
-	"github.com/arpb2/C-3PO/pkg/presentation/auth/middleware/single"
+	"github.com/arpb2/C-3PO/pkg/presentation/middleware/user/single"
 	"github.com/arpb2/C-3PO/test/mock/golden"
 	testhttpwrapper "github.com/arpb2/C-3PO/test/mock/http"
 	"github.com/arpb2/C-3PO/test/mock/service"

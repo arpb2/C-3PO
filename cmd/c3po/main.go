@@ -13,9 +13,11 @@ import (
 	"github.com/arpb2/C-3PO/pkg/infra/executor/decorator"
 	"github.com/arpb2/C-3PO/pkg/infra/pipeline"
 	"github.com/arpb2/C-3PO/pkg/infra/server"
-	"github.com/arpb2/C-3PO/pkg/presentation/auth/middleware/single"
-	"github.com/arpb2/C-3PO/pkg/presentation/auth/middleware/teacher"
 	health "github.com/arpb2/C-3PO/pkg/presentation/health/controller"
+	level "github.com/arpb2/C-3PO/pkg/presentation/level/controller"
+	"github.com/arpb2/C-3PO/pkg/presentation/middleware/admin"
+	"github.com/arpb2/C-3PO/pkg/presentation/middleware/user/single"
+	"github.com/arpb2/C-3PO/pkg/presentation/middleware/user/teacher"
 	session "github.com/arpb2/C-3PO/pkg/presentation/session/controller"
 	user "github.com/arpb2/C-3PO/pkg/presentation/user/controller"
 	"github.com/arpb2/C-3PO/pkg/presentation/user/validation"
@@ -28,9 +30,10 @@ import (
 )
 
 const (
-	envPort      = "PORT"
-	envMysqlDSN  = "MYSQL_DSN"
-	envSecretJWT = "SECRET_JWT"
+	envPort             = "PORT"
+	envMysqlDSN         = "MYSQL_DSN"
+	envSecretJWT        = "SECRET_JWT"
+	envSecretAdminToken = "SECRET_TOKEN_ADMIN"
 
 	defaultPort = "8080"
 )
@@ -65,6 +68,7 @@ func main() {
 	userLevelService := userlevelservice.CreateService(dbClient)
 	credentialService := credentialservice.CreateService(dbClient)
 
+	adminAuthMiddleware := admin.CreateMiddleware([]byte(assertEnv(envSecretAdminToken)))
 	singleAuthMiddleware := single.CreateMiddleware(tokenHandler)
 	teacherAuthMiddleware := teacher.CreateMiddleware(tokenHandler, teacherService)
 
@@ -101,6 +105,9 @@ func main() {
 
 		userlevel.CreateGetController(httpPipeline, teacherAuthMiddleware, userLevelService),
 		userlevel.CreatePutController(httpPipeline, teacherAuthMiddleware, userLevelService),
+
+		level.CreateGetController(),
+		level.CreatePutController(adminAuthMiddleware),
 	}
 
 	if err := server.StartApplication(engine, controllers); err != nil {

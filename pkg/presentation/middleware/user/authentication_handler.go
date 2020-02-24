@@ -1,8 +1,10 @@
-package middleware
+package user
 
 import (
 	"fmt"
 	"strconv"
+
+	"github.com/arpb2/C-3PO/pkg/presentation/middleware"
 
 	"github.com/arpb2/C-3PO/pkg/domain/auth"
 	"github.com/arpb2/C-3PO/pkg/domain/http"
@@ -10,7 +12,7 @@ import (
 )
 
 func HandleAuthentication(ctx *http.Context, tokenHandler auth.TokenHandler, strategies ...authmiddleware.AuthenticationStrategy) {
-	authToken := ctx.GetHeader("Authorization")
+	authToken := ctx.GetHeader(middleware.HeaderAuthorization)
 
 	if authToken == "" {
 		ctx.AbortTransactionWithError(http.CreateUnauthorizedError())

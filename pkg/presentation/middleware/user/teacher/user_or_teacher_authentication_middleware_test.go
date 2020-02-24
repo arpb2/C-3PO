@@ -7,12 +7,14 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/arpb2/C-3PO/pkg/presentation/middleware"
+
 	"github.com/arpb2/C-3PO/pkg/data/jwt"
 	"github.com/arpb2/C-3PO/pkg/domain/controller"
 	httpwrapper "github.com/arpb2/C-3PO/pkg/domain/http"
 	"github.com/arpb2/C-3PO/pkg/domain/model"
 	ginengine "github.com/arpb2/C-3PO/pkg/infra/engine/gin"
-	"github.com/arpb2/C-3PO/pkg/presentation/auth/middleware/teacher"
+	"github.com/arpb2/C-3PO/pkg/presentation/middleware/user/teacher"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -93,7 +95,7 @@ func Test_Multi_HandlingOfAuthentication_BadHeader(t *testing.T) {
 	})
 
 	headers := map[string][]string{}
-	headers["Authorization"] = []string{"bad token"}
+	headers[middleware.HeaderAuthorization] = []string{"bad token"}
 	recorder := performRequest(e, "GET", "/test", "", headers)
 
 	assert.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -118,7 +120,7 @@ func Test_Multi_HandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
 
 	headers := map[string][]string{}
 	// Token for user 1000
-	headers["Authorization"] = []string{"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEwMDB9.GVS-KC5nOCHybzzFIIH864u4KcGu-ZSd-96krqTUGWo"}
+	headers[middleware.HeaderAuthorization] = []string{"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEwMDB9.GVS-KC5nOCHybzzFIIH864u4KcGu-ZSd-96krqTUGWo"}
 	recorder := performRequest(e, "GET", "/test/1", "", headers)
 
 	assert.Equal(t, http.StatusUnauthorized, recorder.Code)
@@ -142,7 +144,7 @@ func Test_Multi_HandlingOfAuthentication_Authorized_SameUser(t *testing.T) {
 
 	headers := map[string][]string{}
 	// Token for user 1000
-	headers["Authorization"] = []string{"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEwMDB9.GVS-KC5nOCHybzzFIIH864u4KcGu-ZSd-96krqTUGWo"}
+	headers[middleware.HeaderAuthorization] = []string{"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEwMDB9.GVS-KC5nOCHybzzFIIH864u4KcGu-ZSd-96krqTUGWo"}
 	recorder := performRequest(e, "GET", "/test/1000", "", headers)
 
 	assert.Equal(t, http.StatusOK, recorder.Code)
@@ -174,7 +176,7 @@ func Test_Multi_HandlingOfAuthentication_Authorized_Student(t *testing.T) {
 
 	headers := map[string][]string{}
 	// Token for user 1001
-	headers["Authorization"] = []string{"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEwMDF9.Vx0MXNKC_A5s7rWZ_LfcwEc7rVgbns62mfFbq3RwSk0"}
+	headers[middleware.HeaderAuthorization] = []string{"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEwMDF9.Vx0MXNKC_A5s7rWZ_LfcwEc7rVgbns62mfFbq3RwSk0"}
 	recorder := performRequest(e, "GET", "/test/1000", "", headers)
 
 	assert.Equal(t, http.StatusOK, recorder.Code)
@@ -210,7 +212,7 @@ func Test_Multi_HandlingOfAuthentication_Unauthorized_Student(t *testing.T) {
 
 	headers := map[string][]string{}
 	// Token for user 1002
-	headers["Authorization"] = []string{"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEwMDJ9.YRQ2drFXz-apv85QOyMjNybmxsizVnfwImTWKwIVqso"}
+	headers[middleware.HeaderAuthorization] = []string{"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEwMDJ9.YRQ2drFXz-apv85QOyMjNybmxsizVnfwImTWKwIVqso"}
 	recorder := performRequest(e, "GET", "/test/1000", "", headers)
 
 	assert.Equal(t, http.StatusUnauthorized, recorder.Code)
@@ -236,7 +238,7 @@ func Test_Multi_HandlingOfAuthentication_Service_Error(t *testing.T) {
 
 	headers := map[string][]string{}
 	// Token for user 1001
-	headers["Authorization"] = []string{"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEwMDF9.Vx0MXNKC_A5s7rWZ_LfcwEc7rVgbns62mfFbq3RwSk0"}
+	headers[middleware.HeaderAuthorization] = []string{"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEwMDF9.Vx0MXNKC_A5s7rWZ_LfcwEc7rVgbns62mfFbq3RwSk0"}
 	recorder := performRequest(e, "GET", "/test/1000", "", headers)
 
 	assert.Equal(t, http.StatusInternalServerError, recorder.Code)
