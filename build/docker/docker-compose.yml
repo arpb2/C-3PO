@@ -52,6 +52,7 @@ services:
         environment:
             - MYSQL_DSN=santi:santipassword@tcp(database:3380)/testdb # TODO remove from here before going live
             - SECRET_JWT=dbe0d0499ecf76fb40821c7c9a705254b15d4db4f9a637023406cb2b425ec622 # TODO remove from here before going live
+            - SECRET_TOKEN_ADMIN=secret-token-admin-stub # TODO remove from here before going live
         build:
             context: ../..
             dockerfile: build/docker/Dockerfile
