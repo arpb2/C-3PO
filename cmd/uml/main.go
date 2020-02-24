@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	levelcontroller "github.com/arpb2/C-3PO/pkg/presentation/level/controller"
 	"os"
 
+	levelcontroller "github.com/arpb2/C-3PO/pkg/presentation/level/controller"
 	sessioncontroller "github.com/arpb2/C-3PO/pkg/presentation/session/controller"
 	usercontroller "github.com/arpb2/C-3PO/pkg/presentation/user/controller"
 	userlevelcontroller "github.com/arpb2/C-3PO/pkg/presentation/user_level/controller"
