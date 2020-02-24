@@ -1,7 +1,9 @@
 # C-3PO
 
-Backend for the ARPB2 project
+![Build Status](https://github.com/arpb2/C-3PO/workflows/Docker%20Image%20CI/badge.svg) 
+[![Coverage](https://codecov.io/gh/arpb2/C-3PO/branch/master/graph/badge.svg)](https://codecov.io/gh/arpb2/C-3PO)
 
+Backend for the ARPB2 project
 
 ## Development
 
@@ -9,19 +11,9 @@ Clone the repository at `$GOPATH/go/src/github.com/arpb2` and start developing!
 
 ## Running
 
-Simply run (standing at the root of the project)
+Simply run the `docker-compose.yml` inside `build/docker/`
 
 ```bash
-docker-compose up # Use --build if you need to rebuild the image
+cd build/docker
+docker-compose up --build
 ```
-
-After that, simply access them through the exposed ports in the compose
-
-```bash
-# API
-curl localhost:5555/ping
-```
-
-Or as websites:
-- [Grafana](http://localhost)
-- [CAdvisor](http://localhost:8080)
