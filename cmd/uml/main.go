@@ -2,18 +2,19 @@ package main
 
 import (
 	"fmt"
+	levelcontroller "github.com/arpb2/C-3PO/pkg/presentation/level/controller"
 	"os"
 
-	controller2 "github.com/arpb2/C-3PO/pkg/presentation/session/controller"
-	controller3 "github.com/arpb2/C-3PO/pkg/presentation/user/controller"
-	controller4 "github.com/arpb2/C-3PO/pkg/presentation/user_level/controller"
+	sessioncontroller "github.com/arpb2/C-3PO/pkg/presentation/session/controller"
+	usercontroller "github.com/arpb2/C-3PO/pkg/presentation/user/controller"
+	userlevelcontroller "github.com/arpb2/C-3PO/pkg/presentation/user_level/controller"
 
 	gopipeline "github.com/saantiaguilera/go-pipeline"
 
 	"github.com/arpb2/C-3PO/pkg/domain/controller"
 	"github.com/arpb2/C-3PO/pkg/domain/http"
 	"github.com/arpb2/C-3PO/pkg/domain/pipeline"
-	pipeline2 "github.com/arpb2/C-3PO/pkg/infra/pipeline"
+	httppipeline "github.com/arpb2/C-3PO/pkg/infra/pipeline"
 )
 
 func createDrawablePipeline(fileName string) pipeline.HttpPipeline {
@@ -28,18 +29,23 @@ func createDrawablePipeline(fileName string) pipeline.HttpPipeline {
 		Type: gopipeline.UMLFormatSVG,
 	})
 
-	return pipeline2.CreateDrawablePipeline(file, graphRenderer)
+	return httppipeline.CreateDrawablePipeline(file, graphRenderer)
 }
 
 func getPipelinedControllers() []controller.Controller {
 	return []controller.Controller{
-		controller4.CreateGetController(createDrawablePipeline("user_level_get_controller"), nil, nil),
-		controller4.CreatePutController(createDrawablePipeline("user_level_put_controller"), nil, nil),
-		controller2.CreatePostController(createDrawablePipeline("session_post_controller"), nil, nil, nil),
-		controller3.CreateGetController(createDrawablePipeline("user_get_controller"), nil, nil),
-		controller3.CreatePostController(createDrawablePipeline("user_post_controller"), nil, nil),
-		controller3.CreatePutController(createDrawablePipeline("user_put_controller"), nil, nil, nil),
-		controller3.CreateDeleteController(createDrawablePipeline("user_delete_controller"), nil, nil),
+		levelcontroller.CreateGetController(createDrawablePipeline("level_get_controller"), nil),
+		levelcontroller.CreatePutController(createDrawablePipeline("level_put_controller"), nil, nil),
+
+		userlevelcontroller.CreateGetController(createDrawablePipeline("user_level_get_controller"), nil, nil),
+		userlevelcontroller.CreatePutController(createDrawablePipeline("user_level_put_controller"), nil, nil),
+
+		sessioncontroller.CreatePostController(createDrawablePipeline("session_post_controller"), nil, nil, nil),
+
+		usercontroller.CreateGetController(createDrawablePipeline("user_get_controller"), nil, nil),
+		usercontroller.CreatePostController(createDrawablePipeline("user_post_controller"), nil, nil),
+		usercontroller.CreatePutController(createDrawablePipeline("user_put_controller"), nil, nil, nil),
+		usercontroller.CreateDeleteController(createDrawablePipeline("user_delete_controller"), nil, nil),
 	}
 }
 
