@@ -24,7 +24,7 @@ func TestGetControllerPath_IsLevels(t *testing.T) {
 
 func TestGetController_IsStubbed(t *testing.T) {
 	writer := new(httpmock.MockWriter)
-	writer.On("WriteString", 200, "stub").Once()
+	writer.On("WriteString", 200, "stub", []interface{}(nil)).Once()
 	ctx := &http.Context{
 		Writer: writer,
 	}
