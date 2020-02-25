@@ -14,6 +14,9 @@ func get(dbClient *ent.Client, userId uint) (model.User, error) {
 	result, err := dbClient.User.Get(ctx, userId)
 
 	if err != nil {
+		if ent.IsNotFound(err) {
+			return userModel, http.CreateNotFoundError()
+		}
 		return userModel, err
 	}
 
