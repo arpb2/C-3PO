@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"os"
 
 	"github.com/arpb2/C-3PO/third_party/ent"
@@ -18,7 +17,7 @@ func main() {
 	}
 
 	ctx := context.Background()
-	drv, err := sql.Open("mysql", fmt.Sprintf("%s/testdb", dsn))
+	drv, err := sql.Open("mysql", dsn)
 
 	if err != nil {
 		panic(err)

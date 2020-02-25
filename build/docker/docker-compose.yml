@@ -37,22 +37,13 @@ services:
             - "/var/lib/docker/:/var/lib/docker:ro"
 
     database:
-        restart: unless-stopped
         image: mysql:8
-        environment:
-            MYSQL_ROOT_PASSWORD: rootpassword # TODO remove from here before going live, pass from env
-            MYSQL_USER: santi # TODO remove from here before going live, pass from env
-            MYSQL_PASSWORD: santipassword # TODO remove from here before going live, pass from env
-            MYSQL_DATABASE: testdb # TODO remove from here before going live, pass from env
         ports:
             - "3380:3306"
 
     go:
-        restart: unless-stopped
         environment:
-            - MYSQL_DSN=santi:santipassword@tcp(database:3380)/testdb # TODO remove from here before going live
-            - SECRET_JWT=dbe0d0499ecf76fb40821c7c9a705254b15d4db4f9a637023406cb2b425ec622 # TODO remove from here before going live
-            - SECRET_TOKEN_ADMIN=secret-token-admin-stub # TODO remove from here before going live
+            - MYSQL_DSN=${MYSQL_USER}:${MYSQL_PASSWORD}@tcp(database)/${MYSQL_DATABASE}
         build:
             context: ../..
             dockerfile: build/docker/Dockerfile
@@ -60,7 +51,7 @@ services:
             - .:/app/go
         ports:
             - "5555:8080"
-        depends_on:
+        links:
             - database
         command: go run cmd/c3po/main.go
 
