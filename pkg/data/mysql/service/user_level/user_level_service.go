@@ -45,6 +45,9 @@ func (c *userLevelService) GetUserLevel(userId uint, levelId uint) (userLevel mo
 		First(ctx)
 
 	if err != nil {
+		if ent.IsNotFound(err) {
+			return ul, http.CreateNotFoundError()
+		}
 		return ul, err
 	}
 

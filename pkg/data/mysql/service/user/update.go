@@ -13,18 +13,18 @@ import (
 )
 
 func updateUser(tx *ent.Tx, ctx context.Context, user model.User) (*ent.User, error) {
-	createOp := tx.User.Create()
+	updateOp := tx.User.UpdateOneID(user.Id)
 	if len(user.Name) > 0 {
-		createOp = createOp.SetName(user.Name)
+		updateOp = updateOp.SetName(user.Name)
 	}
 	if len(user.Surname) > 0 {
-		createOp = createOp.SetSurname(user.Surname)
+		updateOp = updateOp.SetSurname(user.Surname)
 	}
 	if len(user.Email) > 0 {
-		createOp = createOp.SetEmail(user.Email)
+		updateOp = updateOp.SetEmail(user.Email)
 	}
 
-	result, err := createOp.
+	result, err := updateOp.
 		SetUpdatedAt(time.Now()).
 		Save(ctx)
 	if err != nil || result == nil {
@@ -42,6 +42,9 @@ func hasToUpdateCredential(dbClient *ent.Client, ctx context.Context, authUser m
 			Strings(ctx)
 
 		if err != nil {
+			if ent.IsNotFound(err) {
+				return nil, http.CreateNotFoundError()
+			}
 			return nil, err
 		}
 
@@ -83,7 +86,7 @@ func update(dbClient *ent.Client, authUser model.AuthenticatedUser) (model.User,
 
 	hashPw, err := hasToUpdateCredential(dbClient, ctx, authUser)
 	if err != nil {
-		return userModel, http.CreateInternalError()
+		return userModel, err
 	}
 
 	if hashPw != nil {
