@@ -2,6 +2,7 @@ package level
 
 import (
 	"context"
+	"time"
 
 	"github.com/arpb2/C-3PO/pkg/domain/http"
 	"github.com/arpb2/C-3PO/pkg/domain/model"
@@ -70,6 +71,7 @@ func (l *levelService) StoreLevel(level model.Level) (result model.Level, err er
 			Update().
 			SetName(level.Name).
 			SetDescription(level.Description).
+			SetUpdatedAt(time.Now()).
 			Save(ctx)
 	}
 

@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"github.com/arpb2/C-3PO/pkg/domain/http"
 
 	"github.com/arpb2/C-3PO/third_party/ent"
 	"github.com/arpb2/C-3PO/third_party/ent/credential"
@@ -13,8 +14,15 @@ func del(dbClient *ent.Client, userId uint) error {
 
 	_, err := dbClient.Credential.Delete().Where(credential.HasHolderWith(user.ID(userId))).Exec(ctx)
 	if err != nil {
+		if ent.IsNotFound(err) {
+			return http.CreateNotFoundError()
+		}
 		return err
 	}
 
-	return dbClient.User.DeleteOneID(userId).Exec(ctx)
+	err = dbClient.User.DeleteOneID(userId).Exec(ctx)
+	if err != nil && ent.IsNotFound(err) {
+		return http.CreateNotFoundError()
+	}
+	return err
 }
