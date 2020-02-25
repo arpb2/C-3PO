@@ -38,12 +38,19 @@ services:
 
     database:
         image: mysql:8
+        environment:
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+            MYSQL_USER: ${MYSQL_USER}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+            MYSQL_DATABASE: ${MYSQL_DATABASE}
         ports:
             - "3380:3306"
 
     go:
         environment:
             - MYSQL_DSN=${MYSQL_USER}:${MYSQL_PASSWORD}@tcp(database)/${MYSQL_DATABASE}
+            - SECRET_JWT=${SECRET_JWT}
+            - SECRET_TOKEN_ADMIN=${SECRET_TOKEN_ADMIN}
         build:
             context: ../..
             dockerfile: build/docker/Dockerfile
