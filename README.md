@@ -5,10 +5,6 @@
 
 Backend for the ARPB2 project
 
-## Development
-
-Clone the repository at `$GOPATH/go/src/github.com/arpb2` and start developing!
-
 ## Running
 
 Simply run the `docker-compose.yml` inside `build/docker/`
