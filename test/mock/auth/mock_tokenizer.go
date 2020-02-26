@@ -1,7 +1,7 @@
 package auth
 
 import (
-	"github.com/arpb2/C-3PO/pkg/domain/session/token"
+	"github.com/arpb2/C-3PO/pkg/domain/session/repository"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -9,7 +9,7 @@ type MockTokenHandler struct {
 	mock.Mock
 }
 
-func (t *MockTokenHandler) Create(token *token.Token) (tokenStr string, err error) {
+func (t *MockTokenHandler) Create(token *repository.Token) (tokenStr string, err error) {
 	args := t.Called(token)
 
 	tokenStr = args.String(0)
@@ -19,12 +19,12 @@ func (t *MockTokenHandler) Create(token *token.Token) (tokenStr string, err erro
 	return
 }
 
-func (t *MockTokenHandler) Retrieve(tokn string) (tkn *token.Token, err error) {
+func (t *MockTokenHandler) Retrieve(tokn string) (tkn *repository.Token, err error) {
 	args := t.Called(tokn)
 
 	tokenParam := args.Get(0)
 	if tokenParam != nil {
-		tkn = tokenParam.(*token.Token)
+		tkn = tokenParam.(*repository.Token)
 	}
 
 	err = args.Error(1)

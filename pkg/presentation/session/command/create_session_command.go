@@ -3,13 +3,13 @@ package command
 import (
 	"github.com/arpb2/C-3PO/pkg/domain/architecture/http"
 	model2 "github.com/arpb2/C-3PO/pkg/domain/session/model"
-	token2 "github.com/arpb2/C-3PO/pkg/domain/session/token"
+	"github.com/arpb2/C-3PO/pkg/domain/session/repository"
 	"github.com/arpb2/C-3PO/pkg/presentation/user/command"
 	"github.com/saantiaguilera/go-pipeline"
 )
 
 type createSessionCommand struct {
-	tokenHandler token2.Handler
+	tokenHandler repository.TokenRepository
 }
 
 func (c *createSessionCommand) Name() string {
@@ -23,7 +23,7 @@ func (c *createSessionCommand) Run(ctx pipeline.Context) error {
 		return http.CreateInternalError()
 	}
 
-	token, err := c.tokenHandler.Create(&token2.Token{
+	token, err := c.tokenHandler.Create(&repository.Token{
 		UserId: userId,
 	})
 
@@ -38,7 +38,7 @@ func (c *createSessionCommand) Run(ctx pipeline.Context) error {
 	return nil
 }
 
-func CreateCreateSessionCommand(tokenHandler token2.Handler) pipeline.Step {
+func CreateCreateSessionCommand(tokenHandler repository.TokenRepository) pipeline.Step {
 	return &createSessionCommand{
 		tokenHandler: tokenHandler,
 	}

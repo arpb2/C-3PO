@@ -9,7 +9,7 @@ import (
 	"github.com/arpb2/C-3PO/pkg/presentation/user/command"
 
 	"github.com/arpb2/C-3PO/pkg/domain/architecture/http"
-	"github.com/arpb2/C-3PO/test/mock/service"
+	"github.com/arpb2/C-3PO/test/mock/repository"
 	gopipeline "github.com/saantiaguilera/go-pipeline"
 	"github.com/stretchr/testify/assert"
 )
@@ -31,12 +31,12 @@ func TestCreateUserCommand_GivenOneAndAContextWithoutAuthenticatedUser_WhenRunni
 	assert.Equal(t, http.CreateInternalError(), err)
 }
 
-func TestCreateUserCommand_GivenOneAndAFailingService_WhenRunning_ThenServiceError(t *testing.T) {
+func TestCreateUserCommand_GivenOneAndAFailingRepository_WhenRunning_ThenRepositoryError(t *testing.T) {
 	expectedVal := model2.AuthenticatedUser{}
 	ctx := gopipeline.CreateContext()
 	ctx.Set(command.TagAuthenticatedUser, expectedVal)
 	expectedErr := errors.New("some error")
-	s := new(service.MockUserService)
+	s := new(repository.MockUserRepository)
 	s.On("CreateUser", expectedVal).Return(expectedVal.User, expectedErr)
 	cmd := command.CreateCreateUserCommand(s)
 
@@ -50,7 +50,7 @@ func TestCreateUserCommand_GivenOne_WhenRunning_ThenContextHasUserAndReturnsNoEr
 	expectedVal := model2.AuthenticatedUser{}
 	ctx := gopipeline.CreateContext()
 	ctx.Set(command.TagAuthenticatedUser, expectedVal)
-	s := new(service.MockUserService)
+	s := new(repository.MockUserRepository)
 	s.On("CreateUser", expectedVal).Return(expectedVal.User, nil)
 	cmd := command.CreateCreateUserCommand(s)
 

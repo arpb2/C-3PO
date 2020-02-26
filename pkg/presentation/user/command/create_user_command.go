@@ -2,12 +2,12 @@ package command
 
 import (
 	httppipeline "github.com/arpb2/C-3PO/pkg/domain/architecture/pipeline"
-	service2 "github.com/arpb2/C-3PO/pkg/domain/user/service"
+	repository2 "github.com/arpb2/C-3PO/pkg/domain/user/repository"
 	"github.com/saantiaguilera/go-pipeline"
 )
 
 type createUserCommand struct {
-	service service2.Service
+	repository repository2.UserRepository
 }
 
 func (c *createUserCommand) Name() string {
@@ -23,7 +23,7 @@ func (c *createUserCommand) Run(ctx pipeline.Context) error {
 		return err
 	}
 
-	user, err := c.service.CreateUser(authenticatedUser)
+	user, err := c.repository.CreateUser(authenticatedUser)
 
 	if err != nil {
 		return err
@@ -33,8 +33,8 @@ func (c *createUserCommand) Run(ctx pipeline.Context) error {
 	return nil
 }
 
-func CreateCreateUserCommand(service service2.Service) pipeline.Step {
+func CreateCreateUserCommand(repository repository2.UserRepository) pipeline.Step {
 	return &createUserCommand{
-		service: service,
+		repository: repository,
 	}
 }

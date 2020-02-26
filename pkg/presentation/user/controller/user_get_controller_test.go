@@ -21,7 +21,7 @@ import (
 	"github.com/arpb2/C-3PO/pkg/presentation/middleware/user/single"
 	"github.com/arpb2/C-3PO/test/mock/golden"
 	testhttpwrapper "github.com/arpb2/C-3PO/test/mock/http"
-	"github.com/arpb2/C-3PO/test/mock/service"
+	"github.com/arpb2/C-3PO/test/mock/repository"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -75,11 +75,11 @@ func TestUserGetControllerBody_400OnMalformedUserId(t *testing.T) {
 	reader.AssertExpectations(t)
 }
 
-func TestUserGetControllerBody_500OnServiceReadError(t *testing.T) {
-	service := new(service.MockUserService)
-	service.On("GetUser", uint(1000)).Return(nil, errors.New("whoops error")).Once()
+func TestUserGetControllerBody_500OnRepositoryReadError(t *testing.T) {
+	repository := new(repository.MockUserRepository)
+	repository.On("GetUser", uint(1000)).Return(nil, errors.New("whoops error")).Once()
 
-	body := usercontroller.CreateGetBody(pipeline2.CreateDebugHttpPipeline(), service)
+	body := usercontroller.CreateGetBody(pipeline2.CreateDebugHttpPipeline(), repository)
 
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetParameter", user.ParamUserId).Return("1000").Once()
@@ -90,19 +90,19 @@ func TestUserGetControllerBody_500OnServiceReadError(t *testing.T) {
 	body(c)
 
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
-	expected := golden.Get(t, actual, "internal_server_error.error_read.service.golden.json")
+	expected := golden.Get(t, actual, "internal_server_error.error_read.repository.golden.json")
 
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 	assert.Equal(t, expected, actual)
 	reader.AssertExpectations(t)
-	service.AssertExpectations(t)
+	repository.AssertExpectations(t)
 }
 
-func TestUserGetControllerBody_400OnNoUserStoredInService(t *testing.T) {
-	service := new(service.MockUserService)
-	service.On("GetUser", uint(1000)).Return(model2.User{}, http2.CreateNotFoundError()).Once()
+func TestUserGetControllerBody_400OnNoUserStoredInRepository(t *testing.T) {
+	repository := new(repository.MockUserRepository)
+	repository.On("GetUser", uint(1000)).Return(model2.User{}, http2.CreateNotFoundError()).Once()
 
-	body := usercontroller.CreateGetBody(pipeline2.CreateDebugHttpPipeline(), service)
+	body := usercontroller.CreateGetBody(pipeline2.CreateDebugHttpPipeline(), repository)
 
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetParameter", user.ParamUserId).Return("1000").Once()
@@ -113,25 +113,25 @@ func TestUserGetControllerBody_400OnNoUserStoredInService(t *testing.T) {
 	body(c)
 
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
-	expected := golden.Get(t, actual, "not_found.missing_user.read.service.golden.json")
+	expected := golden.Get(t, actual, "not_found.missing_user.read.repository.golden.json")
 
 	assert.Equal(t, http.StatusNotFound, w.Code)
 	assert.Equal(t, expected, actual)
 	reader.AssertExpectations(t)
-	service.AssertExpectations(t)
+	repository.AssertExpectations(t)
 }
 
-func TestUserGetControllerBody_200OnUserStoredOnService(t *testing.T) {
+func TestUserGetControllerBody_200OnUserStoredOnRepository(t *testing.T) {
 	expectedUser := model2.User{
 		Id:      1000,
 		Email:   "test@email.com",
 		Name:    "TestName",
 		Surname: "TestSurname",
 	}
-	service := new(service.MockUserService)
-	service.On("GetUser", uint(1000)).Return(expectedUser, nil).Once()
+	repository := new(repository.MockUserRepository)
+	repository.On("GetUser", uint(1000)).Return(expectedUser, nil).Once()
 
-	body := usercontroller.CreateGetBody(pipeline2.CreateDebugHttpPipeline(), service)
+	body := usercontroller.CreateGetBody(pipeline2.CreateDebugHttpPipeline(), repository)
 
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetParameter", user.ParamUserId).Return("1000").Once()
@@ -147,5 +147,5 @@ func TestUserGetControllerBody_200OnUserStoredOnService(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Equal(t, expected, actual)
 	reader.AssertExpectations(t)
-	service.AssertExpectations(t)
+	repository.AssertExpectations(t)
 }

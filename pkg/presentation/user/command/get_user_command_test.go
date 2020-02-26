@@ -9,7 +9,7 @@ import (
 	"github.com/arpb2/C-3PO/pkg/presentation/user/command"
 
 	"github.com/arpb2/C-3PO/pkg/domain/architecture/http"
-	"github.com/arpb2/C-3PO/test/mock/service"
+	"github.com/arpb2/C-3PO/test/mock/repository"
 	gopipeline "github.com/saantiaguilera/go-pipeline"
 	"github.com/stretchr/testify/assert"
 )
@@ -31,12 +31,12 @@ func TestGetUserCommand_GivenOneAndAContextWithoutAuthenticatedUser_WhenRunning_
 	assert.Equal(t, http.CreateInternalError(), err)
 }
 
-func TestGetUserCommand_GivenOneAndAFailingService_WhenRunning_ThenServiceError(t *testing.T) {
+func TestGetUserCommand_GivenOneAndAFailingRepository_WhenRunning_ThenRepositoryError(t *testing.T) {
 	expectedVal := uint(1000)
 	ctx := gopipeline.CreateContext()
 	ctx.Set(command.TagUserId, expectedVal)
 	expectedErr := errors.New("some error")
-	s := new(service.MockUserService)
+	s := new(repository.MockUserRepository)
 	s.On("GetUser", expectedVal).Return(nil, expectedErr)
 	cmd := command.CreateGetUserCommand(s)
 
@@ -46,12 +46,12 @@ func TestGetUserCommand_GivenOneAndAFailingService_WhenRunning_ThenServiceError(
 	s.AssertExpectations(t)
 }
 
-func TestGetUserCommand_GivenOneAndANoUserCreatedService_WhenRunning_Then404(t *testing.T) {
+func TestGetUserCommand_GivenOneAndANoUserCreatedRepository_WhenRunning_Then404(t *testing.T) {
 	expectedVal := uint(1000)
 	ctx := gopipeline.CreateContext()
 	ctx.Set(command.TagUserId, expectedVal)
 	expectedErr := http.CreateNotFoundError()
-	s := new(service.MockUserService)
+	s := new(repository.MockUserRepository)
 	s.On("GetUser", expectedVal).Return(model2.User{}, http.CreateNotFoundError())
 	cmd := command.CreateGetUserCommand(s)
 
@@ -65,7 +65,7 @@ func TestGetUserCommand_GivenOne_WhenRunning_ThenContextHasUserAndReturnsNoError
 	expectedVal := model2.User{}
 	ctx := gopipeline.CreateContext()
 	ctx.Set(command.TagUserId, uint(1000))
-	s := new(service.MockUserService)
+	s := new(repository.MockUserRepository)
 	s.On("GetUser", uint(1000)).Return(expectedVal, nil)
 	cmd := command.CreateGetUserCommand(s)
 

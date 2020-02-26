@@ -9,7 +9,7 @@ import (
 	"github.com/arpb2/C-3PO/pkg/presentation/user/command"
 
 	"github.com/arpb2/C-3PO/pkg/domain/architecture/http"
-	"github.com/arpb2/C-3PO/test/mock/service"
+	"github.com/arpb2/C-3PO/test/mock/repository"
 	gopipeline "github.com/saantiaguilera/go-pipeline"
 	"github.com/stretchr/testify/assert"
 )
@@ -42,7 +42,7 @@ func TestUpdateUserCommand_GivenOneAndAContextWithoutUserId_WhenRunning_Then500(
 	assert.Equal(t, http.CreateInternalError(), err)
 }
 
-func TestUpdateUserCommand_GivenOneAndAFailingService_WhenRunning_ThenServiceError(t *testing.T) {
+func TestUpdateUserCommand_GivenOneAndAFailingRepository_WhenRunning_ThenRepositoryError(t *testing.T) {
 	expectedVal := model2.AuthenticatedUser{
 		User: model2.User{
 			Id: uint(1000),
@@ -52,7 +52,7 @@ func TestUpdateUserCommand_GivenOneAndAFailingService_WhenRunning_ThenServiceErr
 	ctx.Set(command.TagUserId, uint(1000))
 	ctx.Set(command.TagAuthenticatedUser, expectedVal)
 	expectedErr := errors.New("some error")
-	s := new(service.MockUserService)
+	s := new(repository.MockUserRepository)
 	s.On("UpdateUser", expectedVal).Return(expectedVal.User, expectedErr)
 	cmd := command.CreateUpdateUserCommand(s)
 
@@ -71,7 +71,7 @@ func TestUpdateUserCommand_GivenOne_WhenRunning_ThenContextHasUserAndReturnsNoEr
 	ctx := gopipeline.CreateContext()
 	ctx.Set(command.TagUserId, uint(1000))
 	ctx.Set(command.TagAuthenticatedUser, expectedVal)
-	s := new(service.MockUserService)
+	s := new(repository.MockUserRepository)
 	s.On("UpdateUser", expectedVal).Return(expectedVal.User, nil)
 	cmd := command.CreateUpdateUserCommand(s)
 

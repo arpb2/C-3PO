@@ -5,7 +5,7 @@ import (
 
 	"github.com/arpb2/C-3PO/pkg/presentation/user"
 
-	"github.com/arpb2/C-3PO/pkg/domain/user/service"
+	"github.com/arpb2/C-3PO/pkg/domain/user/repository"
 
 	"github.com/arpb2/C-3PO/pkg/presentation/user/command"
 
@@ -15,25 +15,25 @@ import (
 	gopipeline "github.com/saantiaguilera/go-pipeline"
 )
 
-func CreateDeleteController(exec pipeline.HttpPipeline, authMiddleware http.Handler, userService service.Service) controller.Controller {
+func CreateDeleteController(exec pipeline.HttpPipeline, authMiddleware http.Handler, userRepository repository.UserRepository) controller.Controller {
 	return controller.Controller{
 		Method: "DELETE",
 		Path:   fmt.Sprintf("/users/:%s", user.ParamUserId),
 		Middleware: []http.Handler{
 			authMiddleware,
 		},
-		Body: CreateDeleteBody(exec, userService),
+		Body: CreateDeleteBody(exec, userRepository),
 	}
 }
 
-func CreateDeleteBody(exec pipeline.HttpPipeline, userService service.Service) http.Handler {
+func CreateDeleteBody(exec pipeline.HttpPipeline, userRepository repository.UserRepository) http.Handler {
 	fetchUserIdCommand := command.CreateFetchUserIdCommand()
-	serviceCommand := command.CreateDeleteUserCommand(userService)
+	repositoryCommand := command.CreateDeleteUserCommand(userRepository)
 	renderCommand := command.CreateRenderEmptyCommand()
 
 	graph := gopipeline.CreateSequentialStage(
 		fetchUserIdCommand,
-		serviceCommand,
+		repositoryCommand,
 		renderCommand,
 	)
 

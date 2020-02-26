@@ -5,23 +5,23 @@ import (
 	"time"
 
 	model2 "github.com/arpb2/C-3PO/pkg/domain/level/model"
-	"github.com/arpb2/C-3PO/pkg/domain/level/service"
+	"github.com/arpb2/C-3PO/pkg/domain/level/repository"
 
 	"github.com/arpb2/C-3PO/pkg/domain/architecture/http"
 	"github.com/arpb2/C-3PO/third_party/ent"
 )
 
-func CreateService(dbClient *ent.Client) service.Service {
-	return &levelService{
+func CreateRepository(dbClient *ent.Client) repository.LevelRepository {
+	return &levelRepository{
 		dbClient: dbClient,
 	}
 }
 
-type levelService struct {
+type levelRepository struct {
 	dbClient *ent.Client
 }
 
-func (l *levelService) mapToDTO(input *ent.Level, output *model2.Level) {
+func (l *levelRepository) mapToDTO(input *ent.Level, output *model2.Level) {
 	if input == nil {
 		return
 	}
@@ -31,7 +31,7 @@ func (l *levelService) mapToDTO(input *ent.Level, output *model2.Level) {
 	output.Description = input.Description
 }
 
-func (l *levelService) GetLevel(levelId uint) (level model2.Level, err error) {
+func (l *levelRepository) GetLevel(levelId uint) (level model2.Level, err error) {
 	var lev model2.Level
 	ctx := context.Background()
 	result, err := l.dbClient.Level.
@@ -53,7 +53,7 @@ func (l *levelService) GetLevel(levelId uint) (level model2.Level, err error) {
 	return lev, nil
 }
 
-func (l *levelService) StoreLevel(level model2.Level) (result model2.Level, err error) {
+func (l *levelRepository) StoreLevel(level model2.Level) (result model2.Level, err error) {
 	ctx := context.Background()
 
 	lev, err := l.dbClient.Level.

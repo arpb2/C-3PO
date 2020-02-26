@@ -1,10 +1,10 @@
-package token
+package repository
 
 type Token struct {
 	UserId uint
 }
 
-type Handler interface {
+type TokenRepository interface {
 	Create(token *Token) (string, error)
 	Retrieve(token string) (*Token, error)
 }

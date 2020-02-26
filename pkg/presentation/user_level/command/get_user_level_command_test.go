@@ -12,7 +12,7 @@ import (
 	usercommand "github.com/arpb2/C-3PO/pkg/presentation/user_level/command"
 
 	"github.com/arpb2/C-3PO/pkg/domain/architecture/http"
-	"github.com/arpb2/C-3PO/test/mock/service"
+	"github.com/arpb2/C-3PO/test/mock/repository"
 	gopipeline "github.com/saantiaguilera/go-pipeline"
 	"github.com/stretchr/testify/assert"
 )
@@ -45,12 +45,12 @@ func TestGetUserLevelCommand_GivenOneAndAContextWithoutUserID_WhenRunning_Then50
 	assert.Equal(t, http.CreateInternalError(), err)
 }
 
-func TestGetUserLevelCommand_GivenOneAndAFailingService_WhenRunning_ThenServiceError(t *testing.T) {
+func TestGetUserLevelCommand_GivenOneAndAFailingRepository_WhenRunning_ThenRepositoryError(t *testing.T) {
 	ctx := gopipeline.CreateContext()
 	ctx.Set(levelcommand.TagLevelId, uint(1000))
 	ctx.Set(command.TagUserId, uint(1000))
 	expectedErr := errors.New("some error")
-	s := new(service.MockUserLevelService)
+	s := new(repository.MockUserLevelRepository)
 	s.On("GetUserLevel", uint(1000), uint(1000)).Return(model2.UserLevel{}, expectedErr)
 	cmd := usercommand.CreateGetUserLevelCommand(s)
 
@@ -60,11 +60,11 @@ func TestGetUserLevelCommand_GivenOneAndAFailingService_WhenRunning_ThenServiceE
 	s.AssertExpectations(t)
 }
 
-func TestGetUserLevelCommand_GivenOneAndAServiceWithNoCode_WhenRunning_Then404(t *testing.T) {
+func TestGetUserLevelCommand_GivenOneAndARepositoryWithNoCode_WhenRunning_Then404(t *testing.T) {
 	ctx := gopipeline.CreateContext()
 	ctx.Set(levelcommand.TagLevelId, uint(1000))
 	ctx.Set(command.TagUserId, uint(1000))
-	s := new(service.MockUserLevelService)
+	s := new(repository.MockUserLevelRepository)
 	s.On("GetUserLevel", uint(1000), uint(1000)).Return(model2.UserLevel{}, http.CreateNotFoundError())
 	cmd := usercommand.CreateGetUserLevelCommand(s)
 
@@ -79,7 +79,7 @@ func TestGetUserLevelCommand_GivenOne_WhenRunning_ThenContextHasCodeAndReturnsNo
 	ctx.Set(levelcommand.TagLevelId, uint(1000))
 	ctx.Set(command.TagUserId, uint(1000))
 	expectedVal := model2.UserLevel{}
-	s := new(service.MockUserLevelService)
+	s := new(repository.MockUserLevelRepository)
 	s.On("GetUserLevel", uint(1000), uint(1000)).Return(expectedVal, nil)
 	cmd := usercommand.CreateGetUserLevelCommand(s)
 

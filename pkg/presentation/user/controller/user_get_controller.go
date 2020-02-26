@@ -5,7 +5,7 @@ import (
 
 	"github.com/arpb2/C-3PO/pkg/presentation/user"
 
-	"github.com/arpb2/C-3PO/pkg/domain/user/service"
+	"github.com/arpb2/C-3PO/pkg/domain/user/repository"
 
 	"github.com/arpb2/C-3PO/pkg/presentation/user/command"
 
@@ -17,25 +17,25 @@ import (
 
 func CreateGetController(executor pipeline.HttpPipeline,
 	authMiddleware http.Handler,
-	userService service.Service) controller.Controller {
+	userRepository repository.UserRepository) controller.Controller {
 	return controller.Controller{
 		Method: "GET",
 		Path:   fmt.Sprintf("/users/:%s", user.ParamUserId),
 		Middleware: []http.Handler{
 			authMiddleware,
 		},
-		Body: CreateGetBody(executor, userService),
+		Body: CreateGetBody(executor, userRepository),
 	}
 }
 
-func CreateGetBody(exec pipeline.HttpPipeline, userService service.Service) http.Handler {
+func CreateGetBody(exec pipeline.HttpPipeline, userRepository repository.UserRepository) http.Handler {
 	fetchUserIdCommand := command.CreateFetchUserIdCommand()
-	serviceCommand := command.CreateGetUserCommand(userService)
+	repositoryCommand := command.CreateGetUserCommand(userRepository)
 	renderCommand := command.CreateRenderUserCommand()
 
 	graph := gopipeline.CreateSequentialStage(
 		fetchUserIdCommand,
-		serviceCommand,
+		repositoryCommand,
 		renderCommand,
 	)
 

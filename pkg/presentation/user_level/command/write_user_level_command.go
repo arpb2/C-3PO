@@ -4,14 +4,14 @@ import (
 	"github.com/arpb2/C-3PO/pkg/domain/architecture/http"
 	httppipeline "github.com/arpb2/C-3PO/pkg/domain/architecture/pipeline"
 	model2 "github.com/arpb2/C-3PO/pkg/domain/user_level/model"
-	service2 "github.com/arpb2/C-3PO/pkg/domain/user_level/service"
+	repository2 "github.com/arpb2/C-3PO/pkg/domain/user_level/repository"
 	levelcommand "github.com/arpb2/C-3PO/pkg/presentation/level/command"
 	"github.com/arpb2/C-3PO/pkg/presentation/user/command"
 	"github.com/saantiaguilera/go-pipeline"
 )
 
 type replaceUserLevelCommand struct {
-	service service2.Service
+	repository repository2.UserLevelRepository
 }
 
 func (c *replaceUserLevelCommand) Name() string {
@@ -35,7 +35,7 @@ func (c *replaceUserLevelCommand) Run(ctx pipeline.Context) error {
 		UserLevelData: userLevelData,
 	}
 
-	userLevel, err := c.service.StoreUserLevel(userLevel)
+	userLevel, err := c.repository.StoreUserLevel(userLevel)
 
 	if err != nil {
 		return err
@@ -45,8 +45,8 @@ func (c *replaceUserLevelCommand) Run(ctx pipeline.Context) error {
 	return nil
 }
 
-func CreateWriteUserLevelCommand(service service2.Service) pipeline.Step {
+func CreateWriteUserLevelCommand(repository repository2.UserLevelRepository) pipeline.Step {
 	return &replaceUserLevelCommand{
-		service: service,
+		repository: repository,
 	}
 }

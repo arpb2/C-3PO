@@ -10,11 +10,11 @@ import (
 	level2 "github.com/arpb2/C-3PO/pkg/presentation/level"
 
 	model2 "github.com/arpb2/C-3PO/pkg/domain/level/model"
-	"github.com/arpb2/C-3PO/pkg/domain/level/service"
+	"github.com/arpb2/C-3PO/pkg/domain/level/repository"
 	pipeline2 "github.com/arpb2/C-3PO/test/mock/pipeline"
 
 	"github.com/arpb2/C-3PO/test/mock/golden"
-	servicemock "github.com/arpb2/C-3PO/test/mock/service"
+	repositorymock "github.com/arpb2/C-3PO/test/mock/repository"
 
 	"github.com/arpb2/C-3PO/pkg/domain/architecture/controller"
 	level "github.com/arpb2/C-3PO/pkg/presentation/level/controller"
@@ -22,8 +22,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func createGetController(service service.Service) controller.Controller {
-	return level.CreateGetController(pipeline2.CreateDebugHttpPipeline(), service)
+func createGetController(repository repository.LevelRepository) controller.Controller {
+	return level.CreateGetController(pipeline2.CreateDebugHttpPipeline(), repository)
 }
 
 func TestGetController_IsGet(t *testing.T) {
@@ -68,30 +68,30 @@ func TestGetController_GivenNoUintId_WhenCalled_Then400(t *testing.T) {
 	reader.AssertExpectations(t)
 }
 
-func TestGetController_GivenAnErroredService_WhenCalled_ThenServiceError(t *testing.T) {
+func TestGetController_GivenAnErroredRepository_WhenCalled_ThenRepositoryError(t *testing.T) {
 	expectedErr := errors.New("error")
 
 	reader := new(httpmock.MockReader)
 	reader.On("GetParameter", level2.ParamLevelId).Return("1000").Once()
 
-	service := new(servicemock.MockLevelService)
-	service.On("GetLevel", uint(1000)).Return(model2.Level{}, expectedErr)
+	repository := new(repositorymock.MockLevelRepository)
+	repository.On("GetLevel", uint(1000)).Return(model2.Level{}, expectedErr)
 
 	c, w := httpmock.CreateTestContext()
 	c.Reader = reader
 
-	createGetController(service).Body(c)
+	createGetController(repository).Body(c)
 
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
-	expected := golden.Get(t, actual, "internal_server_error.error_read.service.golden.json")
+	expected := golden.Get(t, actual, "internal_server_error.error_read.repository.golden.json")
 
 	assert.Equal(t, httpcodes.StatusInternalServerError, w.Code)
 	assert.Equal(t, expected, actual)
 	reader.AssertExpectations(t)
-	service.AssertExpectations(t)
+	repository.AssertExpectations(t)
 }
 
-func TestGetController_GivenAServiceWithTheCalleeId_WhenCalled_ThenStoredLevelIsReturned(t *testing.T) {
+func TestGetController_GivenARepositoryWithTheCalleeId_WhenCalled_ThenStoredLevelIsReturned(t *testing.T) {
 	expectedLevel := model2.Level{
 		Id:          1000,
 		Name:        "Some name",
@@ -101,13 +101,13 @@ func TestGetController_GivenAServiceWithTheCalleeId_WhenCalled_ThenStoredLevelIs
 	reader := new(httpmock.MockReader)
 	reader.On("GetParameter", level2.ParamLevelId).Return("1000").Once()
 
-	service := new(servicemock.MockLevelService)
-	service.On("GetLevel", expectedLevel.Id).Return(expectedLevel, nil)
+	repository := new(repositorymock.MockLevelRepository)
+	repository.On("GetLevel", expectedLevel.Id).Return(expectedLevel, nil)
 
 	c, w := httpmock.CreateTestContext()
 	c.Reader = reader
 
-	createGetController(service).Body(c)
+	createGetController(repository).Body(c)
 
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "ok.get_level.golden.json")
@@ -115,5 +115,5 @@ func TestGetController_GivenAServiceWithTheCalleeId_WhenCalled_ThenStoredLevelIs
 	assert.Equal(t, httpcodes.StatusOK, w.Code)
 	assert.Equal(t, expected, actual)
 	reader.AssertExpectations(t)
-	service.AssertExpectations(t)
+	repository.AssertExpectations(t)
 }

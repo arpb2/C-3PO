@@ -7,23 +7,23 @@ import (
 	"github.com/arpb2/C-3PO/pkg/data/mysql"
 
 	"github.com/arpb2/C-3PO/pkg/domain/architecture/http"
-	credentialservice "github.com/arpb2/C-3PO/pkg/domain/session/service"
+	credentialrepository "github.com/arpb2/C-3PO/pkg/domain/session/repository"
 	"github.com/arpb2/C-3PO/third_party/ent"
 	"github.com/arpb2/C-3PO/third_party/ent/credential"
 	"github.com/arpb2/C-3PO/third_party/ent/user"
 )
 
-func CreateService(dbClient *ent.Client) credentialservice.Service {
-	return &credentialService{
+func CreateRepository(dbClient *ent.Client) credentialrepository.CredentialRepository {
+	return &credentialRepository{
 		dbClient: dbClient,
 	}
 }
 
-type credentialService struct {
+type credentialRepository struct {
 	dbClient *ent.Client
 }
 
-func (c credentialService) GetUserId(email, password string) (uint, error) {
+func (c credentialRepository) GetUserId(email, password string) (uint, error) {
 	ctx := context.Background()
 	cred, err := c.dbClient.Credential.
 		Query().

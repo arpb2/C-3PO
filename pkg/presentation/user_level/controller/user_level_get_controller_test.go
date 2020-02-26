@@ -22,7 +22,7 @@ import (
 	"github.com/arpb2/C-3PO/pkg/presentation/middleware/user/teacher"
 	"github.com/arpb2/C-3PO/test/mock/golden"
 	testhttpwrapper "github.com/arpb2/C-3PO/test/mock/http"
-	"github.com/arpb2/C-3PO/test/mock/service"
+	"github.com/arpb2/C-3PO/test/mock/repository"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -113,9 +113,9 @@ func TestCodeGetControllerBody_400OnEmptyLevelId(t *testing.T) {
 	reader.AssertExpectations(t)
 }
 
-func TestCodeGetControllerBody_500OnServiceReadError(t *testing.T) {
-	userLevelService := new(service.MockUserLevelService)
-	userLevelService.On("GetUserLevel", uint(1000), uint(1000)).Return(model2.UserLevel{}, errors.New("whoops error"))
+func TestCodeGetControllerBody_500OnRepositoryReadError(t *testing.T) {
+	userLevelRepository := new(repository.MockUserLevelRepository)
+	userLevelRepository.On("GetUserLevel", uint(1000), uint(1000)).Return(model2.UserLevel{}, errors.New("whoops error"))
 
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetParameter", user.ParamUserId).Return("1000").Once()
@@ -124,20 +124,20 @@ func TestCodeGetControllerBody_500OnServiceReadError(t *testing.T) {
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
-	userlevelcontroller.CreateGetBody(mockpipeline.CreateDebugHttpPipeline(), userLevelService)(c)
+	userlevelcontroller.CreateGetBody(mockpipeline.CreateDebugHttpPipeline(), userLevelRepository)(c)
 
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
-	expected := golden.Get(t, actual, "internal_server_error.error_read.service.golden.json")
+	expected := golden.Get(t, actual, "internal_server_error.error_read.repository.golden.json")
 
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 	assert.Equal(t, expected, actual)
 	reader.AssertExpectations(t)
-	userLevelService.AssertExpectations(t)
+	userLevelRepository.AssertExpectations(t)
 }
 
-func TestCodeGetControllerBody_400OnNoCodeStoredInService(t *testing.T) {
-	userLevelService := new(service.MockUserLevelService)
-	userLevelService.On("GetUserLevel", uint(1000), uint(1000)).Return(model2.UserLevel{}, http2.CreateNotFoundError())
+func TestCodeGetControllerBody_400OnNoCodeStoredInRepository(t *testing.T) {
+	userLevelRepository := new(repository.MockUserLevelRepository)
+	userLevelRepository.On("GetUserLevel", uint(1000), uint(1000)).Return(model2.UserLevel{}, http2.CreateNotFoundError())
 
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetParameter", user.ParamUserId).Return("1000").Once()
@@ -146,18 +146,18 @@ func TestCodeGetControllerBody_400OnNoCodeStoredInService(t *testing.T) {
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
-	userlevelcontroller.CreateGetBody(mockpipeline.CreateDebugHttpPipeline(), userLevelService)(c)
+	userlevelcontroller.CreateGetBody(mockpipeline.CreateDebugHttpPipeline(), userLevelRepository)(c)
 
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
-	expected := golden.Get(t, actual, "not_found.missing_user_level.read.service.golden.json")
+	expected := golden.Get(t, actual, "not_found.missing_user_level.read.repository.golden.json")
 
 	assert.Equal(t, http.StatusNotFound, w.Code)
 	assert.Equal(t, expected, actual)
 	reader.AssertExpectations(t)
-	userLevelService.AssertExpectations(t)
+	userLevelRepository.AssertExpectations(t)
 }
 
-func TestCodeGetControllerBody_200OnCodeStoredOnService(t *testing.T) {
+func TestCodeGetControllerBody_200OnCodeStoredOnRepository(t *testing.T) {
 	expectedCode := `
 package main
 
@@ -170,8 +170,8 @@ func main() {
 }
 			`
 
-	userLevelService := new(service.MockUserLevelService)
-	userLevelService.On("GetUserLevel", uint(1000), uint(1000)).Return(model2.UserLevel{
+	userLevelRepository := new(repository.MockUserLevelRepository)
+	userLevelRepository.On("GetUserLevel", uint(1000), uint(1000)).Return(model2.UserLevel{
 		UserId:  1000,
 		LevelId: 1000,
 		UserLevelData: model2.UserLevelData{
@@ -186,7 +186,7 @@ func main() {
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
-	userlevelcontroller.CreateGetBody(mockpipeline.CreateDebugHttpPipeline(), userLevelService)(c)
+	userlevelcontroller.CreateGetBody(mockpipeline.CreateDebugHttpPipeline(), userLevelRepository)(c)
 
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "ok.get_user_level.golden.json")
@@ -194,13 +194,13 @@ func main() {
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Equal(t, expected, actual)
 	reader.AssertExpectations(t)
-	userLevelService.AssertExpectations(t)
+	userLevelRepository.AssertExpectations(t)
 }
 
-func TestCodeGetControllerBody_200OnEmptyCodeStoredOnService(t *testing.T) {
+func TestCodeGetControllerBody_200OnEmptyCodeStoredOnRepository(t *testing.T) {
 	expectedCode := ""
-	userLevelService := new(service.MockUserLevelService)
-	userLevelService.On("GetUserLevel", uint(1000), uint(1000)).Return(model2.UserLevel{
+	userLevelRepository := new(repository.MockUserLevelRepository)
+	userLevelRepository.On("GetUserLevel", uint(1000), uint(1000)).Return(model2.UserLevel{
 		UserId:  1000,
 		LevelId: 1000,
 		UserLevelData: model2.UserLevelData{
@@ -215,7 +215,7 @@ func TestCodeGetControllerBody_200OnEmptyCodeStoredOnService(t *testing.T) {
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
-	userlevelcontroller.CreateGetBody(mockpipeline.CreateDebugHttpPipeline(), userLevelService)(c)
+	userlevelcontroller.CreateGetBody(mockpipeline.CreateDebugHttpPipeline(), userLevelRepository)(c)
 
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "ok.get_empty_user_level.golden.json")
@@ -223,5 +223,5 @@ func TestCodeGetControllerBody_200OnEmptyCodeStoredOnService(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Equal(t, expected, actual)
 	reader.AssertExpectations(t)
-	userLevelService.AssertExpectations(t)
+	userLevelRepository.AssertExpectations(t)
 }

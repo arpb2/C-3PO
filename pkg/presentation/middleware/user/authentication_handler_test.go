@@ -2,13 +2,13 @@ package user_test
 
 import (
 	"errors"
+	"github.com/arpb2/C-3PO/pkg/domain/session/repository"
 	"net/http"
 	"testing"
 
 	user2 "github.com/arpb2/C-3PO/pkg/presentation/user"
 
 	http3 "github.com/arpb2/C-3PO/pkg/domain/architecture/http"
-	"github.com/arpb2/C-3PO/pkg/domain/session/token"
 	http2 "github.com/arpb2/C-3PO/test/mock/http"
 	mocktoken "github.com/arpb2/C-3PO/test/mock/token"
 
@@ -24,7 +24,7 @@ type MockAuthenticationStrategy struct {
 	mock.Mock
 }
 
-func (s *MockAuthenticationStrategy) Authenticate(token *token.Token, userId string) (authorized bool, err error) {
+func (s *MockAuthenticationStrategy) Authenticate(token *repository.Token, userId string) (authorized bool, err error) {
 	args := s.Called(token, userId)
 	return args.Bool(0), args.Error(1)
 }
@@ -63,7 +63,7 @@ func Test_HandlingOfAuthentication_BadHeader(t *testing.T) {
 
 func Test_HandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
 	tokenHandler := new(mocktoken.MockTokenHandler)
-	tokenHandler.On("Retrieve", "token").Return(&token.Token{
+	tokenHandler.On("Retrieve", "token").Return(&repository.Token{
 		UserId: 1000,
 	}, nil)
 
@@ -84,7 +84,7 @@ func Test_HandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
 
 func Test_HandlingOfAuthentication_Authorized_SameUser(t *testing.T) {
 	tokenHandler := new(mocktoken.MockTokenHandler)
-	tokenHandler.On("Retrieve", "token").Return(&token.Token{
+	tokenHandler.On("Retrieve", "token").Return(&repository.Token{
 		UserId: 1000,
 	}, nil)
 
@@ -104,12 +104,12 @@ func Test_HandlingOfAuthentication_Authorized_SameUser(t *testing.T) {
 
 func TestStrategy_Error_Halts(t *testing.T) {
 	tokenHandler := new(mocktoken.MockTokenHandler)
-	tokenHandler.On("Retrieve", "token").Return(&token.Token{
+	tokenHandler.On("Retrieve", "token").Return(&repository.Token{
 		UserId: 1000,
 	}, nil)
 
 	strategy := new(MockAuthenticationStrategy)
-	strategy.On("Authenticate", mock.MatchedBy(func(token *token.Token) bool {
+	strategy.On("Authenticate", mock.MatchedBy(func(token *repository.Token) bool {
 		return token.UserId == uint(1000)
 	}), "1001").Return(false, errors.New("whoops this fails")).Once()
 
@@ -131,12 +131,12 @@ func TestStrategy_Error_Halts(t *testing.T) {
 
 func TestStrategy_Unauthorized_Halts(t *testing.T) {
 	tokenHandler := new(mocktoken.MockTokenHandler)
-	tokenHandler.On("Retrieve", "token").Return(&token.Token{
+	tokenHandler.On("Retrieve", "token").Return(&repository.Token{
 		UserId: 1000,
 	}, nil)
 
 	strategy := new(MockAuthenticationStrategy)
-	strategy.On("Authenticate", mock.MatchedBy(func(token *token.Token) bool {
+	strategy.On("Authenticate", mock.MatchedBy(func(token *repository.Token) bool {
 		return token.UserId == uint(1000)
 	}), "1001").Return(false, nil).Once()
 
@@ -158,12 +158,12 @@ func TestStrategy_Unauthorized_Halts(t *testing.T) {
 
 func TestStrategy_Authorized_Continues(t *testing.T) {
 	tokenHandler := new(mocktoken.MockTokenHandler)
-	tokenHandler.On("Retrieve", "token").Return(&token.Token{
+	tokenHandler.On("Retrieve", "token").Return(&repository.Token{
 		UserId: 1000,
 	}, nil)
 
 	strategy := new(MockAuthenticationStrategy)
-	strategy.On("Authenticate", mock.MatchedBy(func(token *token.Token) bool {
+	strategy.On("Authenticate", mock.MatchedBy(func(token *repository.Token) bool {
 		return token.UserId == uint(1000)
 	}), "1001").Return(true, nil).Once()
 

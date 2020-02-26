@@ -3,7 +3,7 @@ package controller
 import (
 	"fmt"
 
-	"github.com/arpb2/C-3PO/pkg/domain/user_level/service"
+	"github.com/arpb2/C-3PO/pkg/domain/user_level/repository"
 	"github.com/arpb2/C-3PO/pkg/presentation/level"
 	"github.com/arpb2/C-3PO/pkg/presentation/user"
 
@@ -16,22 +16,22 @@ import (
 	gopipeline "github.com/saantiaguilera/go-pipeline"
 )
 
-func CreatePutController(exec pipeline.HttpPipeline, authMiddleware http.Handler, userLevelService service.Service) controller.Controller {
+func CreatePutController(exec pipeline.HttpPipeline, authMiddleware http.Handler, userLevelRepository repository.UserLevelRepository) controller.Controller {
 	return controller.Controller{
 		Method: "PUT",
 		Path:   fmt.Sprintf("/users/:%s/levels/:%s", user.ParamUserId, level.ParamLevelId),
 		Middleware: []http.Handler{
 			authMiddleware,
 		},
-		Body: CreatePutBody(exec, userLevelService),
+		Body: CreatePutBody(exec, userLevelRepository),
 	}
 }
 
-func CreatePutBody(exec pipeline.HttpPipeline, userLevelService service.Service) http.Handler {
+func CreatePutBody(exec pipeline.HttpPipeline, userLevelRepository repository.UserLevelRepository) http.Handler {
 	fetchUserIdCommand := command.CreateFetchUserIdCommand()
 	fetchCodeCommand := userlevelcommand.CreateFetchCodeCommand()
 	fetchLevelIdCommand := userlevelcommand.CreateFetchLevelIdCommand()
-	serviceCommand := userlevelcommand.CreateWriteUserLevelCommand(userLevelService)
+	repositoryCommand := userlevelcommand.CreateWriteUserLevelCommand(userLevelRepository)
 	renderCommand := userlevelcommand.CreateRenderUserLevelCommand()
 
 	graph := gopipeline.CreateSequentialGroup(
@@ -41,7 +41,7 @@ func CreatePutBody(exec pipeline.HttpPipeline, userLevelService service.Service)
 			fetchLevelIdCommand,
 		),
 		gopipeline.CreateSequentialStage(
-			serviceCommand,
+			repositoryCommand,
 			renderCommand,
 		),
 	)

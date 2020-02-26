@@ -5,7 +5,7 @@ import (
 
 	"github.com/arpb2/C-3PO/pkg/presentation/user"
 
-	"github.com/arpb2/C-3PO/pkg/domain/user/service"
+	"github.com/arpb2/C-3PO/pkg/domain/user/repository"
 
 	"github.com/arpb2/C-3PO/pkg/presentation/user/command"
 	"github.com/arpb2/C-3PO/pkg/presentation/user/validation"
@@ -16,22 +16,22 @@ import (
 	gopipeline "github.com/saantiaguilera/go-pipeline"
 )
 
-func CreatePutController(exec pipeline.HttpPipeline, authMiddleware http.Handler, userService service.Service, validations []validation.Validation) controller.Controller {
+func CreatePutController(exec pipeline.HttpPipeline, authMiddleware http.Handler, userRepository repository.UserRepository, validations []validation.Validation) controller.Controller {
 	return controller.Controller{
 		Method: "PUT",
 		Path:   fmt.Sprintf("/users/:%s", user.ParamUserId),
 		Middleware: []http.Handler{
 			authMiddleware,
 		},
-		Body: CreatePutBody(exec, userService, validations),
+		Body: CreatePutBody(exec, userRepository, validations),
 	}
 }
 
-func CreatePutBody(exec pipeline.HttpPipeline, userService service.Service, validations []validation.Validation) http.Handler {
+func CreatePutBody(exec pipeline.HttpPipeline, userRepository repository.UserRepository, validations []validation.Validation) http.Handler {
 	fetchUserIdCommand := command.CreateFetchUserIdCommand()
 	fetchUserCommand := command.CreateFetchAuthenticatedUserCommand()
 	validateCommand := command.CreateValidateUserParametersCommand(validations)
-	serviceCommand := command.CreateUpdateUserCommand(userService)
+	repositoryCommand := command.CreateUpdateUserCommand(userRepository)
 	renderCommand := command.CreateRenderUserCommand()
 
 	graph := gopipeline.CreateSequentialGroup(
@@ -45,7 +45,7 @@ func CreatePutBody(exec pipeline.HttpPipeline, userService service.Service, vali
 			),
 		),
 		gopipeline.CreateSequentialStage(
-			serviceCommand,
+			repositoryCommand,
 			renderCommand,
 		),
 	)

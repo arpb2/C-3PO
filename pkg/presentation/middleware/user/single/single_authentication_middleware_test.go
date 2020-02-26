@@ -1,13 +1,13 @@
 package single_test
 
 import (
+	"github.com/arpb2/C-3PO/pkg/domain/session/repository"
 	"net/http"
 	"testing"
 
 	"github.com/arpb2/C-3PO/pkg/presentation/user"
 
 	http3 "github.com/arpb2/C-3PO/pkg/domain/architecture/http"
-	token2 "github.com/arpb2/C-3PO/pkg/domain/session/token"
 	http2 "github.com/arpb2/C-3PO/test/mock/http"
 	"github.com/arpb2/C-3PO/test/mock/token"
 
@@ -54,7 +54,7 @@ func Test_Single_HandlingOfAuthentication_BadHeader(t *testing.T) {
 
 func Test_Single_HandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
 	tokenHandler := new(token.MockTokenHandler)
-	tokenHandler.On("Retrieve", "token").Return(&token2.Token{
+	tokenHandler.On("Retrieve", "token").Return(&repository.Token{
 		UserId: 1000,
 	}, nil)
 
@@ -77,7 +77,7 @@ func Test_Single_HandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
 
 func Test_Single_HandlingOfAuthentication_Authorized_SameUser(t *testing.T) {
 	tokenHandler := new(token.MockTokenHandler)
-	tokenHandler.On("Retrieve", "token").Return(&token2.Token{
+	tokenHandler.On("Retrieve", "token").Return(&repository.Token{
 		UserId: 1000,
 	}, nil)
 

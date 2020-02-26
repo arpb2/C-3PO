@@ -12,7 +12,7 @@ import (
 	userlevelcommand "github.com/arpb2/C-3PO/pkg/presentation/user_level/command"
 
 	"github.com/arpb2/C-3PO/pkg/domain/architecture/http"
-	"github.com/arpb2/C-3PO/test/mock/service"
+	"github.com/arpb2/C-3PO/test/mock/repository"
 	gopipeline "github.com/saantiaguilera/go-pipeline"
 	"github.com/stretchr/testify/assert"
 )
@@ -60,7 +60,7 @@ func TestWriteUserLevelCommand_GivenOneAndAContextWithoutUserID_WhenRunning_Then
 	assert.Equal(t, http.CreateInternalError(), err)
 }
 
-func TestWriteUserLevelCommand_GivenOneAndAFailingService_WhenRunning_ThenServiceError(t *testing.T) {
+func TestWriteUserLevelCommand_GivenOneAndAFailingRepository_WhenRunning_ThenRepositoryError(t *testing.T) {
 	ctx := gopipeline.CreateContext()
 	ctx.Set(userlevelcommand.TagUserLevelData, model2.UserLevelData{
 		Code: "code",
@@ -75,7 +75,7 @@ func TestWriteUserLevelCommand_GivenOneAndAFailingService_WhenRunning_ThenServic
 		LevelId: uint(1000),
 		UserId:  uint(1000),
 	}
-	s := new(service.MockUserLevelService)
+	s := new(repository.MockUserLevelRepository)
 	s.On("StoreUserLevel", expectedUserLevel).Return(expectedUserLevel, expectedErr)
 	cmd := userlevelcommand.CreateWriteUserLevelCommand(s)
 
@@ -99,7 +99,7 @@ func TestWriteUserLevelCommand_GivenOne_WhenRunning_ThenContextHasCodeAndReturns
 		LevelId: uint(1000),
 		UserId:  uint(1000),
 	}
-	s := new(service.MockUserLevelService)
+	s := new(repository.MockUserLevelRepository)
 	s.On("StoreUserLevel", expectedVal).Return(expectedVal, nil)
 	cmd := userlevelcommand.CreateWriteUserLevelCommand(s)
 

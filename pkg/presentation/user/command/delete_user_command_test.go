@@ -7,7 +7,7 @@ import (
 	"github.com/arpb2/C-3PO/pkg/presentation/user/command"
 
 	"github.com/arpb2/C-3PO/pkg/domain/architecture/http"
-	"github.com/arpb2/C-3PO/test/mock/service"
+	"github.com/arpb2/C-3PO/test/mock/repository"
 	gopipeline "github.com/saantiaguilera/go-pipeline"
 	"github.com/stretchr/testify/assert"
 )
@@ -29,11 +29,11 @@ func TestDeleteUserCommand_GivenOneAndAContextWithoutUserId_WhenRunning_Then500(
 	assert.Equal(t, http.CreateInternalError(), err)
 }
 
-func TestDeleteUserCommand_GivenOneAndAFailingService_WhenRunning_ThenServiceError(t *testing.T) {
+func TestDeleteUserCommand_GivenOneAndAFailingRepository_WhenRunning_ThenRepositoryError(t *testing.T) {
 	ctx := gopipeline.CreateContext()
 	ctx.Set(command.TagUserId, uint(1000))
 	expectedErr := errors.New("some error")
-	s := new(service.MockUserService)
+	s := new(repository.MockUserRepository)
 	s.On("DeleteUser", uint(1000)).Return(expectedErr)
 	cmd := command.CreateDeleteUserCommand(s)
 
@@ -46,7 +46,7 @@ func TestDeleteUserCommand_GivenOneAndAFailingService_WhenRunning_ThenServiceErr
 func TestDeleteUserCommand_GivenOne_WhenRunning_ThenReturnsNoError(t *testing.T) {
 	ctx := gopipeline.CreateContext()
 	ctx.Set(command.TagUserId, uint(1000))
-	s := new(service.MockUserService)
+	s := new(repository.MockUserRepository)
 	s.On("DeleteUser", uint(1000)).Return(nil)
 	cmd := command.CreateDeleteUserCommand(s)
 

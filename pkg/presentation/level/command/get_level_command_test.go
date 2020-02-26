@@ -9,7 +9,7 @@ import (
 	"github.com/arpb2/C-3PO/pkg/presentation/level/command"
 
 	"github.com/arpb2/C-3PO/pkg/domain/architecture/http"
-	"github.com/arpb2/C-3PO/test/mock/service"
+	"github.com/arpb2/C-3PO/test/mock/repository"
 	gopipeline "github.com/saantiaguilera/go-pipeline"
 	"github.com/stretchr/testify/assert"
 )
@@ -31,12 +31,12 @@ func TestGetLevelCommand_GivenOneAndAContextWithoutAuthenticatedLevel_WhenRunnin
 	assert.Equal(t, http.CreateInternalError(), err)
 }
 
-func TestGetLevelCommand_GivenOneAndAFailingService_WhenRunning_ThenServiceError(t *testing.T) {
+func TestGetLevelCommand_GivenOneAndAFailingRepository_WhenRunning_ThenRepositoryError(t *testing.T) {
 	expectedVal := uint(1000)
 	ctx := gopipeline.CreateContext()
 	ctx.Set(command.TagLevelId, expectedVal)
 	expectedErr := errors.New("some error")
-	s := new(service.MockLevelService)
+	s := new(repository.MockLevelRepository)
 	s.On("GetLevel", expectedVal).Return(model2.Level{}, expectedErr)
 	cmd := command.CreateGetLevelCommand(s)
 
@@ -46,12 +46,12 @@ func TestGetLevelCommand_GivenOneAndAFailingService_WhenRunning_ThenServiceError
 	s.AssertExpectations(t)
 }
 
-func TestGetLevelCommand_GivenOneAndANoLevelCreatedService_WhenRunning_Then404(t *testing.T) {
+func TestGetLevelCommand_GivenOneAndANoLevelCreatedRepository_WhenRunning_Then404(t *testing.T) {
 	expectedVal := uint(1000)
 	ctx := gopipeline.CreateContext()
 	ctx.Set(command.TagLevelId, expectedVal)
 	expectedErr := http.CreateNotFoundError()
-	s := new(service.MockLevelService)
+	s := new(repository.MockLevelRepository)
 	s.On("GetLevel", expectedVal).Return(model2.Level{}, http.CreateNotFoundError())
 	cmd := command.CreateGetLevelCommand(s)
 
@@ -65,7 +65,7 @@ func TestGetLevelCommand_GivenOne_WhenRunning_ThenContextHasLevelAndReturnsNoErr
 	expectedVal := model2.Level{}
 	ctx := gopipeline.CreateContext()
 	ctx.Set(command.TagLevelId, uint(1000))
-	s := new(service.MockLevelService)
+	s := new(repository.MockLevelRepository)
 	s.On("GetLevel", uint(1000)).Return(expectedVal, nil)
 	cmd := command.CreateGetLevelCommand(s)
 

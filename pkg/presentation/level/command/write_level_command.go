@@ -3,12 +3,12 @@ package command
 import (
 	"github.com/arpb2/C-3PO/pkg/domain/architecture/http"
 	httppipeline "github.com/arpb2/C-3PO/pkg/domain/architecture/pipeline"
-	service2 "github.com/arpb2/C-3PO/pkg/domain/level/service"
+	repository2 "github.com/arpb2/C-3PO/pkg/domain/level/repository"
 	"github.com/saantiaguilera/go-pipeline"
 )
 
 type writeLevelCommand struct {
-	service service2.Service
+	repository repository2.LevelRepository
 }
 
 func (c *writeLevelCommand) Name() string {
@@ -26,7 +26,7 @@ func (c *writeLevelCommand) Run(ctx pipeline.Context) error {
 	}
 
 	levelData.Id = levelId
-	level, err := c.service.StoreLevel(levelData)
+	level, err := c.repository.StoreLevel(levelData)
 
 	if err != nil {
 		return err
@@ -36,8 +36,8 @@ func (c *writeLevelCommand) Run(ctx pipeline.Context) error {
 	return nil
 }
 
-func CreateWriteLevelCommand(service service2.Service) pipeline.Step {
+func CreateWriteLevelCommand(repository repository2.LevelRepository) pipeline.Step {
 	return &writeLevelCommand{
-		service: service,
+		repository: repository,
 	}
 }

@@ -1,19 +1,19 @@
 package teacher
 
 import (
+	sessionrepository "github.com/arpb2/C-3PO/pkg/domain/session/repository"
 	"strconv"
 
-	"github.com/arpb2/C-3PO/pkg/domain/session/token"
-	"github.com/arpb2/C-3PO/pkg/domain/teacher/service"
+	teacherrepository "github.com/arpb2/C-3PO/pkg/domain/teacher/repository"
 
 	"github.com/arpb2/C-3PO/pkg/presentation/middleware/user"
 
 	"github.com/arpb2/C-3PO/pkg/domain/architecture/http"
 )
 
-func CreateMiddleware(tokenHandler token.Handler, teacherService service.Service) http.Handler {
+func CreateMiddleware(tokenHandler sessionrepository.TokenRepository, teacherRepository teacherrepository.TeacherRepository) http.Handler {
 	strategy := &teacherAuthenticationStrategy{
-		teacherService,
+		teacherRepository,
 	}
 
 	return func(ctx *http.Context) {
@@ -22,11 +22,11 @@ func CreateMiddleware(tokenHandler token.Handler, teacherService service.Service
 }
 
 type teacherAuthenticationStrategy struct {
-	service.Service
+	teacherrepository.TeacherRepository
 }
 
-func (s teacherAuthenticationStrategy) Authenticate(token *token.Token, userId string) (bool, error) {
-	students, err := s.Service.GetStudents(token.UserId)
+func (s teacherAuthenticationStrategy) Authenticate(token *sessionrepository.Token, userId string) (bool, error) {
+	students, err := s.TeacherRepository.GetStudents(token.UserId)
 
 	if err != nil {
 		return false, err

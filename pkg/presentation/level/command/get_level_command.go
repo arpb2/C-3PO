@@ -2,12 +2,12 @@ package command
 
 import (
 	"github.com/arpb2/C-3PO/pkg/domain/architecture/http"
-	service2 "github.com/arpb2/C-3PO/pkg/domain/level/service"
+	repository2 "github.com/arpb2/C-3PO/pkg/domain/level/repository"
 	"github.com/saantiaguilera/go-pipeline"
 )
 
 type getLevelCommand struct {
-	service service2.Service
+	repository repository2.LevelRepository
 }
 
 func (c *getLevelCommand) Name() string {
@@ -21,7 +21,7 @@ func (c *getLevelCommand) Run(ctx pipeline.Context) error {
 		return http.CreateInternalError()
 	}
 
-	level, err := c.service.GetLevel(levelId)
+	level, err := c.repository.GetLevel(levelId)
 
 	if err != nil {
 		return err
@@ -31,8 +31,8 @@ func (c *getLevelCommand) Run(ctx pipeline.Context) error {
 	return nil
 }
 
-func CreateGetLevelCommand(service service2.Service) pipeline.Step {
+func CreateGetLevelCommand(repository repository2.LevelRepository) pipeline.Step {
 	return &getLevelCommand{
-		service: service,
+		repository: repository,
 	}
 }

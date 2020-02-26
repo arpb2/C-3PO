@@ -20,7 +20,7 @@ import (
 	"github.com/arpb2/C-3PO/pkg/presentation/middleware/user/single"
 	"github.com/arpb2/C-3PO/test/mock/golden"
 	testhttpwrapper "github.com/arpb2/C-3PO/test/mock/http"
-	"github.com/arpb2/C-3PO/test/mock/service"
+	"github.com/arpb2/C-3PO/test/mock/repository"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -101,9 +101,9 @@ func TestUserPutControllerBody_400OnEmptyOrMalformedUser(t *testing.T) {
 	reader.AssertExpectations(t)
 }
 
-func TestUserPutControllerBody_500OnServiceCreateError(t *testing.T) {
-	service := new(service.MockUserService)
-	service.On("UpdateUser", mock.MatchedBy(func(obj interface{}) bool {
+func TestUserPutControllerBody_500OnRepositoryCreateError(t *testing.T) {
+	repository := new(repository.MockUserRepository)
+	repository.On("UpdateUser", mock.MatchedBy(func(obj interface{}) bool {
 		return true
 	})).Return(model2.User{
 		Id:      1234,
@@ -112,7 +112,7 @@ func TestUserPutControllerBody_500OnServiceCreateError(t *testing.T) {
 		Surname: "test surname",
 	}, errors.New("whoops error")).Once()
 
-	body := usercontroller.CreatePutBody(pipeline2.CreateDebugHttpPipeline(), service, []validation.Validation{})
+	body := usercontroller.CreatePutBody(pipeline2.CreateDebugHttpPipeline(), repository, []validation.Validation{})
 
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetParameter", user.ParamUserId).Return("1000").Once()
@@ -133,18 +133,18 @@ func TestUserPutControllerBody_500OnServiceCreateError(t *testing.T) {
 	body(c)
 
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
-	expected := golden.Get(t, actual, "internal_server_error.error_update.service.golden.json")
+	expected := golden.Get(t, actual, "internal_server_error.error_update.repository.golden.json")
 
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 	assert.Equal(t, expected, actual)
 	reader.AssertExpectations(t)
-	service.AssertExpectations(t)
+	repository.AssertExpectations(t)
 }
 
 func TestUserPutControllerBody_400OnIdSpecified(t *testing.T) {
-	service := new(service.MockUserService)
+	repository := new(repository.MockUserRepository)
 
-	body := usercontroller.CreatePutBody(pipeline2.CreateDebugHttpPipeline(), service, []validation.Validation{
+	body := usercontroller.CreatePutBody(pipeline2.CreateDebugHttpPipeline(), repository, []validation.Validation{
 		validation.IdProvided,
 	})
 
@@ -168,22 +168,22 @@ func TestUserPutControllerBody_400OnIdSpecified(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 	assert.Equal(t, expected, actual)
 	reader.AssertExpectations(t)
-	service.AssertExpectations(t)
+	repository.AssertExpectations(t)
 }
 
-func TestUserPutControllerBody_200OnUserStoredOnService(t *testing.T) {
+func TestUserPutControllerBody_200OnUserStoredOnRepository(t *testing.T) {
 	expectedUser := model2.User{
 		Id:      1000,
 		Email:   "test@email.com",
 		Name:    "TestName",
 		Surname: "TestSurname",
 	}
-	service := new(service.MockUserService)
-	service.On("UpdateUser", mock.MatchedBy(func(obj interface{}) bool {
+	repository := new(repository.MockUserRepository)
+	repository.On("UpdateUser", mock.MatchedBy(func(obj interface{}) bool {
 		return true
 	})).Return(expectedUser, nil).Once()
 
-	body := usercontroller.CreatePutBody(pipeline2.CreateDebugHttpPipeline(), service, []validation.Validation{})
+	body := usercontroller.CreatePutBody(pipeline2.CreateDebugHttpPipeline(), repository, []validation.Validation{})
 
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetParameter", user.ParamUserId).Return("1000").Once()
@@ -209,5 +209,5 @@ func TestUserPutControllerBody_200OnUserStoredOnService(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Equal(t, expected, actual)
 	reader.AssertExpectations(t)
-	service.AssertExpectations(t)
+	repository.AssertExpectations(t)
 }

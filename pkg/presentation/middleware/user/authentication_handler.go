@@ -2,17 +2,16 @@ package user
 
 import (
 	"fmt"
+	"github.com/arpb2/C-3PO/pkg/domain/session/repository"
 	"strconv"
 
 	middleware2 "github.com/arpb2/C-3PO/pkg/domain/session/middleware"
-	"github.com/arpb2/C-3PO/pkg/domain/session/token"
-
 	"github.com/arpb2/C-3PO/pkg/presentation/middleware"
 
 	"github.com/arpb2/C-3PO/pkg/domain/architecture/http"
 )
 
-func HandleAuthentication(ctx *http.Context, tokenHandler token.Handler, strategies ...middleware2.AuthenticationStrategy) {
+func HandleAuthentication(ctx *http.Context, tokenHandler repository.TokenRepository, strategies ...middleware2.AuthenticationStrategy) {
 	authToken := ctx.GetHeader(middleware.HeaderAuthorization)
 
 	if authToken == "" {

@@ -18,7 +18,6 @@ func dial(t *testing.T) {
 }
 
 func Test_Get(t *testing.T) {
-	// CreateService request to perform
 	req, err := http.NewRequest("GET", fmt.Sprintf("http://localhost:8080/users/%d/levels/%d", 1, 1), strings.NewReader(""))
 	assert.Nil(t, err)
 
@@ -54,7 +53,6 @@ func generateToken(userId uint) string {
 }
 
 func Test_Put(t *testing.T) {
-	// CreateService request to perform
 	data := url.Values{}
 	data["code"] = []string{"some code i'm replacing"}
 	data["workspace"] = []string{"some workspace i'm replacing"}

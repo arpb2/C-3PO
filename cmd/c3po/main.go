@@ -24,11 +24,11 @@ import (
 	"github.com/arpb2/C-3PO/pkg/presentation/user/validation"
 	userlevel "github.com/arpb2/C-3PO/pkg/presentation/user_level/controller"
 
-	credentialservice "github.com/arpb2/C-3PO/pkg/data/mysql/credential"
-	levelservice "github.com/arpb2/C-3PO/pkg/data/mysql/level"
-	teacherservice "github.com/arpb2/C-3PO/pkg/data/mysql/teacher"
-	userservice "github.com/arpb2/C-3PO/pkg/data/mysql/user"
-	userlevelservice "github.com/arpb2/C-3PO/pkg/data/mysql/user_level"
+	credentialrepository "github.com/arpb2/C-3PO/pkg/data/mysql/credential"
+	levelrepository "github.com/arpb2/C-3PO/pkg/data/mysql/level"
+	teacherrepository "github.com/arpb2/C-3PO/pkg/data/mysql/teacher"
+	userrepository "github.com/arpb2/C-3PO/pkg/data/mysql/user"
+	userlevelrepository "github.com/arpb2/C-3PO/pkg/data/mysql/user_level"
 )
 
 const (
@@ -63,17 +63,17 @@ func main() {
 	httpExecutor := executor.CreateHttpExecutor(traceDecorator)
 	httpPipeline := pipeline.CreateHttpPipeline(httpExecutor)
 
-	tokenHandler := jwt.CreateTokenHandler([]byte(assertEnv(envSecretJWT)))
+	tokenHandler := jwt.CreateTokenRepository([]byte(assertEnv(envSecretJWT)))
 
-	userService := userservice.CreateService(dbClient)
-	teacherService := teacherservice.CreateService(userService, dbClient)
-	levelService := levelservice.CreateService(dbClient)
-	userLevelService := userlevelservice.CreateService(dbClient)
-	credentialService := credentialservice.CreateService(dbClient)
+	userRepository := userrepository.CreateRepository(dbClient)
+	teacherRepository := teacherrepository.CreateRepository(userRepository, dbClient)
+	levelRepository := levelrepository.CreateRepository(dbClient)
+	userLevelRepository := userlevelrepository.CreateRepository(dbClient)
+	credentialRepository := credentialrepository.CreateRepository(dbClient)
 
 	adminAuthMiddleware := admin.CreateMiddleware([]byte(assertEnv(envSecretAdminToken)))
 	singleAuthMiddleware := single.CreateMiddleware(tokenHandler)
-	teacherAuthMiddleware := teacher.CreateMiddleware(tokenHandler, teacherService)
+	teacherAuthMiddleware := teacher.CreateMiddleware(tokenHandler, teacherRepository)
 
 	emptyEmailValidation := validation.EmptyEmail
 	emptyNameValidation := validation.EmptyName
@@ -85,13 +85,13 @@ func main() {
 	controllers := []controller.Controller{
 		health.CreateGetController(),
 
-		session.CreatePostController(httpPipeline, tokenHandler, credentialService, []validation.Validation{
+		session.CreatePostController(httpPipeline, tokenHandler, credentialRepository, []validation.Validation{
 			validation.EmptyUser,
 			validation.EmptyEmail,
 			validation.EmptyPassword,
 		}),
 
-		user.CreatePostController(httpPipeline, userService, []validation.Validation{
+		user.CreatePostController(httpPipeline, userRepository, []validation.Validation{
 			emptyEmailValidation,
 			emptyNameValidation,
 			emptySurnameValidation,
@@ -99,18 +99,18 @@ func main() {
 			securePasswordValidation,
 			idProvidedValidation,
 		}),
-		user.CreateGetController(httpPipeline, singleAuthMiddleware, userService),
-		user.CreatePutController(httpPipeline, singleAuthMiddleware, userService, []validation.Validation{
+		user.CreateGetController(httpPipeline, singleAuthMiddleware, userRepository),
+		user.CreatePutController(httpPipeline, singleAuthMiddleware, userRepository, []validation.Validation{
 			idProvidedValidation,
 			securePasswordValidation,
 		}),
-		user.CreateDeleteController(httpPipeline, singleAuthMiddleware, userService),
+		user.CreateDeleteController(httpPipeline, singleAuthMiddleware, userRepository),
 
-		userlevel.CreateGetController(httpPipeline, teacherAuthMiddleware, userLevelService),
-		userlevel.CreatePutController(httpPipeline, teacherAuthMiddleware, userLevelService),
+		userlevel.CreateGetController(httpPipeline, teacherAuthMiddleware, userLevelRepository),
+		userlevel.CreatePutController(httpPipeline, teacherAuthMiddleware, userLevelRepository),
 
-		level.CreateGetController(httpPipeline, levelService),
-		level.CreatePutController(httpPipeline, adminAuthMiddleware, levelService),
+		level.CreateGetController(httpPipeline, levelRepository),
+		level.CreatePutController(httpPipeline, adminAuthMiddleware, levelRepository),
 	}
 
 	if err := server.StartApplication(engine, controllers); err != nil {

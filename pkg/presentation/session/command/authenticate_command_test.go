@@ -10,7 +10,7 @@ import (
 	usercommand "github.com/arpb2/C-3PO/pkg/presentation/user/command"
 
 	"github.com/arpb2/C-3PO/pkg/domain/architecture/http"
-	"github.com/arpb2/C-3PO/test/mock/service"
+	"github.com/arpb2/C-3PO/test/mock/repository"
 	gopipeline "github.com/saantiaguilera/go-pipeline"
 	"github.com/stretchr/testify/assert"
 )
@@ -32,13 +32,13 @@ func TestAuthenticateCommand_GivenOneAndAContextWithoutAuthenticatedUser_WhenRun
 	assert.Equal(t, http.CreateInternalError(), err)
 }
 
-func TestAuthenticateCommand_GivenOneAndAFailingService_WhenRunning_ThenServiceError(t *testing.T) {
+func TestAuthenticateCommand_GivenOneAndAFailingRepository_WhenRunning_ThenRepositoryError(t *testing.T) {
 	ctx := gopipeline.CreateContext()
 	ctx.Set(usercommand.TagAuthenticatedUser, model2.AuthenticatedUser{
 		User: model2.User{},
 	})
 	expectedErr := errors.New("some error")
-	s := new(service.MockCredentialService)
+	s := new(repository.MockCredentialRepository)
 	s.On("GetUserId", "", "").Return(uint(0), expectedErr)
 	cmd := command.CreateAuthenticateCommand(s)
 
@@ -54,7 +54,7 @@ func TestAuthenticateCommand_GivenOne_WhenRunning_ThenContextHasUserIDAndReturns
 		User: model2.User{},
 	})
 	expectedVal := uint(1000)
-	s := new(service.MockCredentialService)
+	s := new(repository.MockCredentialRepository)
 	s.On("GetUserId", "", "").Return(expectedVal, nil)
 	cmd := command.CreateAuthenticateCommand(s)
 

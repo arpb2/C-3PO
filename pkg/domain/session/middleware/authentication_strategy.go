@@ -1,9 +1,9 @@
 package middleware
 
 import (
-	"github.com/arpb2/C-3PO/pkg/domain/session/token"
+	"github.com/arpb2/C-3PO/pkg/domain/session/repository"
 )
 
 type AuthenticationStrategy interface {
-	Authenticate(token *token.Token, userId string) (authorized bool, err error)
+	Authenticate(token *repository.Token, userId string) (authorized bool, err error)
 }

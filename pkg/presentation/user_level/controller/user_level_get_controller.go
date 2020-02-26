@@ -3,7 +3,7 @@ package controller
 import (
 	"fmt"
 
-	"github.com/arpb2/C-3PO/pkg/domain/user_level/service"
+	"github.com/arpb2/C-3PO/pkg/domain/user_level/repository"
 	"github.com/arpb2/C-3PO/pkg/presentation/level"
 	"github.com/arpb2/C-3PO/pkg/presentation/user"
 
@@ -16,21 +16,21 @@ import (
 	gopipeline "github.com/saantiaguilera/go-pipeline"
 )
 
-func CreateGetController(exec pipeline.HttpPipeline, authMiddleware http.Handler, userLevelService service.Service) controller.Controller {
+func CreateGetController(exec pipeline.HttpPipeline, authMiddleware http.Handler, userLevelRepository repository.UserLevelRepository) controller.Controller {
 	return controller.Controller{
 		Method: "GET",
 		Path:   fmt.Sprintf("/users/:%s/levels/:%s", user.ParamUserId, level.ParamLevelId),
 		Middleware: []http.Handler{
 			authMiddleware,
 		},
-		Body: CreateGetBody(exec, userLevelService),
+		Body: CreateGetBody(exec, userLevelRepository),
 	}
 }
 
-func CreateGetBody(exec pipeline.HttpPipeline, userLevelService service.Service) http.Handler {
+func CreateGetBody(exec pipeline.HttpPipeline, userLevelRepository repository.UserLevelRepository) http.Handler {
 	fetchUserIdCommand := command.CreateFetchUserIdCommand()
 	fetchLevelIdCommand := userlevelcommand.CreateFetchLevelIdCommand()
-	serviceCommand := userlevelcommand.CreateGetUserLevelCommand(userLevelService)
+	repositoryCommand := userlevelcommand.CreateGetUserLevelCommand(userLevelRepository)
 	renderCommand := userlevelcommand.CreateRenderUserLevelCommand()
 
 	graph := gopipeline.CreateSequentialGroup(
@@ -39,7 +39,7 @@ func CreateGetBody(exec pipeline.HttpPipeline, userLevelService service.Service)
 			fetchLevelIdCommand,
 		),
 		gopipeline.CreateSequentialStage(
-			serviceCommand,
+			repositoryCommand,
 			renderCommand,
 		),
 	)

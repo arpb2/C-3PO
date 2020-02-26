@@ -2,13 +2,13 @@ package teacher_test
 
 import (
 	"errors"
+	"github.com/arpb2/C-3PO/pkg/domain/session/repository"
 	"net/http"
 	"testing"
 
 	"github.com/arpb2/C-3PO/pkg/presentation/user"
 
 	http3 "github.com/arpb2/C-3PO/pkg/domain/architecture/http"
-	token2 "github.com/arpb2/C-3PO/pkg/domain/session/token"
 	model2 "github.com/arpb2/C-3PO/pkg/domain/user/model"
 	http2 "github.com/arpb2/C-3PO/test/mock/http"
 	"github.com/arpb2/C-3PO/test/mock/token"
@@ -20,27 +20,27 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-type MockTeacherService struct {
+type MockTeacherRepository struct {
 	mock.Mock
 }
 
-func (m *MockTeacherService) GetUser(userId uint) (user model2.User, err error) {
+func (m *MockTeacherRepository) GetUser(userId uint) (user model2.User, err error) {
 	panic("implement me")
 }
 
-func (m *MockTeacherService) CreateUser(user model2.User) (result model2.User, err error) {
+func (m *MockTeacherRepository) CreateUser(user model2.User) (result model2.User, err error) {
 	panic("implement me")
 }
 
-func (m *MockTeacherService) UpdateUser(user model2.User) (result model2.User, err error) {
+func (m *MockTeacherRepository) UpdateUser(user model2.User) (result model2.User, err error) {
 	panic("implement me")
 }
 
-func (m *MockTeacherService) DeleteUser(userId uint) error {
+func (m *MockTeacherRepository) DeleteUser(userId uint) error {
 	panic("implement me")
 }
 
-func (m *MockTeacherService) GetStudents(userId uint) (students []model2.User, err error) {
+func (m *MockTeacherRepository) GetStudents(userId uint) (students []model2.User, err error) {
 	args := m.Called(userId)
 
 	firstArg := args.Get(0)
@@ -59,7 +59,7 @@ func Test_Multi_HandlingOfAuthentication_NoHeader(t *testing.T) {
 	c, recorder := http2.CreateTestContext()
 	c.Reader = reader
 
-	middle := teacher.CreateMiddleware(&token.MockTokenHandler{}, &MockTeacherService{})
+	middle := teacher.CreateMiddleware(&token.MockTokenHandler{}, &MockTeacherRepository{})
 
 	middle(c)
 
@@ -77,7 +77,7 @@ func Test_Multi_HandlingOfAuthentication_BadHeader(t *testing.T) {
 	c, recorder := http2.CreateTestContext()
 	c.Reader = reader
 
-	middle := teacher.CreateMiddleware(tokenHandler, &MockTeacherService{})
+	middle := teacher.CreateMiddleware(tokenHandler, &MockTeacherRepository{})
 
 	middle(c)
 
@@ -89,12 +89,12 @@ func Test_Multi_HandlingOfAuthentication_BadHeader(t *testing.T) {
 
 func Test_Multi_HandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
 	tokenHandler := new(token.MockTokenHandler)
-	tokenHandler.On("Retrieve", "token").Return(&token2.Token{
+	tokenHandler.On("Retrieve", "token").Return(&repository.Token{
 		UserId: 1000,
 	}, nil)
 
-	service := new(MockTeacherService)
-	service.On("GetStudents", uint(1000)).Return(nil, nil).Once()
+	repository := new(MockTeacherRepository)
+	repository.On("GetStudents", uint(1000)).Return(nil, nil).Once()
 
 	reader := new(http2.MockReader)
 	reader.On("GetParameter", user.ParamUserId).Return("1", nil).Once()
@@ -103,20 +103,20 @@ func Test_Multi_HandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
 	c, recorder := http2.CreateTestContext()
 	c.Reader = reader
 
-	middle := teacher.CreateMiddleware(tokenHandler, service)
+	middle := teacher.CreateMiddleware(tokenHandler, repository)
 
 	middle(c)
 
 	assert.Equal(t, http.StatusUnauthorized, recorder.Code)
 	assert.Equal(t, "{\"error\":\"unauthorized\"}", recorder.Body.String())
-	service.AssertExpectations(t)
+	repository.AssertExpectations(t)
 	reader.AssertExpectations(t)
 	tokenHandler.AssertExpectations(t)
 }
 
 func Test_Multi_HandlingOfAuthentication_Authorized_SameUser(t *testing.T) {
 	tokenHandler := new(token.MockTokenHandler)
-	tokenHandler.On("Retrieve", "token").Return(&token2.Token{
+	tokenHandler.On("Retrieve", "token").Return(&repository.Token{
 		UserId: 1000,
 	}, nil)
 
@@ -127,7 +127,7 @@ func Test_Multi_HandlingOfAuthentication_Authorized_SameUser(t *testing.T) {
 	c, recorder := http2.CreateTestContext()
 	c.Reader = reader
 
-	middle := teacher.CreateMiddleware(tokenHandler, &MockTeacherService{})
+	middle := teacher.CreateMiddleware(tokenHandler, &MockTeacherRepository{})
 
 	middle(c)
 
@@ -138,12 +138,12 @@ func Test_Multi_HandlingOfAuthentication_Authorized_SameUser(t *testing.T) {
 
 func Test_Multi_HandlingOfAuthentication_Authorized_Student(t *testing.T) {
 	tokenHandler := new(token.MockTokenHandler)
-	tokenHandler.On("Retrieve", "token").Return(&token2.Token{
+	tokenHandler.On("Retrieve", "token").Return(&repository.Token{
 		UserId: 1001,
 	}, nil)
 
-	service := new(MockTeacherService)
-	service.On("GetStudents", uint(1001)).Return([]model2.User{
+	repository := new(MockTeacherRepository)
+	repository.On("GetStudents", uint(1001)).Return([]model2.User{
 		{
 			Id: 999,
 		},
@@ -159,24 +159,24 @@ func Test_Multi_HandlingOfAuthentication_Authorized_Student(t *testing.T) {
 	c, recorder := http2.CreateTestContext()
 	c.Reader = reader
 
-	middle := teacher.CreateMiddleware(tokenHandler, service)
+	middle := teacher.CreateMiddleware(tokenHandler, repository)
 
 	middle(c)
 
 	assert.Equal(t, http.StatusOK, recorder.Code)
-	service.AssertExpectations(t)
+	repository.AssertExpectations(t)
 	reader.AssertExpectations(t)
 	tokenHandler.AssertExpectations(t)
 }
 
 func Test_Multi_HandlingOfAuthentication_Unauthorized_Student(t *testing.T) {
 	tokenHandler := new(token.MockTokenHandler)
-	tokenHandler.On("Retrieve", "token").Return(&token2.Token{
+	tokenHandler.On("Retrieve", "token").Return(&repository.Token{
 		UserId: 1002,
 	}, nil)
 
-	service := new(MockTeacherService)
-	service.On("GetStudents", uint(1002)).Return([]model2.User{
+	repository := new(MockTeacherRepository)
+	repository.On("GetStudents", uint(1002)).Return([]model2.User{
 		{
 			Id: 1,
 		},
@@ -195,25 +195,25 @@ func Test_Multi_HandlingOfAuthentication_Unauthorized_Student(t *testing.T) {
 	c, recorder := http2.CreateTestContext()
 	c.Reader = reader
 
-	middle := teacher.CreateMiddleware(tokenHandler, service)
+	middle := teacher.CreateMiddleware(tokenHandler, repository)
 
 	middle(c)
 
 	assert.Equal(t, http.StatusUnauthorized, recorder.Code)
 	assert.Equal(t, "{\"error\":\"unauthorized\"}", recorder.Body.String())
-	service.AssertExpectations(t)
+	repository.AssertExpectations(t)
 	reader.AssertExpectations(t)
 	tokenHandler.AssertExpectations(t)
 }
 
-func Test_Multi_HandlingOfAuthentication_Service_Error(t *testing.T) {
+func Test_Multi_HandlingOfAuthentication_Repository_Error(t *testing.T) {
 	tokenHandler := new(token.MockTokenHandler)
-	tokenHandler.On("Retrieve", "token").Return(&token2.Token{
+	tokenHandler.On("Retrieve", "token").Return(&repository.Token{
 		UserId: 1001,
 	}, nil)
 
-	service := new(MockTeacherService)
-	service.On("GetStudents", uint(1001)).Return([]model2.User{}, errors.New("whoops this fails")).Once()
+	repository := new(MockTeacherRepository)
+	repository.On("GetStudents", uint(1001)).Return([]model2.User{}, errors.New("whoops this fails")).Once()
 
 	reader := new(http2.MockReader)
 	reader.On("GetParameter", user.ParamUserId).Return("1000", nil).Once()
@@ -222,13 +222,13 @@ func Test_Multi_HandlingOfAuthentication_Service_Error(t *testing.T) {
 	c, recorder := http2.CreateTestContext()
 	c.Reader = reader
 
-	middle := teacher.CreateMiddleware(tokenHandler, service)
+	middle := teacher.CreateMiddleware(tokenHandler, repository)
 
 	middle(c)
 
 	assert.Equal(t, http.StatusInternalServerError, recorder.Code)
 	assert.Equal(t, "{\"error\":\"internal error\"}", recorder.Body.String())
-	service.AssertExpectations(t)
+	repository.AssertExpectations(t)
 	reader.AssertExpectations(t)
 	tokenHandler.AssertExpectations(t)
 }

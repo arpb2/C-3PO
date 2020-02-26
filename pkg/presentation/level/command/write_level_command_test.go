@@ -9,7 +9,7 @@ import (
 	levelcommand "github.com/arpb2/C-3PO/pkg/presentation/level/command"
 
 	"github.com/arpb2/C-3PO/pkg/domain/architecture/http"
-	"github.com/arpb2/C-3PO/test/mock/service"
+	"github.com/arpb2/C-3PO/test/mock/repository"
 	gopipeline "github.com/saantiaguilera/go-pipeline"
 	"github.com/stretchr/testify/assert"
 )
@@ -42,13 +42,13 @@ func TestWriteLevelCommand_GivenOneAndAContextWithoutLevelId_WhenRunning_Then500
 	assert.Equal(t, http.CreateInternalError(), err)
 }
 
-func TestWriteLevelCommand_GivenOneAndAFailingService_WhenRunning_ThenServiceError(t *testing.T) {
+func TestWriteLevelCommand_GivenOneAndAFailingRepository_WhenRunning_ThenRepositoryError(t *testing.T) {
 	ctx := gopipeline.CreateContext()
 	ctx.Set(levelcommand.TagLevel, model2.Level{})
 	ctx.Set(levelcommand.TagLevelId, uint(1000))
 	expectedErr := errors.New("some error")
 	expectedLevel := model2.Level{}
-	s := new(service.MockLevelService)
+	s := new(repository.MockLevelRepository)
 	s.On("StoreLevel", model2.Level{
 		Id: 1000,
 	}).Return(expectedLevel, expectedErr)
@@ -65,7 +65,7 @@ func TestWriteLevelCommand_GivenOne_WhenRunning_ThenContextHasCodeAndReturnsNoEr
 	ctx.Set(levelcommand.TagLevel, model2.Level{})
 	ctx.Set(levelcommand.TagLevelId, uint(1000))
 	expectedVal := model2.Level{}
-	s := new(service.MockLevelService)
+	s := new(repository.MockLevelRepository)
 	s.On("StoreLevel", model2.Level{
 		Id: 1000,
 	}).Return(expectedVal, nil)

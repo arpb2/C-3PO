@@ -2,11 +2,11 @@ package controller_test
 
 import (
 	"errors"
+	"github.com/arpb2/C-3PO/pkg/domain/session/repository"
 	"net/http"
 	"testing"
 
 	model3 "github.com/arpb2/C-3PO/pkg/domain/session/model"
-	"github.com/arpb2/C-3PO/pkg/domain/session/token"
 	model2 "github.com/arpb2/C-3PO/pkg/domain/user/model"
 	pipeline2 "github.com/arpb2/C-3PO/test/mock/pipeline"
 
@@ -17,7 +17,7 @@ import (
 	httpwrapper "github.com/arpb2/C-3PO/pkg/domain/architecture/http"
 	testauth "github.com/arpb2/C-3PO/test/mock/auth"
 	testhttpwrapper "github.com/arpb2/C-3PO/test/mock/http"
-	"github.com/arpb2/C-3PO/test/mock/service"
+	mockrepository "github.com/arpb2/C-3PO/test/mock/repository"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -80,7 +80,7 @@ func TestPostController_FetchUserIdTask_FailsOnValidationFail(t *testing.T) {
 	middleware.AssertExpectations(t)
 }
 
-func TestFetchUserIdTaskImpl_FailsOnServiceFailure(t *testing.T) {
+func TestFetchUserIdTaskImpl_FailsOnRepositoryFailure(t *testing.T) {
 	middleware := new(testhttpwrapper.MockMiddleware)
 	middleware.On("AbortTransactionWithError", httpwrapper.CreateInternalError()).Once()
 
@@ -93,15 +93,15 @@ func TestFetchUserIdTaskImpl_FailsOnServiceFailure(t *testing.T) {
 		return true
 	})).Return(nil).Once()
 
-	service := new(service.MockCredentialService)
-	service.On("GetUserId", "test@email.com", "testpassword").Return(uint(0), httpwrapper.CreateInternalError()).Once()
+	repository := new(mockrepository.MockCredentialRepository)
+	repository.On("GetUserId", "test@email.com", "testpassword").Return(uint(0), httpwrapper.CreateInternalError()).Once()
 
 	var validations []validation.Validation
 
 	postController := sessioncontroller.CreatePostController(
 		pipeline2.CreateDebugHttpPipeline(),
 		nil,
-		service,
+		repository,
 		validations,
 	)
 
@@ -112,7 +112,7 @@ func TestFetchUserIdTaskImpl_FailsOnServiceFailure(t *testing.T) {
 	})
 
 	middleware.AssertExpectations(t)
-	service.AssertExpectations(t)
+	repository.AssertExpectations(t)
 	reader.AssertExpectations(t)
 }
 
@@ -131,18 +131,18 @@ func TestFetchUserIdTaskImpl_FailsOnTokenFailure(t *testing.T) {
 
 	var validations []validation.Validation
 
-	credentialService := new(service.MockCredentialService)
-	credentialService.On("GetUserId", "test@email.com", "testpassword").Return(uint(1000), nil)
+	credentialRepository := new(mockrepository.MockCredentialRepository)
+	credentialRepository.On("GetUserId", "test@email.com", "testpassword").Return(uint(1000), nil)
 
 	tokenHandler := new(testauth.MockTokenHandler)
-	tokenHandler.On("Create", mock.MatchedBy(func(tkn *token.Token) bool {
+	tokenHandler.On("Create", mock.MatchedBy(func(tkn *repository.Token) bool {
 		return tkn.UserId == uint(1000)
 	})).Return("", httpwrapper.CreateInternalError())
 
 	postController := sessioncontroller.CreatePostController(
 		pipeline2.CreateDebugHttpPipeline(),
 		tokenHandler,
-		credentialService,
+		credentialRepository,
 		validations,
 	)
 
@@ -154,7 +154,7 @@ func TestFetchUserIdTaskImpl_FailsOnTokenFailure(t *testing.T) {
 
 	middleware.AssertExpectations(t)
 	reader.AssertExpectations(t)
-	credentialService.AssertExpectations(t)
+	credentialRepository.AssertExpectations(t)
 	tokenHandler.AssertExpectations(t)
 }
 
@@ -178,18 +178,18 @@ func TestFetchUserIdTaskImpl_SuccessReturnsToken(t *testing.T) {
 
 	var validations []validation.Validation
 
-	credentialService := new(service.MockCredentialService)
-	credentialService.On("GetUserId", "test@email.com", "test password").Return(uint(1000), nil)
+	credentialRepository := new(mockrepository.MockCredentialRepository)
+	credentialRepository.On("GetUserId", "test@email.com", "test password").Return(uint(1000), nil)
 
 	tokenHandler := new(testauth.MockTokenHandler)
-	tokenHandler.On("Create", mock.MatchedBy(func(tkn *token.Token) bool {
+	tokenHandler.On("Create", mock.MatchedBy(func(tkn *repository.Token) bool {
 		return tkn.UserId == uint(1000)
 	})).Return("test token", nil)
 
 	postController := sessioncontroller.CreatePostController(
 		pipeline2.CreateDebugHttpPipeline(),
 		tokenHandler,
-		credentialService,
+		credentialRepository,
 		validations,
 	)
 
@@ -202,6 +202,6 @@ func TestFetchUserIdTaskImpl_SuccessReturnsToken(t *testing.T) {
 	writer.AssertExpectations(t)
 	reader.AssertExpectations(t)
 	middleware.AssertExpectations(t)
-	credentialService.AssertExpectations(t)
+	credentialRepository.AssertExpectations(t)
 	tokenHandler.AssertExpectations(t)
 }
