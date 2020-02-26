@@ -4,7 +4,7 @@ import (
 	"net/http/httptest"
 
 	internal "github.com/arpb2/C-3PO/cmd/c3po/infrastructure/http/gin"
-	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
+	"github.com/arpb2/C-3PO/pkg/domain/architecture/http"
 	"github.com/gin-gonic/gin"
 )
 

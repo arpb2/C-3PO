@@ -3,10 +3,10 @@ package executor
 import (
 	"net/http"
 
-	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/pipeline/decorator"
+	"github.com/arpb2/C-3PO/pkg/domain/architecture/pipeline/decorator"
 
 	"github.com/afex/hystrix-go/hystrix"
-	httpwrapper "github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
+	httpwrapper "github.com/arpb2/C-3PO/pkg/domain/architecture/http"
 	gopipeline "github.com/saantiaguilera/go-pipeline"
 	"golang.org/x/xerrors"
 )

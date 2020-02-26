@@ -6,8 +6,8 @@ import (
 	"net/http"
 
 	ginwrapper "github.com/arpb2/C-3PO/cmd/c3po/infrastructure/http/gin"
-	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/controller"
-	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/engine"
+	"github.com/arpb2/C-3PO/pkg/domain/architecture/controller"
+	"github.com/arpb2/C-3PO/pkg/domain/architecture/engine"
 	"github.com/gin-gonic/gin"
 )
 

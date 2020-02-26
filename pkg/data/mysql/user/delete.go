@@ -3,7 +3,7 @@ package user
 import (
 	"context"
 
-	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
+	"github.com/arpb2/C-3PO/pkg/domain/architecture/http"
 
 	"github.com/arpb2/C-3PO/third_party/ent"
 	"github.com/arpb2/C-3PO/third_party/ent/credential"

@@ -1,7 +1,7 @@
 package pipeline
 
 import (
-	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
+	"github.com/arpb2/C-3PO/pkg/domain/architecture/http"
 	levelmodel "github.com/arpb2/C-3PO/pkg/domain/level/model"
 	sessionmodel "github.com/arpb2/C-3PO/pkg/domain/session/model"
 	usermodel "github.com/arpb2/C-3PO/pkg/domain/user/model"

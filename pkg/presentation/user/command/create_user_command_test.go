@@ -8,7 +8,7 @@ import (
 
 	"github.com/arpb2/C-3PO/pkg/presentation/user/command"
 
-	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
+	"github.com/arpb2/C-3PO/pkg/domain/architecture/http"
 	"github.com/arpb2/C-3PO/test/mock/service"
 	gopipeline "github.com/saantiaguilera/go-pipeline"
 	"github.com/stretchr/testify/assert"

@@ -13,8 +13,8 @@ import (
 	sessioncontroller "github.com/arpb2/C-3PO/pkg/presentation/session/controller"
 	"github.com/arpb2/C-3PO/pkg/presentation/user/validation"
 
-	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/controller"
-	httpwrapper "github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
+	"github.com/arpb2/C-3PO/pkg/domain/architecture/controller"
+	httpwrapper "github.com/arpb2/C-3PO/pkg/domain/architecture/http"
 	testauth "github.com/arpb2/C-3PO/test/mock/auth"
 	testhttpwrapper "github.com/arpb2/C-3PO/test/mock/http"
 	"github.com/arpb2/C-3PO/test/mock/service"

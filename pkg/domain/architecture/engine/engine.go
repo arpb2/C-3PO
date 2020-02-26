@@ -3,7 +3,7 @@ package engine
 import (
 	"net/http"
 
-	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/controller"
+	"github.com/arpb2/C-3PO/pkg/domain/architecture/controller"
 )
 
 type ServerEngine interface {

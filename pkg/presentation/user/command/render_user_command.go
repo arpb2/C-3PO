@@ -3,11 +3,11 @@ package command
 import (
 	"net/http"
 
-	ctxaware "github.com/arpb2/C-3PO/pkg/domain/infrastructure/pipeline"
+	ctxaware "github.com/arpb2/C-3PO/pkg/domain/architecture/pipeline"
 
 	"github.com/saantiaguilera/go-pipeline"
 
-	httpwrapper "github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
+	httpwrapper "github.com/arpb2/C-3PO/pkg/domain/architecture/http"
 )
 
 type renderUserCommand struct{}

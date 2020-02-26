@@ -7,7 +7,7 @@ import (
 
 	token2 "github.com/arpb2/C-3PO/pkg/domain/session/token"
 
-	httpwrapper "github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
+	httpwrapper "github.com/arpb2/C-3PO/pkg/domain/architecture/http"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/xerrors"
 )

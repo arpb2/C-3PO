@@ -3,8 +3,8 @@ package server
 import (
 	"fmt"
 
-	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/controller"
-	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/engine"
+	"github.com/arpb2/C-3PO/pkg/domain/architecture/controller"
+	"github.com/arpb2/C-3PO/pkg/domain/architecture/engine"
 )
 
 func StartApplication(engine engine.ServerEngine, controllers []controller.Controller) error {

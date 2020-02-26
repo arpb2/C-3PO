@@ -1,7 +1,7 @@
 package jwt
 
 import (
-	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
+	"github.com/arpb2/C-3PO/pkg/domain/architecture/http"
 	token2 "github.com/arpb2/C-3PO/pkg/domain/session/token"
 	"github.com/dgrijalva/jwt-go"
 )

@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	internalhttpwrapper "github.com/arpb2/C-3PO/cmd/c3po/infrastructure/http/gin"
-	apihttpwrapper "github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
+	apihttpwrapper "github.com/arpb2/C-3PO/pkg/domain/architecture/http"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )

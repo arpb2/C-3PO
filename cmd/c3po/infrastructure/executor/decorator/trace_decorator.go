@@ -3,7 +3,7 @@ package decorator
 import (
 	"io"
 
-	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/pipeline/decorator"
+	"github.com/arpb2/C-3PO/pkg/domain/architecture/pipeline/decorator"
 	"github.com/saantiaguilera/go-pipeline"
 )
 

@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	this "github.com/arpb2/C-3PO/cmd/c3po/infrastructure/http/gin"
-	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
+	"github.com/arpb2/C-3PO/pkg/domain/architecture/http"
 	gin "github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )

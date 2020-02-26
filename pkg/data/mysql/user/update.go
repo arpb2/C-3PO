@@ -7,7 +7,7 @@ import (
 	"github.com/arpb2/C-3PO/pkg/data/mysql"
 	model2 "github.com/arpb2/C-3PO/pkg/domain/user/model"
 
-	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
+	"github.com/arpb2/C-3PO/pkg/domain/architecture/http"
 	"github.com/arpb2/C-3PO/third_party/ent"
 	"github.com/arpb2/C-3PO/third_party/ent/credential"
 	"github.com/arpb2/C-3PO/third_party/ent/user"

@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/controller"
-	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
-	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/pipeline"
+	"github.com/arpb2/C-3PO/pkg/domain/architecture/controller"
+	"github.com/arpb2/C-3PO/pkg/domain/architecture/http"
+	"github.com/arpb2/C-3PO/pkg/domain/architecture/pipeline"
 	credentialservice "github.com/arpb2/C-3PO/pkg/domain/session/service"
 	"github.com/arpb2/C-3PO/pkg/domain/session/token"
 	"github.com/arpb2/C-3PO/pkg/presentation/session/command"

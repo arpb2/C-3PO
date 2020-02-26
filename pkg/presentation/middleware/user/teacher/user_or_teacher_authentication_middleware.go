@@ -8,7 +8,7 @@ import (
 
 	"github.com/arpb2/C-3PO/pkg/presentation/middleware/user"
 
-	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
+	"github.com/arpb2/C-3PO/pkg/domain/architecture/http"
 )
 
 func CreateMiddleware(tokenHandler token.Handler, teacherService service.Service) http.Handler {

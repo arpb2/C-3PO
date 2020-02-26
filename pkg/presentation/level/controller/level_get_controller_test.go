@@ -15,7 +15,7 @@ import (
 	"github.com/arpb2/C-3PO/test/mock/golden"
 	servicemock "github.com/arpb2/C-3PO/test/mock/service"
 
-	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/controller"
+	"github.com/arpb2/C-3PO/pkg/domain/architecture/controller"
 	level "github.com/arpb2/C-3PO/pkg/presentation/level/controller"
 	httpmock "github.com/arpb2/C-3PO/test/mock/http"
 	"github.com/stretchr/testify/assert"

@@ -6,7 +6,7 @@ import (
 
 	"github.com/arpb2/C-3PO/pkg/data/mysql"
 
-	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
+	"github.com/arpb2/C-3PO/pkg/domain/architecture/http"
 	credentialservice "github.com/arpb2/C-3PO/pkg/domain/session/service"
 	"github.com/arpb2/C-3PO/third_party/ent"
 	"github.com/arpb2/C-3PO/third_party/ent/credential"

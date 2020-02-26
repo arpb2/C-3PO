@@ -1,8 +1,8 @@
 package command
 
 import (
-	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
-	httppipeline "github.com/arpb2/C-3PO/pkg/domain/infrastructure/pipeline"
+	"github.com/arpb2/C-3PO/pkg/domain/architecture/http"
+	httppipeline "github.com/arpb2/C-3PO/pkg/domain/architecture/pipeline"
 	"github.com/arpb2/C-3PO/pkg/presentation/user/validation"
 	"github.com/saantiaguilera/go-pipeline"
 )

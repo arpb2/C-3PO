@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
+	"github.com/arpb2/C-3PO/pkg/domain/architecture/http"
 )
 
 type Controller struct {

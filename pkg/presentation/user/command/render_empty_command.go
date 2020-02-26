@@ -3,7 +3,7 @@ package command
 import (
 	"net/http"
 
-	httppipeline "github.com/arpb2/C-3PO/pkg/domain/infrastructure/pipeline"
+	httppipeline "github.com/arpb2/C-3PO/pkg/domain/architecture/pipeline"
 
 	"github.com/saantiaguilera/go-pipeline"
 )

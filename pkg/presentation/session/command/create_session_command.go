@@ -1,7 +1,7 @@
 package command
 
 import (
-	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
+	"github.com/arpb2/C-3PO/pkg/domain/architecture/http"
 	model2 "github.com/arpb2/C-3PO/pkg/domain/session/model"
 	token2 "github.com/arpb2/C-3PO/pkg/domain/session/token"
 	"github.com/arpb2/C-3PO/pkg/presentation/user/command"

@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/arpb2/C-3PO/cmd/c3po/infrastructure/executor"
-	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
+	"github.com/arpb2/C-3PO/pkg/domain/architecture/http"
 	pipeline2 "github.com/arpb2/C-3PO/test/mock/pipeline"
 	"github.com/saantiaguilera/go-pipeline"
 	"github.com/stretchr/testify/assert"

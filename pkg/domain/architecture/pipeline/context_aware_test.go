@@ -3,12 +3,12 @@ package pipeline_test
 import (
 	"testing"
 
-	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/pipeline"
+	"github.com/arpb2/C-3PO/pkg/domain/architecture/pipeline"
 	model3 "github.com/arpb2/C-3PO/pkg/domain/session/model"
 	model2 "github.com/arpb2/C-3PO/pkg/domain/user/model"
 	model4 "github.com/arpb2/C-3PO/pkg/domain/user_level/model"
 
-	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
+	"github.com/arpb2/C-3PO/pkg/domain/architecture/http"
 	http2 "github.com/arpb2/C-3PO/test/mock/http"
 	gopipeline "github.com/saantiaguilera/go-pipeline"
 	"github.com/stretchr/testify/assert"

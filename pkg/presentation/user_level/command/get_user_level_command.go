@@ -1,7 +1,7 @@
 package command
 
 import (
-	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
+	"github.com/arpb2/C-3PO/pkg/domain/architecture/http"
 	service2 "github.com/arpb2/C-3PO/pkg/domain/user_level/service"
 	levelcommand "github.com/arpb2/C-3PO/pkg/presentation/level/command"
 	"github.com/arpb2/C-3PO/pkg/presentation/user/command"

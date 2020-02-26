@@ -13,7 +13,7 @@ import (
 	"github.com/arpb2/C-3PO/cmd/c3po/infrastructure/executor/decorator"
 	"github.com/arpb2/C-3PO/cmd/c3po/infrastructure/pipeline"
 	"github.com/arpb2/C-3PO/cmd/c3po/infrastructure/server"
-	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/controller"
+	"github.com/arpb2/C-3PO/pkg/domain/architecture/controller"
 	health "github.com/arpb2/C-3PO/pkg/presentation/health/controller"
 	level "github.com/arpb2/C-3PO/pkg/presentation/level/controller"
 	"github.com/arpb2/C-3PO/pkg/presentation/middleware/admin"

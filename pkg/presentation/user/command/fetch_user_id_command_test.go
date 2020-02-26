@@ -3,11 +3,11 @@ package command_test
 import (
 	"testing"
 
-	pipeline2 "github.com/arpb2/C-3PO/pkg/domain/infrastructure/pipeline"
+	pipeline2 "github.com/arpb2/C-3PO/pkg/domain/architecture/pipeline"
 
 	"github.com/arpb2/C-3PO/pkg/presentation/user/command"
 
-	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
+	"github.com/arpb2/C-3PO/pkg/domain/architecture/http"
 	http2 "github.com/arpb2/C-3PO/test/mock/http"
 	gopipeline "github.com/saantiaguilera/go-pipeline"
 	"github.com/stretchr/testify/assert"

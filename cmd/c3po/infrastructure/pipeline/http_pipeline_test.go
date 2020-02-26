@@ -3,10 +3,10 @@ package pipeline_test
 import (
 	"testing"
 
-	api "github.com/arpb2/C-3PO/pkg/domain/infrastructure/pipeline"
+	api "github.com/arpb2/C-3PO/pkg/domain/architecture/pipeline"
 
 	"github.com/arpb2/C-3PO/cmd/c3po/infrastructure/pipeline"
-	http2 "github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
+	http2 "github.com/arpb2/C-3PO/pkg/domain/architecture/http"
 	"github.com/arpb2/C-3PO/test/mock/http"
 	pipeline2 "github.com/arpb2/C-3PO/test/mock/pipeline"
 	gopipeline "github.com/saantiaguilera/go-pipeline"

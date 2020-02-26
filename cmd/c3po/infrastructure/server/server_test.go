@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/arpb2/C-3PO/cmd/c3po/infrastructure/server"
-	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/controller"
+	"github.com/arpb2/C-3PO/pkg/domain/architecture/controller"
 	"github.com/stretchr/testify/assert"
 )
 

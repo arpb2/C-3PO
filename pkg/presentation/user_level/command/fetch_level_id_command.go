@@ -8,11 +8,11 @@ import (
 
 	"github.com/arpb2/C-3PO/pkg/presentation/level/command"
 
-	httppipeline "github.com/arpb2/C-3PO/pkg/domain/infrastructure/pipeline"
+	httppipeline "github.com/arpb2/C-3PO/pkg/domain/architecture/pipeline"
 
 	"github.com/saantiaguilera/go-pipeline"
 
-	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
+	"github.com/arpb2/C-3PO/pkg/domain/architecture/http"
 )
 
 type fetchLevelIdCommand struct {

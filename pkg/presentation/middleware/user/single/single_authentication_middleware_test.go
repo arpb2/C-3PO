@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"testing"
 
-	http3 "github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
+	http3 "github.com/arpb2/C-3PO/pkg/domain/architecture/http"
 	token2 "github.com/arpb2/C-3PO/pkg/domain/session/token"
 	"github.com/arpb2/C-3PO/pkg/domain/user/controller"
 	http2 "github.com/arpb2/C-3PO/test/mock/http"

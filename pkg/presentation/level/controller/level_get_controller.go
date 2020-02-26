@@ -6,9 +6,9 @@ import (
 	controller3 "github.com/arpb2/C-3PO/pkg/domain/level/controller"
 	"github.com/arpb2/C-3PO/pkg/domain/level/service"
 
-	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/controller"
-	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
-	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/pipeline"
+	"github.com/arpb2/C-3PO/pkg/domain/architecture/controller"
+	"github.com/arpb2/C-3PO/pkg/domain/architecture/http"
+	"github.com/arpb2/C-3PO/pkg/domain/architecture/pipeline"
 	"github.com/arpb2/C-3PO/pkg/presentation/level/command"
 	gopipeline "github.com/saantiaguilera/go-pipeline"
 )

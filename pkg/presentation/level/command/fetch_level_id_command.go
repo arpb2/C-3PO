@@ -6,11 +6,11 @@ import (
 
 	controller3 "github.com/arpb2/C-3PO/pkg/domain/level/controller"
 
-	httppipeline "github.com/arpb2/C-3PO/pkg/domain/infrastructure/pipeline"
+	httppipeline "github.com/arpb2/C-3PO/pkg/domain/architecture/pipeline"
 
 	"github.com/saantiaguilera/go-pipeline"
 
-	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
+	"github.com/arpb2/C-3PO/pkg/domain/architecture/http"
 )
 
 type fetchLevelIdCommand struct{}

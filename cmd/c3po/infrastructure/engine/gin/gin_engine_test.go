@@ -7,8 +7,8 @@ import (
 	"testing"
 
 	ginengine "github.com/arpb2/C-3PO/cmd/c3po/infrastructure/engine/gin"
-	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/controller"
-	httpwrapper "github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
+	"github.com/arpb2/C-3PO/pkg/domain/architecture/controller"
+	httpwrapper "github.com/arpb2/C-3PO/pkg/domain/architecture/http"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -9,7 +9,7 @@ import (
 
 	"github.com/arpb2/C-3PO/pkg/presentation/middleware"
 
-	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
+	"github.com/arpb2/C-3PO/pkg/domain/architecture/http"
 )
 
 func HandleAuthentication(ctx *http.Context, tokenHandler token.Handler, strategies ...middleware2.AuthenticationStrategy) {
