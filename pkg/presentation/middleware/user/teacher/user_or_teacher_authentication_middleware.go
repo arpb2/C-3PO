@@ -1,8 +1,9 @@
 package teacher
 
 import (
-	sessionrepository "github.com/arpb2/C-3PO/pkg/domain/session/repository"
 	"strconv"
+
+	sessionrepository "github.com/arpb2/C-3PO/pkg/domain/session/repository"
 
 	teacherrepository "github.com/arpb2/C-3PO/pkg/domain/teacher/repository"
 

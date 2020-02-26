@@ -2,8 +2,9 @@ package user
 
 import (
 	"fmt"
-	"github.com/arpb2/C-3PO/pkg/domain/session/repository"
 	"strconv"
+
+	"github.com/arpb2/C-3PO/pkg/domain/session/repository"
 
 	middleware2 "github.com/arpb2/C-3PO/pkg/domain/session/middleware"
 	"github.com/arpb2/C-3PO/pkg/presentation/middleware"

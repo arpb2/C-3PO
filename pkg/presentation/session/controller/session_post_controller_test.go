@@ -2,9 +2,10 @@ package controller_test
 
 import (
 	"errors"
-	"github.com/arpb2/C-3PO/pkg/domain/session/repository"
 	"net/http"
 	"testing"
+
+	"github.com/arpb2/C-3PO/pkg/domain/session/repository"
 
 	model3 "github.com/arpb2/C-3PO/pkg/domain/session/model"
 	model2 "github.com/arpb2/C-3PO/pkg/domain/user/model"

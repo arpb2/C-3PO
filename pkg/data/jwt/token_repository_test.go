@@ -1,10 +1,11 @@
 package jwt
 
 import (
-	"github.com/arpb2/C-3PO/pkg/domain/session/repository"
 	"net/http"
 	"os"
 	"testing"
+
+	"github.com/arpb2/C-3PO/pkg/domain/session/repository"
 
 	httpwrapper "github.com/arpb2/C-3PO/pkg/domain/architecture/http"
 	"github.com/stretchr/testify/assert"

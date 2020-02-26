@@ -1,9 +1,10 @@
 package single_test
 
 import (
-	"github.com/arpb2/C-3PO/pkg/domain/session/repository"
 	"net/http"
 	"testing"
+
+	"github.com/arpb2/C-3PO/pkg/domain/session/repository"
 
 	"github.com/arpb2/C-3PO/pkg/presentation/user"
 
