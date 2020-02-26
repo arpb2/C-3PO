@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"testing"
 
-	controller2 "github.com/arpb2/C-3PO/pkg/domain/user/controller"
 	pipeline2 "github.com/arpb2/C-3PO/test/mock/pipeline"
 	"github.com/arpb2/C-3PO/test/mock/token"
 
@@ -36,12 +35,12 @@ func TestUserDeleteControllerMethodIsGET(t *testing.T) {
 }
 
 func TestUserDeleteControllerPathIsAsExpected(t *testing.T) {
-	assert.Equal(t, fmt.Sprintf("/users/:%s", controller2.ParamUserId), createDeleteController().Path)
+	assert.Equal(t, fmt.Sprintf("/users/:%s", usercontroller.ParamUserId), createDeleteController().Path)
 }
 
 func TestUserDeleteControllerBody_400OnNoUserId(t *testing.T) {
 	reader := new(testhttpwrapper.MockReader)
-	reader.On("GetParameter", controller2.ParamUserId).Return("").Once()
+	reader.On("GetParameter", usercontroller.ParamUserId).Return("").Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
@@ -57,7 +56,7 @@ func TestUserDeleteControllerBody_400OnNoUserId(t *testing.T) {
 
 func TestUserDeleteControllerBody_400OnMalformedUserId(t *testing.T) {
 	reader := new(testhttpwrapper.MockReader)
-	reader.On("GetParameter", controller2.ParamUserId).Return("not a number").Once()
+	reader.On("GetParameter", usercontroller.ParamUserId).Return("not a number").Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
@@ -78,7 +77,7 @@ func TestUserDeleteControllerBody_500OnServiceDeleteError(t *testing.T) {
 	body := usercontroller.CreateDeleteBody(pipeline2.CreateDebugHttpPipeline(), service)
 
 	reader := new(testhttpwrapper.MockReader)
-	reader.On("GetParameter", controller2.ParamUserId).Return("1000").Once()
+	reader.On("GetParameter", usercontroller.ParamUserId).Return("1000").Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
@@ -101,7 +100,7 @@ func TestUserDeleteControllerBody_200OnUserDeletedOnService(t *testing.T) {
 	body := usercontroller.CreateDeleteBody(pipeline2.CreateDebugHttpPipeline(), service)
 
 	reader := new(testhttpwrapper.MockReader)
-	reader.On("GetParameter", controller2.ParamUserId).Return("1000").Once()
+	reader.On("GetParameter", usercontroller.ParamUserId).Return("1000").Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader

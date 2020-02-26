@@ -3,7 +3,6 @@ package controller
 import (
 	"fmt"
 
-	controller2 "github.com/arpb2/C-3PO/pkg/domain/user/controller"
 	"github.com/arpb2/C-3PO/pkg/domain/user/service"
 
 	"github.com/arpb2/C-3PO/pkg/presentation/user/command"
@@ -17,7 +16,7 @@ import (
 func CreateDeleteController(exec pipeline.HttpPipeline, authMiddleware http.Handler, userService service.Service) controller.Controller {
 	return controller.Controller{
 		Method: "DELETE",
-		Path:   fmt.Sprintf("/users/:%s", controller2.ParamUserId),
+		Path:   fmt.Sprintf("/users/:%s", ParamUserId),
 		Middleware: []http.Handler{
 			authMiddleware,
 		},

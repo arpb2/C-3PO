@@ -7,7 +7,6 @@ import (
 	httpcodes "net/http"
 	"testing"
 
-	controller3 "github.com/arpb2/C-3PO/pkg/domain/level/controller"
 	model2 "github.com/arpb2/C-3PO/pkg/domain/level/model"
 	"github.com/arpb2/C-3PO/pkg/domain/level/service"
 	pipeline2 "github.com/arpb2/C-3PO/test/mock/pipeline"
@@ -30,12 +29,12 @@ func TestGetController_IsGet(t *testing.T) {
 }
 
 func TestGetControllerPath_IsLevels(t *testing.T) {
-	assert.Equal(t, fmt.Sprintf("/levels/:%s", controller3.ParamLevelId), createGetController(nil).Path)
+	assert.Equal(t, fmt.Sprintf("/levels/:%s", level.ParamLevelId), createGetController(nil).Path)
 }
 
 func TestGetController_GivenNoId_WhenCalled_Then400(t *testing.T) {
 	reader := new(httpmock.MockReader)
-	reader.On("GetParameter", controller3.ParamLevelId).Return("").Once()
+	reader.On("GetParameter", level.ParamLevelId).Return("").Once()
 
 	c, w := httpmock.CreateTestContext()
 	c.Reader = reader
@@ -52,7 +51,7 @@ func TestGetController_GivenNoId_WhenCalled_Then400(t *testing.T) {
 
 func TestGetController_GivenNoUintId_WhenCalled_Then400(t *testing.T) {
 	reader := new(httpmock.MockReader)
-	reader.On("GetParameter", controller3.ParamLevelId).Return("not uint").Once()
+	reader.On("GetParameter", level.ParamLevelId).Return("not uint").Once()
 
 	c, w := httpmock.CreateTestContext()
 	c.Reader = reader
@@ -71,7 +70,7 @@ func TestGetController_GivenAnErroredService_WhenCalled_ThenServiceError(t *test
 	expectedErr := errors.New("error")
 
 	reader := new(httpmock.MockReader)
-	reader.On("GetParameter", controller3.ParamLevelId).Return("1000").Once()
+	reader.On("GetParameter", level.ParamLevelId).Return("1000").Once()
 
 	service := new(servicemock.MockLevelService)
 	service.On("GetLevel", uint(1000)).Return(model2.Level{}, expectedErr)
@@ -98,7 +97,7 @@ func TestGetController_GivenAServiceWithTheCalleeId_WhenCalled_ThenStoredLevelIs
 	}
 
 	reader := new(httpmock.MockReader)
-	reader.On("GetParameter", controller3.ParamLevelId).Return("1000").Once()
+	reader.On("GetParameter", level.ParamLevelId).Return("1000").Once()
 
 	service := new(servicemock.MockLevelService)
 	service.On("GetLevel", expectedLevel.Id).Return(expectedLevel, nil)

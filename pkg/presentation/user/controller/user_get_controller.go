@@ -3,7 +3,6 @@ package controller
 import (
 	"fmt"
 
-	controller2 "github.com/arpb2/C-3PO/pkg/domain/user/controller"
 	"github.com/arpb2/C-3PO/pkg/domain/user/service"
 
 	"github.com/arpb2/C-3PO/pkg/presentation/user/command"
@@ -19,7 +18,7 @@ func CreateGetController(executor pipeline.HttpPipeline,
 	userService service.Service) controller.Controller {
 	return controller.Controller{
 		Method: "GET",
-		Path:   fmt.Sprintf("/users/:%s", controller2.ParamUserId),
+		Path:   fmt.Sprintf("/users/:%s", ParamUserId),
 		Middleware: []http.Handler{
 			authMiddleware,
 		},

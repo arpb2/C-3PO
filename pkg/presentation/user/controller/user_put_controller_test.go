@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"testing"
 
-	controller2 "github.com/arpb2/C-3PO/pkg/domain/user/controller"
 	model2 "github.com/arpb2/C-3PO/pkg/domain/user/model"
 	pipeline2 "github.com/arpb2/C-3PO/test/mock/pipeline"
 	"github.com/arpb2/C-3PO/test/mock/token"
@@ -40,7 +39,7 @@ func TestUserPutControllerMethodIsPUT(t *testing.T) {
 }
 
 func TestUserPutControllerPathIsAsExpected(t *testing.T) {
-	assert.Equal(t, fmt.Sprintf("/users/:%s", controller2.ParamUserId), createPutController().Path)
+	assert.Equal(t, fmt.Sprintf("/users/:%s", usercontroller.ParamUserId), createPutController().Path)
 }
 
 func TestUserPutControllerBody_400OnNoUserId(t *testing.T) {
@@ -48,7 +47,7 @@ func TestUserPutControllerBody_400OnNoUserId(t *testing.T) {
 	reader.On("ReadBody", mock.MatchedBy(func(obj interface{}) bool {
 		return true
 	})).Return(nil).Maybe()
-	reader.On("GetParameter", controller2.ParamUserId).Return("").Once()
+	reader.On("GetParameter", usercontroller.ParamUserId).Return("").Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
@@ -67,7 +66,7 @@ func TestUserPutControllerBody_400OnMalformedUserId(t *testing.T) {
 	reader.On("ReadBody", mock.MatchedBy(func(obj interface{}) bool {
 		return true
 	})).Return(nil).Maybe()
-	reader.On("GetParameter", controller2.ParamUserId).Return("not a number").Once()
+	reader.On("GetParameter", usercontroller.ParamUserId).Return("not a number").Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
@@ -83,7 +82,7 @@ func TestUserPutControllerBody_400OnMalformedUserId(t *testing.T) {
 
 func TestUserPutControllerBody_400OnEmptyOrMalformedUser(t *testing.T) {
 	reader := new(testhttpwrapper.MockReader)
-	reader.On("GetParameter", controller2.ParamUserId).Return("1000").Once()
+	reader.On("GetParameter", usercontroller.ParamUserId).Return("1000").Once()
 	reader.On("ReadBody", mock.MatchedBy(func(obj interface{}) bool {
 		return true
 	})).Return(errors.New("malformed")).Once()
@@ -114,7 +113,7 @@ func TestUserPutControllerBody_500OnServiceCreateError(t *testing.T) {
 	body := usercontroller.CreatePutBody(pipeline2.CreateDebugHttpPipeline(), service, []validation.Validation{})
 
 	reader := new(testhttpwrapper.MockReader)
-	reader.On("GetParameter", controller2.ParamUserId).Return("1000").Once()
+	reader.On("GetParameter", usercontroller.ParamUserId).Return("1000").Once()
 	reader.On("ReadBody", mock.MatchedBy(func(obj interface{}) bool {
 		return true
 	})).Run(func(args mock.Arguments) {
@@ -148,7 +147,7 @@ func TestUserPutControllerBody_400OnIdSpecified(t *testing.T) {
 	})
 
 	reader := new(testhttpwrapper.MockReader)
-	reader.On("GetParameter", controller2.ParamUserId).Return("1000").Once()
+	reader.On("GetParameter", usercontroller.ParamUserId).Return("1000").Once()
 	reader.On("ReadBody", mock.MatchedBy(func(obj *model2.AuthenticatedUser) bool {
 		obj.User = model2.User{
 			Id: 1000,
@@ -185,7 +184,7 @@ func TestUserPutControllerBody_200OnUserStoredOnService(t *testing.T) {
 	body := usercontroller.CreatePutBody(pipeline2.CreateDebugHttpPipeline(), service, []validation.Validation{})
 
 	reader := new(testhttpwrapper.MockReader)
-	reader.On("GetParameter", controller2.ParamUserId).Return("1000").Once()
+	reader.On("GetParameter", usercontroller.ParamUserId).Return("1000").Once()
 	reader.On("ReadBody", mock.MatchedBy(func(obj *model2.AuthenticatedUser) bool {
 		return true
 	})).Run(func(args mock.Arguments) {

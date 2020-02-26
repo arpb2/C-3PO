@@ -3,7 +3,6 @@ package controller
 import (
 	"fmt"
 
-	controller3 "github.com/arpb2/C-3PO/pkg/domain/level/controller"
 	"github.com/arpb2/C-3PO/pkg/domain/level/service"
 
 	"github.com/arpb2/C-3PO/pkg/domain/architecture/controller"
@@ -16,7 +15,7 @@ import (
 func CreateGetController(exec pipeline.HttpPipeline, levelService service.Service) controller.Controller {
 	return controller.Controller{
 		Method: "GET",
-		Path:   fmt.Sprintf("/levels/:%s", controller3.ParamLevelId),
+		Path:   fmt.Sprintf("/levels/:%s", ParamLevelId),
 		Body:   CreateGetBody(exec, levelService),
 	}
 }

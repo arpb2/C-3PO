@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	controller2 "github.com/arpb2/C-3PO/pkg/presentation/level/controller"
+	controller4 "github.com/arpb2/C-3PO/pkg/presentation/user/controller"
 	"net/http"
 	"testing"
 
-	controller3 "github.com/arpb2/C-3PO/pkg/domain/level/controller"
-	controller2 "github.com/arpb2/C-3PO/pkg/domain/user/controller"
 	model2 "github.com/arpb2/C-3PO/pkg/domain/user_level/model"
 	mockpipeline "github.com/arpb2/C-3PO/test/mock/pipeline"
 	"github.com/arpb2/C-3PO/test/mock/token"
@@ -41,13 +41,13 @@ func TestCodeGetControllerMethodIsGET(t *testing.T) {
 }
 
 func TestCodeGetControllerPathIsAsExpected(t *testing.T) {
-	assert.Equal(t, fmt.Sprintf("/users/:%s/levels/:%s", controller2.ParamUserId, controller3.ParamLevelId), createGetController().Path)
+	assert.Equal(t, fmt.Sprintf("/users/:%s/levels/:%s", controller4.ParamUserId, controller2.ParamLevelId), createGetController().Path)
 }
 
 func TestCodeGetControllerBody_400OnEmptyUserId(t *testing.T) {
 	reader := new(testhttpwrapper.MockReader)
-	reader.On("GetParameter", controller3.ParamLevelId).Return("1").Maybe()
-	reader.On("GetParameter", controller2.ParamUserId).Return("").Once()
+	reader.On("GetParameter", controller2.ParamLevelId).Return("1").Maybe()
+	reader.On("GetParameter", controller4.ParamUserId).Return("").Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
@@ -63,8 +63,8 @@ func TestCodeGetControllerBody_400OnEmptyUserId(t *testing.T) {
 
 func TestCodeGetControllerBody_400OnMalformedUserId(t *testing.T) {
 	reader := new(testhttpwrapper.MockReader)
-	reader.On("GetParameter", controller3.ParamLevelId).Return("1000").Maybe()
-	reader.On("GetParameter", controller2.ParamUserId).Return("not a number").Once()
+	reader.On("GetParameter", controller2.ParamLevelId).Return("1000").Maybe()
+	reader.On("GetParameter", controller4.ParamUserId).Return("not a number").Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
@@ -80,8 +80,8 @@ func TestCodeGetControllerBody_400OnMalformedUserId(t *testing.T) {
 
 func TestCodeGetControllerBody_400OnMalformedLevelId(t *testing.T) {
 	reader := new(testhttpwrapper.MockReader)
-	reader.On("GetParameter", controller2.ParamUserId).Return("1000").Once()
-	reader.On("GetParameter", controller3.ParamLevelId).Return("not a number").Once()
+	reader.On("GetParameter", controller4.ParamUserId).Return("1000").Once()
+	reader.On("GetParameter", controller2.ParamLevelId).Return("not a number").Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
@@ -97,8 +97,8 @@ func TestCodeGetControllerBody_400OnMalformedLevelId(t *testing.T) {
 
 func TestCodeGetControllerBody_400OnEmptyLevelId(t *testing.T) {
 	reader := new(testhttpwrapper.MockReader)
-	reader.On("GetParameter", controller2.ParamUserId).Return("1000").Once()
-	reader.On("GetParameter", controller3.ParamLevelId).Return("").Once()
+	reader.On("GetParameter", controller4.ParamUserId).Return("1000").Once()
+	reader.On("GetParameter", controller2.ParamLevelId).Return("").Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
@@ -117,8 +117,8 @@ func TestCodeGetControllerBody_500OnServiceReadError(t *testing.T) {
 	userLevelService.On("GetUserLevel", uint(1000), uint(1000)).Return(model2.UserLevel{}, errors.New("whoops error"))
 
 	reader := new(testhttpwrapper.MockReader)
-	reader.On("GetParameter", controller2.ParamUserId).Return("1000").Once()
-	reader.On("GetParameter", controller3.ParamLevelId).Return("1000").Once()
+	reader.On("GetParameter", controller4.ParamUserId).Return("1000").Once()
+	reader.On("GetParameter", controller2.ParamLevelId).Return("1000").Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
@@ -139,8 +139,8 @@ func TestCodeGetControllerBody_400OnNoCodeStoredInService(t *testing.T) {
 	userLevelService.On("GetUserLevel", uint(1000), uint(1000)).Return(model2.UserLevel{}, http2.CreateNotFoundError())
 
 	reader := new(testhttpwrapper.MockReader)
-	reader.On("GetParameter", controller2.ParamUserId).Return("1000").Once()
-	reader.On("GetParameter", controller3.ParamLevelId).Return("1000").Once()
+	reader.On("GetParameter", controller4.ParamUserId).Return("1000").Once()
+	reader.On("GetParameter", controller2.ParamLevelId).Return("1000").Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
@@ -179,8 +179,8 @@ func main() {
 	}, nil)
 
 	reader := new(testhttpwrapper.MockReader)
-	reader.On("GetParameter", controller2.ParamUserId).Return("1000").Once()
-	reader.On("GetParameter", controller3.ParamLevelId).Return("1000").Once()
+	reader.On("GetParameter", controller4.ParamUserId).Return("1000").Once()
+	reader.On("GetParameter", controller2.ParamLevelId).Return("1000").Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
@@ -208,8 +208,8 @@ func TestCodeGetControllerBody_200OnEmptyCodeStoredOnService(t *testing.T) {
 	}, nil)
 
 	reader := new(testhttpwrapper.MockReader)
-	reader.On("GetParameter", controller2.ParamUserId).Return("1000").Once()
-	reader.On("GetParameter", controller3.ParamLevelId).Return("1000").Once()
+	reader.On("GetParameter", controller4.ParamUserId).Return("1000").Once()
+	reader.On("GetParameter", controller2.ParamLevelId).Return("1000").Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader

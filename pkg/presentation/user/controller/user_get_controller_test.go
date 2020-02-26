@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"testing"
 
-	controller2 "github.com/arpb2/C-3PO/pkg/domain/user/controller"
 	model2 "github.com/arpb2/C-3PO/pkg/domain/user/model"
 	pipeline2 "github.com/arpb2/C-3PO/test/mock/pipeline"
 	"github.com/arpb2/C-3PO/test/mock/token"
@@ -39,12 +38,12 @@ func TestUserGetControllerMethodIsGET(t *testing.T) {
 }
 
 func TestUserGetControllerPathIsAsExpected(t *testing.T) {
-	assert.Equal(t, fmt.Sprintf("/users/:%s", controller2.ParamUserId), createGetController().Path)
+	assert.Equal(t, fmt.Sprintf("/users/:%s", usercontroller.ParamUserId), createGetController().Path)
 }
 
 func TestUserGetControllerBody_400OnEmptyUserId(t *testing.T) {
 	reader := new(testhttpwrapper.MockReader)
-	reader.On("GetParameter", controller2.ParamUserId).Return("").Once()
+	reader.On("GetParameter", usercontroller.ParamUserId).Return("").Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
@@ -60,7 +59,7 @@ func TestUserGetControllerBody_400OnEmptyUserId(t *testing.T) {
 
 func TestUserGetControllerBody_400OnMalformedUserId(t *testing.T) {
 	reader := new(testhttpwrapper.MockReader)
-	reader.On("GetParameter", controller2.ParamUserId).Return("not a number").Once()
+	reader.On("GetParameter", usercontroller.ParamUserId).Return("not a number").Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
@@ -81,7 +80,7 @@ func TestUserGetControllerBody_500OnServiceReadError(t *testing.T) {
 	body := usercontroller.CreateGetBody(pipeline2.CreateDebugHttpPipeline(), service)
 
 	reader := new(testhttpwrapper.MockReader)
-	reader.On("GetParameter", controller2.ParamUserId).Return("1000").Once()
+	reader.On("GetParameter", usercontroller.ParamUserId).Return("1000").Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
@@ -104,7 +103,7 @@ func TestUserGetControllerBody_400OnNoUserStoredInService(t *testing.T) {
 	body := usercontroller.CreateGetBody(pipeline2.CreateDebugHttpPipeline(), service)
 
 	reader := new(testhttpwrapper.MockReader)
-	reader.On("GetParameter", controller2.ParamUserId).Return("1000").Once()
+	reader.On("GetParameter", usercontroller.ParamUserId).Return("1000").Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
@@ -133,7 +132,7 @@ func TestUserGetControllerBody_200OnUserStoredOnService(t *testing.T) {
 	body := usercontroller.CreateGetBody(pipeline2.CreateDebugHttpPipeline(), service)
 
 	reader := new(testhttpwrapper.MockReader)
-	reader.On("GetParameter", controller2.ParamUserId).Return("1000").Once()
+	reader.On("GetParameter", usercontroller.ParamUserId).Return("1000").Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader

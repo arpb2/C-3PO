@@ -2,12 +2,12 @@ package user_test
 
 import (
 	"errors"
+	controller2 "github.com/arpb2/C-3PO/pkg/presentation/user/controller"
 	"net/http"
 	"testing"
 
 	http3 "github.com/arpb2/C-3PO/pkg/domain/architecture/http"
 	"github.com/arpb2/C-3PO/pkg/domain/session/token"
-	"github.com/arpb2/C-3PO/pkg/domain/user/controller"
 	http2 "github.com/arpb2/C-3PO/test/mock/http"
 	mocktoken "github.com/arpb2/C-3PO/test/mock/token"
 
@@ -67,7 +67,7 @@ func Test_HandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
 	}, nil)
 
 	reader := new(http2.MockReader)
-	reader.On("GetParameter", controller.ParamUserId).Return("1", nil).Once()
+	reader.On("GetParameter", controller2.ParamUserId).Return("1", nil).Once()
 	reader.On("GetHeader", middleware.HeaderAuthorization).Return("token")
 
 	c, recorder := http2.CreateTestContext()
@@ -88,7 +88,7 @@ func Test_HandlingOfAuthentication_Authorized_SameUser(t *testing.T) {
 	}, nil)
 
 	reader := new(http2.MockReader)
-	reader.On("GetParameter", controller.ParamUserId).Return("1000", nil).Once()
+	reader.On("GetParameter", controller2.ParamUserId).Return("1000", nil).Once()
 	reader.On("GetHeader", middleware.HeaderAuthorization).Return("token")
 
 	c, recorder := http2.CreateTestContext()
@@ -113,7 +113,7 @@ func TestStrategy_Error_Halts(t *testing.T) {
 	}), "1001").Return(false, errors.New("whoops this fails")).Once()
 
 	reader := new(http2.MockReader)
-	reader.On("GetParameter", controller.ParamUserId).Return("1001", nil).Once()
+	reader.On("GetParameter", controller2.ParamUserId).Return("1001", nil).Once()
 	reader.On("GetHeader", middleware.HeaderAuthorization).Return("token")
 
 	c, recorder := http2.CreateTestContext()
@@ -140,7 +140,7 @@ func TestStrategy_Unauthorized_Halts(t *testing.T) {
 	}), "1001").Return(false, nil).Once()
 
 	reader := new(http2.MockReader)
-	reader.On("GetParameter", controller.ParamUserId).Return("1001", nil).Once()
+	reader.On("GetParameter", controller2.ParamUserId).Return("1001", nil).Once()
 	reader.On("GetHeader", middleware.HeaderAuthorization).Return("token")
 
 	c, recorder := http2.CreateTestContext()
@@ -167,7 +167,7 @@ func TestStrategy_Authorized_Continues(t *testing.T) {
 	}), "1001").Return(true, nil).Once()
 
 	reader := new(http2.MockReader)
-	reader.On("GetParameter", controller.ParamUserId).Return("1001", nil).Once()
+	reader.On("GetParameter", controller2.ParamUserId).Return("1001", nil).Once()
 	reader.On("GetHeader", middleware.HeaderAuthorization).Return("token")
 
 	c, recorder := http2.CreateTestContext()
