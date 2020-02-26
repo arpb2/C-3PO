@@ -75,6 +75,7 @@ func main() {
 	singleAuthMiddleware := single.CreateMiddleware(tokenHandler)
 	teacherAuthMiddleware := teacher.CreateMiddleware(tokenHandler, teacherRepository)
 
+	emptyUserValidation := validation.EmptyUser
 	emptyEmailValidation := validation.EmptyEmail
 	emptyNameValidation := validation.EmptyName
 	emptyPasswordValidation := validation.EmptyPassword
@@ -86,9 +87,9 @@ func main() {
 		health.CreateGetController(),
 
 		session.CreatePostController(httpPipeline, tokenHandler, credentialRepository, []validation.Validation{
-			validation.EmptyUser,
-			validation.EmptyEmail,
-			validation.EmptyPassword,
+			emptyUserValidation,
+			emptyEmailValidation,
+			emptyPasswordValidation,
 		}),
 
 		user.CreatePostController(httpPipeline, userRepository, []validation.Validation{
