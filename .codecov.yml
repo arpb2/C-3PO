@@ -17,6 +17,6 @@ comment:
 
 ignore:
   - "build/**/*" # Build configs
-  - "cmd/**/*" # Commands
+  - "cmd/**/main.go" # Commands
   - "third_party/**/*" # Third party generated files shouldn't be tracked
   - "test/**/*" # Test utilities
