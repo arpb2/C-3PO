@@ -2,111 +2,96 @@ package single_test
 
 import (
 	"net/http"
-	"net/http/httptest"
-	"strings"
 	"testing"
+
+	http3 "github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
+	token2 "github.com/arpb2/C-3PO/pkg/domain/session/token"
+	"github.com/arpb2/C-3PO/pkg/domain/user/controller"
+	http2 "github.com/arpb2/C-3PO/test/mock/http"
+	"github.com/arpb2/C-3PO/test/mock/token"
 
 	"github.com/arpb2/C-3PO/pkg/presentation/middleware"
 
-	"github.com/arpb2/C-3PO/pkg/data/jwt"
-	"github.com/arpb2/C-3PO/pkg/domain/controller"
-	httpwrapper "github.com/arpb2/C-3PO/pkg/domain/http"
-	ginengine "github.com/arpb2/C-3PO/pkg/infra/engine/gin"
 	"github.com/arpb2/C-3PO/pkg/presentation/middleware/user/single"
 	"github.com/stretchr/testify/assert"
 )
 
-var SingleTokenHandler = jwt.CreateTokenHandler([]byte("52bfd2de0a2e69dff4517518590ac32a46bd76606ec22a258f99584a6e70aca2"))
-
-func performRequest(r http.Handler, method, path, body string, headers map[string][]string) *httptest.ResponseRecorder {
-	req, _ := http.NewRequest(method, path, strings.NewReader(body))
-	req.Header = headers
-
-	w := httptest.NewRecorder()
-	r.ServeHTTP(w, req)
-	return w
-}
-
 func Test_Single_HandlingOfAuthentication_NoHeader(t *testing.T) {
-	e := ginengine.CreateEngine("8080")
-	e.Register(controller.Controller{
-		Method: "GET",
-		Path:   "/test",
-		Middleware: []httpwrapper.Handler{
-			single.CreateMiddleware(SingleTokenHandler),
-		},
-		Body: func(ctx *httpwrapper.Context) {
-			panic("Shouldn't reach here!")
-		},
-	})
+	reader := new(http2.MockReader)
+	reader.On("GetHeader", middleware.HeaderAuthorization).Return("")
 
-	recorder := performRequest(e, "GET", "/test", "", map[string][]string{})
+	c, w := http2.CreateTestContext()
+	c.Reader = reader
 
-	assert.Equal(t, http.StatusUnauthorized, recorder.Code)
-	assert.Equal(t, "{\"error\":\"unauthorized\"}\n", recorder.Body.String())
+	middle := single.CreateMiddleware(&token.MockTokenHandler{})
+
+	middle(c)
+
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
+	assert.Equal(t, "{\"error\":\"unauthorized\"}\n", w.Body.String())
 }
 
 func Test_Single_HandlingOfAuthentication_BadHeader(t *testing.T) {
-	e := ginengine.CreateEngine("8080")
-	e.Register(controller.Controller{
-		Method: "GET",
-		Path:   "/test",
-		Middleware: []httpwrapper.Handler{
-			single.CreateMiddleware(SingleTokenHandler),
-		},
-		Body: func(ctx *httpwrapper.Context) {
-			panic("Shouldn't reach here!")
-		},
-	})
+	tokenHandler := new(token.MockTokenHandler)
+	tokenHandler.On("Retrieve", "token").Return(nil, http3.CreateBadRequestError("malformed token"))
 
-	headers := map[string][]string{}
-	headers[middleware.HeaderAuthorization] = []string{"bad token"}
-	recorder := performRequest(e, "GET", "/test", "", headers)
+	reader := new(http2.MockReader)
+	reader.On("GetHeader", middleware.HeaderAuthorization).Return("token")
+
+	c, recorder := http2.CreateTestContext()
+	c.Reader = reader
+
+	middle := single.CreateMiddleware(tokenHandler)
+
+	middle(c)
 
 	assert.Equal(t, http.StatusBadRequest, recorder.Code)
 	assert.Equal(t, "{\"error\":\"malformed token\"}\n", recorder.Body.String())
+	reader.AssertExpectations(t)
+	tokenHandler.AssertExpectations(t)
 }
 
 func Test_Single_HandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
-	e := ginengine.CreateEngine("8080")
-	e.Register(controller.Controller{
-		Method: "GET",
-		Path:   "/test/:user_id",
-		Middleware: []httpwrapper.Handler{
-			single.CreateMiddleware(SingleTokenHandler),
-		},
-		Body: func(ctx *httpwrapper.Context) {
-			panic("Shouldn't reach here!")
-		},
-	})
+	tokenHandler := new(token.MockTokenHandler)
+	tokenHandler.On("Retrieve", "token").Return(&token2.Token{
+		UserId: 1000,
+	}, nil)
 
-	headers := map[string][]string{}
-	// Token for user 1000
-	headers[middleware.HeaderAuthorization] = []string{"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEwMDB9.GVS-KC5nOCHybzzFIIH864u4KcGu-ZSd-96krqTUGWo"}
-	recorder := performRequest(e, "GET", "/test/1", "", headers)
+	reader := new(http2.MockReader)
+	reader.On("GetParameter", controller.ParamUserId).Return("1", nil).Once()
+	reader.On("GetHeader", middleware.HeaderAuthorization).Return("token")
+
+	c, recorder := http2.CreateTestContext()
+	c.Reader = reader
+
+	middle := single.CreateMiddleware(tokenHandler)
+
+	middle(c)
 
 	assert.Equal(t, http.StatusUnauthorized, recorder.Code)
 	assert.Equal(t, "{\"error\":\"unauthorized\"}\n", recorder.Body.String())
+	reader.AssertExpectations(t)
+	tokenHandler.AssertExpectations(t)
 }
 
 func Test_Single_HandlingOfAuthentication_Authorized_SameUser(t *testing.T) {
-	e := ginengine.CreateEngine("8080")
-	e.Register(controller.Controller{
-		Method: "GET",
-		Path:   "/test/:user_id",
-		Middleware: []httpwrapper.Handler{
-			single.CreateMiddleware(SingleTokenHandler),
-		},
-		Body: func(ctx *httpwrapper.Context) {
-			ctx.WriteString(http.StatusOK, "Returned success")
-		},
-	})
+	tokenHandler := new(token.MockTokenHandler)
+	tokenHandler.On("Retrieve", "token").Return(&token2.Token{
+		UserId: 1000,
+	}, nil)
 
-	headers := map[string][]string{}
-	// Token for user 1000
-	headers[middleware.HeaderAuthorization] = []string{"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEwMDB9.GVS-KC5nOCHybzzFIIH864u4KcGu-ZSd-96krqTUGWo"}
-	recorder := performRequest(e, "GET", "/test/1000", "", headers)
+	reader := new(http2.MockReader)
+	reader.On("GetParameter", controller.ParamUserId).Return("1000", nil).Once()
+	reader.On("GetHeader", middleware.HeaderAuthorization).Return("token")
+
+	c, recorder := http2.CreateTestContext()
+	c.Reader = reader
+
+	middle := single.CreateMiddleware(tokenHandler)
+
+	middle(c)
 
 	assert.Equal(t, http.StatusOK, recorder.Code)
-	assert.Equal(t, "Returned success", recorder.Body.String())
+	reader.AssertExpectations(t)
+	tokenHandler.AssertExpectations(t)
 }

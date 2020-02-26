@@ -4,12 +4,13 @@ import (
 	"errors"
 	"testing"
 
+	model2 "github.com/arpb2/C-3PO/pkg/domain/session/model"
+	"github.com/arpb2/C-3PO/pkg/domain/session/token"
+
 	"github.com/arpb2/C-3PO/pkg/presentation/session/command"
 	usercommand "github.com/arpb2/C-3PO/pkg/presentation/user/command"
 
-	auth2 "github.com/arpb2/C-3PO/pkg/domain/auth"
-	"github.com/arpb2/C-3PO/pkg/domain/http"
-	"github.com/arpb2/C-3PO/pkg/domain/model"
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
 	"github.com/arpb2/C-3PO/test/mock/auth"
 	gopipeline "github.com/saantiaguilera/go-pipeline"
 	"github.com/stretchr/testify/assert"
@@ -37,7 +38,7 @@ func TestCreateTokenCommand_GivenOneAndAFailingService_WhenRunning_ThenServiceEr
 	ctx.Set(usercommand.TagUserId, uint(1000))
 	expectedErr := errors.New("some error")
 	s := new(auth.MockTokenHandler)
-	s.On("Create", &auth2.Token{
+	s.On("Create", &token.Token{
 		UserId: uint(1000),
 	}).Return("", expectedErr)
 	cmd := command.CreateCreateSessionCommand(s)
@@ -49,14 +50,14 @@ func TestCreateTokenCommand_GivenOneAndAFailingService_WhenRunning_ThenServiceEr
 }
 
 func TestCreateTokenCommand_GivenOne_WhenRunning_ThenContextHasUserIDAndReturnsNoError(t *testing.T) {
-	expectedVal := model.Session{
+	expectedVal := model2.Session{
 		UserId: uint(1000),
 		Token:  "token",
 	}
 	ctx := gopipeline.CreateContext()
 	ctx.Set(usercommand.TagUserId, expectedVal.UserId)
 	s := new(auth.MockTokenHandler)
-	s.On("Create", &auth2.Token{
+	s.On("Create", &token.Token{
 		UserId: expectedVal.UserId,
 	}).Return(expectedVal.Token, nil)
 	cmd := command.CreateCreateSessionCommand(s)

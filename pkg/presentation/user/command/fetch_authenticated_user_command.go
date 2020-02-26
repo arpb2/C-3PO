@@ -1,9 +1,9 @@
 package command
 
 import (
-	"github.com/arpb2/C-3PO/pkg/domain/http"
-	"github.com/arpb2/C-3PO/pkg/domain/model"
-	httppipeline "github.com/arpb2/C-3PO/pkg/infra/pipeline"
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
+	httppipeline "github.com/arpb2/C-3PO/pkg/domain/infrastructure/pipeline"
+	model2 "github.com/arpb2/C-3PO/pkg/domain/user/model"
 	"github.com/saantiaguilera/go-pipeline"
 )
 
@@ -22,7 +22,7 @@ func (c *fetchAuthenticatedUserCommand) Run(ctx pipeline.Context) error {
 		return err
 	}
 
-	var authenticatedUser model.AuthenticatedUser
+	var authenticatedUser model2.AuthenticatedUser
 	if err := httpReader.ReadBody(&authenticatedUser); err != nil {
 		return http.CreateBadRequestError("malformed body")
 	}

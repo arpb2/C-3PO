@@ -3,10 +3,11 @@ package command_test
 import (
 	"testing"
 
+	pipeline2 "github.com/arpb2/C-3PO/pkg/domain/infrastructure/pipeline"
+
 	"github.com/arpb2/C-3PO/pkg/presentation/user/command"
 
-	"github.com/arpb2/C-3PO/pkg/domain/http"
-	"github.com/arpb2/C-3PO/pkg/infra/pipeline"
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
 	http2 "github.com/arpb2/C-3PO/test/mock/http"
 	gopipeline "github.com/saantiaguilera/go-pipeline"
 	"github.com/stretchr/testify/assert"
@@ -33,7 +34,7 @@ func TestRenderEmptyCommand_GivenOne_WhenRunning_ThenRendersUser(t *testing.T) {
 	writer := new(http2.MockWriter)
 	writer.On("WriteStatus", 200)
 	ctx := gopipeline.CreateContext()
-	ctx.Set(pipeline.TagHttpWriter, writer)
+	ctx.Set(pipeline2.TagHttpWriter, writer)
 	cmd := command.CreateRenderEmptyCommand()
 
 	err := cmd.Run(ctx)

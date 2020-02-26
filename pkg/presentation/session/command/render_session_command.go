@@ -3,11 +3,11 @@ package command
 import (
 	"net/http"
 
-	httppipeline "github.com/arpb2/C-3PO/pkg/infra/pipeline"
+	httppipeline "github.com/arpb2/C-3PO/pkg/domain/infrastructure/pipeline"
 
 	"github.com/saantiaguilera/go-pipeline"
 
-	httpwrapper "github.com/arpb2/C-3PO/pkg/domain/http"
+	httpwrapper "github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
 )
 
 type renderSessionCommand struct{}

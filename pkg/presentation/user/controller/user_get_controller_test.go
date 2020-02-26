@@ -7,16 +7,16 @@ import (
 	"net/http"
 	"testing"
 
+	controller2 "github.com/arpb2/C-3PO/pkg/domain/user/controller"
+	model2 "github.com/arpb2/C-3PO/pkg/domain/user/model"
+	pipeline2 "github.com/arpb2/C-3PO/test/mock/pipeline"
+	"github.com/arpb2/C-3PO/test/mock/token"
+
 	usercontroller "github.com/arpb2/C-3PO/pkg/presentation/user/controller"
 
-	http2 "github.com/arpb2/C-3PO/pkg/domain/http"
+	http2 "github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
 
-	"github.com/arpb2/C-3PO/pkg/infra/pipeline"
-
-	"github.com/arpb2/C-3PO/pkg/data/jwt"
-	"github.com/arpb2/C-3PO/pkg/domain/controller"
-	"github.com/arpb2/C-3PO/pkg/domain/model"
-	"github.com/arpb2/C-3PO/pkg/infra/executor"
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/controller"
 	"github.com/arpb2/C-3PO/pkg/presentation/middleware/user/single"
 	"github.com/arpb2/C-3PO/test/mock/golden"
 	testhttpwrapper "github.com/arpb2/C-3PO/test/mock/http"
@@ -26,9 +26,9 @@ import (
 
 func createGetController() controller.Controller {
 	return usercontroller.CreateGetController(
-		pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()),
+		pipeline2.CreateDebugHttpPipeline(),
 		single.CreateMiddleware(
-			jwt.CreateTokenHandler([]byte("52bfd2de0a2e69dff4517518590ac32a46bd76606ec22a258f99584a6e70aca2")),
+			&token.MockTokenHandler{},
 		),
 		nil,
 	)
@@ -39,12 +39,12 @@ func TestUserGetControllerMethodIsGET(t *testing.T) {
 }
 
 func TestUserGetControllerPathIsAsExpected(t *testing.T) {
-	assert.Equal(t, fmt.Sprintf("/users/:%s", controller.ParamUserId), createGetController().Path)
+	assert.Equal(t, fmt.Sprintf("/users/:%s", controller2.ParamUserId), createGetController().Path)
 }
 
 func TestUserGetControllerBody_400OnEmptyUserId(t *testing.T) {
 	reader := new(testhttpwrapper.MockReader)
-	reader.On("GetParameter", controller.ParamUserId).Return("").Once()
+	reader.On("GetParameter", controller2.ParamUserId).Return("").Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
@@ -60,7 +60,7 @@ func TestUserGetControllerBody_400OnEmptyUserId(t *testing.T) {
 
 func TestUserGetControllerBody_400OnMalformedUserId(t *testing.T) {
 	reader := new(testhttpwrapper.MockReader)
-	reader.On("GetParameter", controller.ParamUserId).Return("not a number").Once()
+	reader.On("GetParameter", controller2.ParamUserId).Return("not a number").Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
@@ -78,10 +78,10 @@ func TestUserGetControllerBody_500OnServiceReadError(t *testing.T) {
 	service := new(service.MockUserService)
 	service.On("GetUser", uint(1000)).Return(nil, errors.New("whoops error")).Once()
 
-	body := usercontroller.CreateGetBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), service)
+	body := usercontroller.CreateGetBody(pipeline2.CreateDebugHttpPipeline(), service)
 
 	reader := new(testhttpwrapper.MockReader)
-	reader.On("GetParameter", controller.ParamUserId).Return("1000").Once()
+	reader.On("GetParameter", controller2.ParamUserId).Return("1000").Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
@@ -99,12 +99,12 @@ func TestUserGetControllerBody_500OnServiceReadError(t *testing.T) {
 
 func TestUserGetControllerBody_400OnNoUserStoredInService(t *testing.T) {
 	service := new(service.MockUserService)
-	service.On("GetUser", uint(1000)).Return(model.User{}, http2.CreateNotFoundError()).Once()
+	service.On("GetUser", uint(1000)).Return(model2.User{}, http2.CreateNotFoundError()).Once()
 
-	body := usercontroller.CreateGetBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), service)
+	body := usercontroller.CreateGetBody(pipeline2.CreateDebugHttpPipeline(), service)
 
 	reader := new(testhttpwrapper.MockReader)
-	reader.On("GetParameter", controller.ParamUserId).Return("1000").Once()
+	reader.On("GetParameter", controller2.ParamUserId).Return("1000").Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
@@ -121,7 +121,7 @@ func TestUserGetControllerBody_400OnNoUserStoredInService(t *testing.T) {
 }
 
 func TestUserGetControllerBody_200OnUserStoredOnService(t *testing.T) {
-	expectedUser := model.User{
+	expectedUser := model2.User{
 		Id:      1000,
 		Email:   "test@email.com",
 		Name:    "TestName",
@@ -130,10 +130,10 @@ func TestUserGetControllerBody_200OnUserStoredOnService(t *testing.T) {
 	service := new(service.MockUserService)
 	service.On("GetUser", uint(1000)).Return(expectedUser, nil).Once()
 
-	body := usercontroller.CreateGetBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), service)
+	body := usercontroller.CreateGetBody(pipeline2.CreateDebugHttpPipeline(), service)
 
 	reader := new(testhttpwrapper.MockReader)
-	reader.On("GetParameter", controller.ParamUserId).Return("1000").Once()
+	reader.On("GetParameter", controller2.ParamUserId).Return("1000").Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader

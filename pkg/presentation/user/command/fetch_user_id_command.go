@@ -3,11 +3,11 @@ package command
 import (
 	"strconv"
 
-	httppipeline "github.com/arpb2/C-3PO/pkg/infra/pipeline"
+	httppipeline "github.com/arpb2/C-3PO/pkg/domain/infrastructure/pipeline"
 
 	"github.com/saantiaguilera/go-pipeline"
 
-	"github.com/arpb2/C-3PO/pkg/domain/http"
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
 )
 
 type fetchUserIdCommand struct{}

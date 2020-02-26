@@ -3,11 +3,12 @@ package command_test
 import (
 	"testing"
 
+	pipeline2 "github.com/arpb2/C-3PO/pkg/domain/infrastructure/pipeline"
+	model2 "github.com/arpb2/C-3PO/pkg/domain/session/model"
+
 	"github.com/arpb2/C-3PO/pkg/presentation/session/command"
 
-	"github.com/arpb2/C-3PO/pkg/domain/http"
-	"github.com/arpb2/C-3PO/pkg/domain/model"
-	"github.com/arpb2/C-3PO/pkg/infra/pipeline"
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
 	http2 "github.com/arpb2/C-3PO/test/mock/http"
 	gopipeline "github.com/saantiaguilera/go-pipeline"
 	"github.com/stretchr/testify/assert"
@@ -23,7 +24,7 @@ func TestRenderSessionCommand_GivenOne_WhenCallingName_ThenItsTheExpected(t *tes
 
 func TestRenderSessionCommand_GivenOneAndAContextWithoutWriter_WhenRunning_Then500(t *testing.T) {
 	ctx := gopipeline.CreateContext()
-	ctx.Set(command.TagSession, model.Session{})
+	ctx.Set(command.TagSession, model2.Session{})
 	cmd := command.CreateRenderSessionCommand()
 
 	err := cmd.Run(ctx)
@@ -34,7 +35,7 @@ func TestRenderSessionCommand_GivenOneAndAContextWithoutWriter_WhenRunning_Then5
 func TestRenderSessionCommand_GivenOneAndAContextWithoutSession_WhenRunning_Then500(t *testing.T) {
 	writer := new(http2.MockWriter)
 	ctx := gopipeline.CreateContext()
-	ctx.Set(pipeline.TagHttpWriter, writer)
+	ctx.Set(pipeline2.TagHttpWriter, writer)
 	cmd := command.CreateRenderSessionCommand()
 
 	err := cmd.Run(ctx)
@@ -43,12 +44,12 @@ func TestRenderSessionCommand_GivenOneAndAContextWithoutSession_WhenRunning_Then
 }
 
 func TestRenderSessionCommand_GivenOne_WhenRunning_ThenRendersSession(t *testing.T) {
-	expectedVal := model.Session{}
+	expectedVal := model2.Session{}
 	writer := new(http2.MockWriter)
 	writer.On("WriteJson", 200, expectedVal)
 	ctx := gopipeline.CreateContext()
 	ctx.Set(command.TagSession, expectedVal)
-	ctx.Set(pipeline.TagHttpWriter, writer)
+	ctx.Set(pipeline2.TagHttpWriter, writer)
 	cmd := command.CreateRenderSessionCommand()
 
 	err := cmd.Run(ctx)

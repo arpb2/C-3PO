@@ -1,13 +1,13 @@
 package command
 
 import (
-	"github.com/arpb2/C-3PO/pkg/domain/http"
-	userservice "github.com/arpb2/C-3PO/pkg/domain/service/user"
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
+	service2 "github.com/arpb2/C-3PO/pkg/domain/user/service"
 	"github.com/saantiaguilera/go-pipeline"
 )
 
 type deleteUserCommand struct {
-	service userservice.Service
+	service service2.Service
 }
 
 func (c *deleteUserCommand) Name() string {
@@ -24,7 +24,7 @@ func (c *deleteUserCommand) Run(ctx pipeline.Context) error {
 	return c.service.DeleteUser(userId)
 }
 
-func CreateDeleteUserCommand(service userservice.Service) pipeline.Step {
+func CreateDeleteUserCommand(service service2.Service) pipeline.Step {
 	return &deleteUserCommand{
 		service: service,
 	}

@@ -6,14 +6,13 @@ import (
 	"net/http"
 	"testing"
 
+	model2 "github.com/arpb2/C-3PO/pkg/domain/user/model"
+	debugpipeline "github.com/arpb2/C-3PO/test/mock/pipeline"
+
 	usercontroller "github.com/arpb2/C-3PO/pkg/presentation/user/controller"
 	"github.com/arpb2/C-3PO/pkg/presentation/user/validation"
 
-	"github.com/arpb2/C-3PO/pkg/infra/pipeline"
-
-	"github.com/arpb2/C-3PO/pkg/domain/controller"
-	"github.com/arpb2/C-3PO/pkg/domain/model"
-	"github.com/arpb2/C-3PO/pkg/infra/executor"
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/controller"
 	"github.com/arpb2/C-3PO/test/mock/golden"
 	testhttpwrapper "github.com/arpb2/C-3PO/test/mock/http"
 	"github.com/arpb2/C-3PO/test/mock/service"
@@ -22,7 +21,7 @@ import (
 )
 
 func createPostController() controller.Controller {
-	return usercontroller.CreatePostController(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), nil, []validation.Validation{})
+	return usercontroller.CreatePostController(debugpipeline.CreateDebugHttpPipeline(), nil, []validation.Validation{})
 }
 
 func TestUserPostControllerMethodIsPOST(t *testing.T) {
@@ -55,9 +54,9 @@ func TestUserPostControllerBody_500OnServiceCreateError(t *testing.T) {
 	service := new(service.MockUserService)
 	service.On("CreateUser", mock.MatchedBy(func(obj interface{}) bool {
 		return true
-	})).Return(model.User{}, errors.New("whoops error")).Once()
+	})).Return(model2.User{}, errors.New("whoops error")).Once()
 
-	body := usercontroller.CreatePostBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), service, []validation.Validation{})
+	body := usercontroller.CreatePostBody(debugpipeline.CreateDebugHttpPipeline(), service, []validation.Validation{})
 
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("ReadBody", mock.MatchedBy(func(obj interface{}) bool {
@@ -79,8 +78,8 @@ func TestUserPostControllerBody_500OnServiceCreateError(t *testing.T) {
 }
 
 func TestUserPostControllerBody_200OnUserStoredOnService(t *testing.T) {
-	expectedUser := &model.AuthenticatedUser{
-		User: model.User{
+	expectedUser := &model2.AuthenticatedUser{
+		User: model2.User{
 			Id:      1000,
 			Email:   "test@email.com",
 			Name:    "TestName",
@@ -93,10 +92,10 @@ func TestUserPostControllerBody_200OnUserStoredOnService(t *testing.T) {
 		return true
 	})).Return(expectedUser.User, nil).Once()
 
-	body := usercontroller.CreatePostBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), service, []validation.Validation{})
+	body := usercontroller.CreatePostBody(debugpipeline.CreateDebugHttpPipeline(), service, []validation.Validation{})
 
 	reader := new(testhttpwrapper.MockReader)
-	reader.On("ReadBody", mock.MatchedBy(func(obj *model.AuthenticatedUser) bool {
+	reader.On("ReadBody", mock.MatchedBy(func(obj *model2.AuthenticatedUser) bool {
 		return true
 	})).Return(nil).Once()
 

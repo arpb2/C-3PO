@@ -4,11 +4,12 @@ import (
 	"errors"
 	"testing"
 
+	model2 "github.com/arpb2/C-3PO/pkg/domain/user/model"
+
 	"github.com/arpb2/C-3PO/pkg/presentation/user/command"
 	"github.com/arpb2/C-3PO/pkg/presentation/user/validation"
 
-	"github.com/arpb2/C-3PO/pkg/domain/http"
-	"github.com/arpb2/C-3PO/pkg/domain/model"
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
 	gopipeline "github.com/saantiaguilera/go-pipeline"
 	"github.com/stretchr/testify/assert"
 )
@@ -33,12 +34,12 @@ func TestValidateParametersCommand_GivenOneAndAContextWithoutAuthenticatedUser_W
 func TestValidateParametersCommand_GivenOneWithAValidatorThatDoesntMetRequirements_WhenRunning_Then400(t *testing.T) {
 	expectedMessage := "something wrong"
 	ctx := gopipeline.CreateContext()
-	ctx.Set(command.TagAuthenticatedUser, model.AuthenticatedUser{})
+	ctx.Set(command.TagAuthenticatedUser, model2.AuthenticatedUser{})
 	cmd := command.CreateValidateUserParametersCommand([]validation.Validation{
-		func(user *model.AuthenticatedUser) error {
+		func(user *model2.AuthenticatedUser) error {
 			return nil
 		},
-		func(user *model.AuthenticatedUser) error {
+		func(user *model2.AuthenticatedUser) error {
 			return errors.New(expectedMessage)
 		},
 	})
@@ -50,12 +51,12 @@ func TestValidateParametersCommand_GivenOneWithAValidatorThatDoesntMetRequiremen
 
 func TestValidateParametersCommand_GivenOneWithOkValidators_WhenRunning_ThenNoErrors(t *testing.T) {
 	ctx := gopipeline.CreateContext()
-	ctx.Set(command.TagAuthenticatedUser, model.AuthenticatedUser{})
+	ctx.Set(command.TagAuthenticatedUser, model2.AuthenticatedUser{})
 	cmd := command.CreateValidateUserParametersCommand([]validation.Validation{
-		func(user *model.AuthenticatedUser) error {
+		func(user *model2.AuthenticatedUser) error {
 			return nil
 		},
-		func(user *model.AuthenticatedUser) error {
+		func(user *model2.AuthenticatedUser) error {
 			return nil
 		},
 	})

@@ -4,11 +4,12 @@ import (
 	"errors"
 	"testing"
 
+	pipeline2 "github.com/arpb2/C-3PO/pkg/domain/infrastructure/pipeline"
+	model2 "github.com/arpb2/C-3PO/pkg/domain/user/model"
+
 	"github.com/arpb2/C-3PO/pkg/presentation/user/command"
 
-	"github.com/arpb2/C-3PO/pkg/domain/http"
-	"github.com/arpb2/C-3PO/pkg/domain/model"
-	"github.com/arpb2/C-3PO/pkg/infra/pipeline"
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
 	http2 "github.com/arpb2/C-3PO/test/mock/http"
 	gopipeline "github.com/saantiaguilera/go-pipeline"
 	"github.com/stretchr/testify/assert"
@@ -36,7 +37,7 @@ func TestFetchAuthenticatedUserCommand_GivenOneAndAReaderWithoutBody_WhenRunning
 	reader := new(http2.MockReader)
 	reader.On("ReadBody", mock.Anything).Return(errors.New("some error"))
 	ctx := gopipeline.CreateContext()
-	ctx.Set(pipeline.TagHttpReader, reader)
+	ctx.Set(pipeline2.TagHttpReader, reader)
 	cmd := command.CreateFetchAuthenticatedUserCommand()
 
 	err := cmd.Run(ctx)
@@ -49,7 +50,7 @@ func TestFetchAuthenticatedUserCommand_GivenOne_WhenRunning_ThenAuthenticatedUse
 	reader := new(http2.MockReader)
 	reader.On("ReadBody", mock.Anything).Return(nil)
 	ctx := gopipeline.CreateContext()
-	ctx.Set(pipeline.TagHttpReader, reader)
+	ctx.Set(pipeline2.TagHttpReader, reader)
 	cmd := command.CreateFetchAuthenticatedUserCommand()
 
 	err := cmd.Run(ctx)
@@ -57,6 +58,6 @@ func TestFetchAuthenticatedUserCommand_GivenOne_WhenRunning_ThenAuthenticatedUse
 
 	assert.Nil(t, err)
 	assert.True(t, exists)
-	assert.Equal(t, model.AuthenticatedUser{}, val)
+	assert.Equal(t, model2.AuthenticatedUser{}, val)
 	reader.AssertExpectations(t)
 }

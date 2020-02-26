@@ -1,19 +1,19 @@
 package jwt
 
 import (
-	"github.com/arpb2/C-3PO/pkg/domain/auth"
-	"github.com/arpb2/C-3PO/pkg/domain/http"
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
+	token2 "github.com/arpb2/C-3PO/pkg/domain/session/token"
 	"github.com/dgrijalva/jwt-go"
 )
 
-func CreateTokenHandler(secret []byte) auth.TokenHandler {
+func CreateTokenHandler(secret []byte) token2.Handler {
 	return &TokenHandler{
 		Secret: secret,
 	}
 }
 
 type token struct {
-	*auth.Token
+	*token2.Token
 	jwt.StandardClaims
 }
 
@@ -21,7 +21,7 @@ type TokenHandler struct {
 	Secret []byte
 }
 
-func (t TokenHandler) Create(authToken *auth.Token) (string, error) {
+func (t TokenHandler) Create(authToken *token2.Token) (string, error) {
 	claims := &token{
 		Token:          authToken,
 		StandardClaims: jwt.StandardClaims{},
@@ -36,7 +36,7 @@ func (t TokenHandler) Create(authToken *auth.Token) (string, error) {
 	return tokenString, nil
 }
 
-func (t TokenHandler) Retrieve(authToken string) (*auth.Token, error) {
+func (t TokenHandler) Retrieve(authToken string) (*token2.Token, error) {
 	claims := &token{}
 
 	tkn, err := jwt.ParseWithClaims(authToken, claims, func(token *jwt.Token) (interface{}, error) {

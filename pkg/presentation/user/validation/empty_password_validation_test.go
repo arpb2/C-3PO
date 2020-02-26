@@ -3,15 +3,16 @@ package validation_test
 import (
 	"testing"
 
+	model2 "github.com/arpb2/C-3PO/pkg/domain/user/model"
+
 	"github.com/arpb2/C-3PO/pkg/presentation/user/validation"
 
-	"github.com/arpb2/C-3PO/pkg/domain/model"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestEmptyPasswordValidation_Error(t *testing.T) {
-	err := validation.EmptyPassword(&model.AuthenticatedUser{
-		User:     model.User{},
+	err := validation.EmptyPassword(&model2.AuthenticatedUser{
+		User:     model2.User{},
 		Password: "",
 	})
 
@@ -20,8 +21,8 @@ func TestEmptyPasswordValidation_Error(t *testing.T) {
 }
 
 func TestEmptyPasswordValidation_Success(t *testing.T) {
-	err := validation.EmptyPassword(&model.AuthenticatedUser{
-		User:     model.User{},
+	err := validation.EmptyPassword(&model2.AuthenticatedUser{
+		User:     model2.User{},
 		Password: "test password",
 	})
 

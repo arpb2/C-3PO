@@ -1,5 +1,7 @@
 package validation
 
-import "github.com/arpb2/C-3PO/pkg/domain/model"
+import (
+	model2 "github.com/arpb2/C-3PO/pkg/domain/user/model"
+)
 
-type Validation func(user *model.AuthenticatedUser) error
+type Validation func(user *model2.AuthenticatedUser) error

@@ -3,15 +3,16 @@ package validation_test
 import (
 	"testing"
 
+	model2 "github.com/arpb2/C-3PO/pkg/domain/user/model"
+
 	"github.com/arpb2/C-3PO/pkg/presentation/user/validation"
 
-	"github.com/arpb2/C-3PO/pkg/domain/model"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestIdProvidedValidation_Error(t *testing.T) {
-	err := validation.IdProvided(&model.AuthenticatedUser{
-		User: model.User{
+	err := validation.IdProvided(&model2.AuthenticatedUser{
+		User: model2.User{
 			Id: 1000,
 		},
 		Password: "",
@@ -22,8 +23,8 @@ func TestIdProvidedValidation_Error(t *testing.T) {
 }
 
 func TestIdProvidedValidation_Success(t *testing.T) {
-	err := validation.IdProvided(&model.AuthenticatedUser{
-		User:     model.User{},
+	err := validation.IdProvided(&model2.AuthenticatedUser{
+		User:     model2.User{},
 		Password: "",
 	})
 

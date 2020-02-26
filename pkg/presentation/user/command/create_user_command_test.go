@@ -4,10 +4,11 @@ import (
 	"errors"
 	"testing"
 
+	model2 "github.com/arpb2/C-3PO/pkg/domain/user/model"
+
 	"github.com/arpb2/C-3PO/pkg/presentation/user/command"
 
-	"github.com/arpb2/C-3PO/pkg/domain/http"
-	"github.com/arpb2/C-3PO/pkg/domain/model"
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
 	"github.com/arpb2/C-3PO/test/mock/service"
 	gopipeline "github.com/saantiaguilera/go-pipeline"
 	"github.com/stretchr/testify/assert"
@@ -31,7 +32,7 @@ func TestCreateUserCommand_GivenOneAndAContextWithoutAuthenticatedUser_WhenRunni
 }
 
 func TestCreateUserCommand_GivenOneAndAFailingService_WhenRunning_ThenServiceError(t *testing.T) {
-	expectedVal := model.AuthenticatedUser{}
+	expectedVal := model2.AuthenticatedUser{}
 	ctx := gopipeline.CreateContext()
 	ctx.Set(command.TagAuthenticatedUser, expectedVal)
 	expectedErr := errors.New("some error")
@@ -46,7 +47,7 @@ func TestCreateUserCommand_GivenOneAndAFailingService_WhenRunning_ThenServiceErr
 }
 
 func TestCreateUserCommand_GivenOne_WhenRunning_ThenContextHasUserAndReturnsNoError(t *testing.T) {
-	expectedVal := model.AuthenticatedUser{}
+	expectedVal := model2.AuthenticatedUser{}
 	ctx := gopipeline.CreateContext()
 	ctx.Set(command.TagAuthenticatedUser, expectedVal)
 	s := new(service.MockUserService)

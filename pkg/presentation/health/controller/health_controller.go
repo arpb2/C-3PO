@@ -3,8 +3,8 @@ package controller
 import (
 	"net/http"
 
-	"github.com/arpb2/C-3PO/pkg/domain/controller"
-	httpwrapper "github.com/arpb2/C-3PO/pkg/domain/http"
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/controller"
+	httpwrapper "github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
 )
 
 func CreateGetController() controller.Controller {

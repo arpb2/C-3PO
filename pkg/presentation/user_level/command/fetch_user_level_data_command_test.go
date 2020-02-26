@@ -3,12 +3,12 @@ package command_test
 import (
 	"testing"
 
+	pipeline2 "github.com/arpb2/C-3PO/pkg/domain/infrastructure/pipeline"
+	model2 "github.com/arpb2/C-3PO/pkg/domain/user_level/model"
+
 	"github.com/arpb2/C-3PO/pkg/presentation/user_level/command"
 
-	"github.com/arpb2/C-3PO/pkg/domain/model"
-
-	"github.com/arpb2/C-3PO/pkg/domain/http"
-	"github.com/arpb2/C-3PO/pkg/infra/pipeline"
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
 	http2 "github.com/arpb2/C-3PO/test/mock/http"
 	gopipeline "github.com/saantiaguilera/go-pipeline"
 	"github.com/stretchr/testify/assert"
@@ -35,7 +35,7 @@ func TestFetchCodeCommand_GivenOneAndAReaderWithoutCodePart_WhenRunning_Then400(
 	reader := new(http2.MockReader)
 	reader.On("GetFormData", "code").Return("", false)
 	ctx := gopipeline.CreateContext()
-	ctx.Set(pipeline.TagHttpReader, reader)
+	ctx.Set(pipeline2.TagHttpReader, reader)
 	cmd := command.CreateFetchCodeCommand()
 
 	err := cmd.Run(ctx)
@@ -49,7 +49,7 @@ func TestFetchCodeCommand_GivenOneAndAReaderWithoutWorkspacePart_WhenRunning_The
 	reader.On("GetFormData", "code").Return("code", true)
 	reader.On("GetFormData", "workspace").Return("", false)
 	ctx := gopipeline.CreateContext()
-	ctx.Set(pipeline.TagHttpReader, reader)
+	ctx.Set(pipeline2.TagHttpReader, reader)
 	cmd := command.CreateFetchCodeCommand()
 
 	err := cmd.Run(ctx)
@@ -63,7 +63,7 @@ func TestFetchCodeCommand_GivenOne_WhenRunning_ThenRawCodeIsAddedToContext(t *te
 	reader.On("GetFormData", "code").Return("test raw code", true)
 	reader.On("GetFormData", "workspace").Return("test workspace", true)
 	ctx := gopipeline.CreateContext()
-	ctx.Set(pipeline.TagHttpReader, reader)
+	ctx.Set(pipeline2.TagHttpReader, reader)
 	cmd := command.CreateFetchCodeCommand()
 
 	err := cmd.Run(ctx)
@@ -71,7 +71,7 @@ func TestFetchCodeCommand_GivenOne_WhenRunning_ThenRawCodeIsAddedToContext(t *te
 
 	assert.Nil(t, err)
 	assert.True(t, exists)
-	assert.Equal(t, model.UserLevelData{
+	assert.Equal(t, model2.UserLevelData{
 		Code:      "test raw code",
 		Workspace: "test workspace",
 	}, val)

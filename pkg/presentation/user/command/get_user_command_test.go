@@ -4,10 +4,11 @@ import (
 	"errors"
 	"testing"
 
+	model2 "github.com/arpb2/C-3PO/pkg/domain/user/model"
+
 	"github.com/arpb2/C-3PO/pkg/presentation/user/command"
 
-	"github.com/arpb2/C-3PO/pkg/domain/http"
-	"github.com/arpb2/C-3PO/pkg/domain/model"
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
 	"github.com/arpb2/C-3PO/test/mock/service"
 	gopipeline "github.com/saantiaguilera/go-pipeline"
 	"github.com/stretchr/testify/assert"
@@ -51,7 +52,7 @@ func TestGetUserCommand_GivenOneAndANoUserCreatedService_WhenRunning_Then404(t *
 	ctx.Set(command.TagUserId, expectedVal)
 	expectedErr := http.CreateNotFoundError()
 	s := new(service.MockUserService)
-	s.On("GetUser", expectedVal).Return(model.User{}, http.CreateNotFoundError())
+	s.On("GetUser", expectedVal).Return(model2.User{}, http.CreateNotFoundError())
 	cmd := command.CreateGetUserCommand(s)
 
 	err := cmd.Run(ctx)
@@ -61,7 +62,7 @@ func TestGetUserCommand_GivenOneAndANoUserCreatedService_WhenRunning_Then404(t *
 }
 
 func TestGetUserCommand_GivenOne_WhenRunning_ThenContextHasUserAndReturnsNoError(t *testing.T) {
-	expectedVal := model.User{}
+	expectedVal := model2.User{}
 	ctx := gopipeline.CreateContext()
 	ctx.Set(command.TagUserId, uint(1000))
 	s := new(service.MockUserService)

@@ -3,18 +3,20 @@ package controller
 import (
 	"fmt"
 
-	"github.com/arpb2/C-3PO/pkg/domain/controller"
-	"github.com/arpb2/C-3PO/pkg/domain/http"
-	"github.com/arpb2/C-3PO/pkg/domain/pipeline"
-	levelservice "github.com/arpb2/C-3PO/pkg/domain/service/level"
+	controller3 "github.com/arpb2/C-3PO/pkg/domain/level/controller"
+	"github.com/arpb2/C-3PO/pkg/domain/level/service"
+
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/controller"
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/pipeline"
 	"github.com/arpb2/C-3PO/pkg/presentation/level/command"
 	gopipeline "github.com/saantiaguilera/go-pipeline"
 )
 
-func CreatePutController(exec pipeline.HttpPipeline, authMiddleware http.Handler, levelService levelservice.Service) controller.Controller {
+func CreatePutController(exec pipeline.HttpPipeline, authMiddleware http.Handler, levelService service.Service) controller.Controller {
 	return controller.Controller{
 		Method: "PUT",
-		Path:   fmt.Sprintf("/levels/:%s", controller.ParamLevelId),
+		Path:   fmt.Sprintf("/levels/:%s", controller3.ParamLevelId),
 		Middleware: []http.Handler{
 			authMiddleware,
 		},
@@ -22,7 +24,7 @@ func CreatePutController(exec pipeline.HttpPipeline, authMiddleware http.Handler
 	}
 }
 
-func CreatePutBody(exec pipeline.HttpPipeline, levelService levelservice.Service) http.Handler {
+func CreatePutBody(exec pipeline.HttpPipeline, levelService service.Service) http.Handler {
 	fetchLevelIdCommand := command.CreateFetchLevelIdCommand()
 	fetchLevelCommand := command.CreateFetchLevelCommand()
 	serviceCommand := command.CreateWriteLevelCommand(levelService)

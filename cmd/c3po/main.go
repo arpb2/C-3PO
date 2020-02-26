@@ -6,13 +6,14 @@ import (
 	"os"
 
 	"github.com/arpb2/C-3PO/pkg/data/jwt"
-	"github.com/arpb2/C-3PO/pkg/data/mysql/client"
-	"github.com/arpb2/C-3PO/pkg/domain/controller"
-	"github.com/arpb2/C-3PO/pkg/infra/engine/gin"
-	"github.com/arpb2/C-3PO/pkg/infra/executor"
-	"github.com/arpb2/C-3PO/pkg/infra/executor/decorator"
-	"github.com/arpb2/C-3PO/pkg/infra/pipeline"
-	"github.com/arpb2/C-3PO/pkg/infra/server"
+	"github.com/arpb2/C-3PO/pkg/data/mysql"
+
+	"github.com/arpb2/C-3PO/cmd/c3po/infrastructure/engine/gin"
+	"github.com/arpb2/C-3PO/cmd/c3po/infrastructure/executor"
+	"github.com/arpb2/C-3PO/cmd/c3po/infrastructure/executor/decorator"
+	"github.com/arpb2/C-3PO/cmd/c3po/infrastructure/pipeline"
+	"github.com/arpb2/C-3PO/cmd/c3po/infrastructure/server"
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/controller"
 	health "github.com/arpb2/C-3PO/pkg/presentation/health/controller"
 	level "github.com/arpb2/C-3PO/pkg/presentation/level/controller"
 	"github.com/arpb2/C-3PO/pkg/presentation/middleware/admin"
@@ -23,11 +24,11 @@ import (
 	"github.com/arpb2/C-3PO/pkg/presentation/user/validation"
 	userlevel "github.com/arpb2/C-3PO/pkg/presentation/user_level/controller"
 
-	credentialservice "github.com/arpb2/C-3PO/pkg/data/mysql/service/credential"
-	levelservice "github.com/arpb2/C-3PO/pkg/data/mysql/service/level"
-	teacherservice "github.com/arpb2/C-3PO/pkg/data/mysql/service/teacher"
-	userservice "github.com/arpb2/C-3PO/pkg/data/mysql/service/user"
-	userlevelservice "github.com/arpb2/C-3PO/pkg/data/mysql/service/user_level"
+	credentialservice "github.com/arpb2/C-3PO/pkg/data/mysql/credential"
+	levelservice "github.com/arpb2/C-3PO/pkg/data/mysql/level"
+	teacherservice "github.com/arpb2/C-3PO/pkg/data/mysql/teacher"
+	userservice "github.com/arpb2/C-3PO/pkg/data/mysql/user"
+	userlevelservice "github.com/arpb2/C-3PO/pkg/data/mysql/user_level"
 )
 
 const (
@@ -56,7 +57,7 @@ func main() {
 
 	traceDecorator := decorator.CreateTraceDecorator(os.Stdout)
 
-	dbClient, driver := client.CreateMysqlClient(assertEnv(envMysqlDSN))
+	dbClient, driver := mysql.CreateMysqlClient(assertEnv(envMysqlDSN))
 	defer driver.Close()
 
 	httpExecutor := executor.CreateHttpExecutor(traceDecorator)

@@ -1,11 +1,11 @@
 package controller
 
 import (
-	"github.com/arpb2/C-3PO/pkg/domain/auth"
-	"github.com/arpb2/C-3PO/pkg/domain/controller"
-	"github.com/arpb2/C-3PO/pkg/domain/http"
-	"github.com/arpb2/C-3PO/pkg/domain/pipeline"
-	credentialservice "github.com/arpb2/C-3PO/pkg/domain/service/credential"
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/controller"
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/pipeline"
+	credentialservice "github.com/arpb2/C-3PO/pkg/domain/session/service"
+	"github.com/arpb2/C-3PO/pkg/domain/session/token"
 	"github.com/arpb2/C-3PO/pkg/presentation/session/command"
 	usercommand "github.com/arpb2/C-3PO/pkg/presentation/user/command"
 	"github.com/arpb2/C-3PO/pkg/presentation/user/validation"
@@ -13,7 +13,7 @@ import (
 )
 
 func CreatePostController(executor pipeline.HttpPipeline,
-	tokenHandler auth.TokenHandler,
+	tokenHandler token.Handler,
 	service credentialservice.Service,
 	validations []validation.Validation) controller.Controller {
 	return controller.Controller{
@@ -23,7 +23,7 @@ func CreatePostController(executor pipeline.HttpPipeline,
 	}
 }
 
-func CreatePostBody(executor pipeline.HttpPipeline, tokenHandler auth.TokenHandler, service credentialservice.Service, validations []validation.Validation) http.Handler {
+func CreatePostBody(executor pipeline.HttpPipeline, tokenHandler token.Handler, service credentialservice.Service, validations []validation.Validation) http.Handler {
 	fetchUserCommand := usercommand.CreateFetchAuthenticatedUserCommand()
 	validateParamsCommand := usercommand.CreateValidateUserParametersCommand(validations)
 	authenticateCommand := command.CreateAuthenticateCommand(service)

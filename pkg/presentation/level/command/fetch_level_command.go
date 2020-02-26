@@ -1,9 +1,9 @@
 package command
 
 import (
-	"github.com/arpb2/C-3PO/pkg/domain/http"
-	"github.com/arpb2/C-3PO/pkg/domain/model"
-	httppipeline "github.com/arpb2/C-3PO/pkg/infra/pipeline"
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
+	httppipeline "github.com/arpb2/C-3PO/pkg/domain/infrastructure/pipeline"
+	model2 "github.com/arpb2/C-3PO/pkg/domain/level/model"
 	"github.com/saantiaguilera/go-pipeline"
 )
 
@@ -22,7 +22,7 @@ func (c *fetchLevelCommand) Run(ctx pipeline.Context) error {
 		return err
 	}
 
-	var level model.Level
+	var level model2.Level
 	if err := httpReader.ReadBody(&level); err != nil {
 		return http.CreateBadRequestError("malformed body")
 	}

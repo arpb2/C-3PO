@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"os"
 
 	"github.com/arpb2/C-3PO/third_party/ent"
 	"github.com/facebookincubator/ent/dialect/sql"
@@ -11,13 +10,8 @@ import (
 )
 
 func main() {
-	dsn, exists := os.LookupEnv("MYSQL_DSN")
-	if !exists {
-		panic("No MYSQL_DSN provided")
-	}
-
 	ctx := context.Background()
-	drv, err := sql.Open("mysql", dsn)
+	drv, err := sql.Open("mysql", "mockuser:mockpassword@tcp(52.14.108.243:3380)/testdb")
 
 	if err != nil {
 		panic(err)

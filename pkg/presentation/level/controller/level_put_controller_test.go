@@ -7,24 +7,25 @@ import (
 	httpcodes "net/http"
 	"testing"
 
-	"github.com/arpb2/C-3PO/pkg/domain/model"
-	levelservice "github.com/arpb2/C-3PO/pkg/domain/service/level"
-	"github.com/arpb2/C-3PO/pkg/infra/executor"
-	"github.com/arpb2/C-3PO/pkg/infra/pipeline"
+	controller3 "github.com/arpb2/C-3PO/pkg/domain/level/controller"
+	model2 "github.com/arpb2/C-3PO/pkg/domain/level/model"
+	"github.com/arpb2/C-3PO/pkg/domain/level/service"
+	pipeline2 "github.com/arpb2/C-3PO/test/mock/pipeline"
+
 	"github.com/arpb2/C-3PO/test/mock/golden"
 	servicemock "github.com/arpb2/C-3PO/test/mock/service"
 	"github.com/stretchr/testify/mock"
 
-	"github.com/arpb2/C-3PO/pkg/domain/controller"
-	"github.com/arpb2/C-3PO/pkg/domain/http"
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/controller"
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
 	level "github.com/arpb2/C-3PO/pkg/presentation/level/controller"
 	httpmock "github.com/arpb2/C-3PO/test/mock/http"
 	"github.com/stretchr/testify/assert"
 )
 
-func createPutController(service levelservice.Service) controller.Controller {
+func createPutController(service service.Service) controller.Controller {
 	return level.CreatePutController(
-		pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()),
+		pipeline2.CreateDebugHttpPipeline(),
 		func(ctx *http.Context) {
 			// Nothing
 		},
@@ -37,12 +38,12 @@ func TestPutController_IsPut(t *testing.T) {
 }
 
 func TestPutControllerPath_IsLevels(t *testing.T) {
-	assert.Equal(t, fmt.Sprintf("/levels/:%s", controller.ParamLevelId), createPutController(nil).Path)
+	assert.Equal(t, fmt.Sprintf("/levels/:%s", controller3.ParamLevelId), createPutController(nil).Path)
 }
 
 func TestPutController_GivenNoId_WhenCalled_Then400(t *testing.T) {
 	reader := new(httpmock.MockReader)
-	reader.On("GetParameter", controller.ParamLevelId).Return("").Once()
+	reader.On("GetParameter", controller3.ParamLevelId).Return("").Once()
 	reader.On("ReadBody", mock.Anything).Return(nil).Maybe()
 
 	c, w := httpmock.CreateTestContext()
@@ -60,7 +61,7 @@ func TestPutController_GivenNoId_WhenCalled_Then400(t *testing.T) {
 
 func TestPutController_GivenNoUintId_WhenCalled_Then400(t *testing.T) {
 	reader := new(httpmock.MockReader)
-	reader.On("GetParameter", controller.ParamLevelId).Return("not uint").Once()
+	reader.On("GetParameter", controller3.ParamLevelId).Return("not uint").Once()
 	reader.On("ReadBody", mock.Anything).Return(nil).Maybe()
 
 	c, w := httpmock.CreateTestContext()
@@ -78,7 +79,7 @@ func TestPutController_GivenNoUintId_WhenCalled_Then400(t *testing.T) {
 
 func TestPutController_GivenNoBody_WhenCalled_Then400(t *testing.T) {
 	reader := new(httpmock.MockReader)
-	reader.On("GetParameter", controller.ParamLevelId).Return("1000").Maybe()
+	reader.On("GetParameter", controller3.ParamLevelId).Return("1000").Maybe()
 	reader.On("ReadBody", mock.Anything).Return(errors.New("error")).Once()
 
 	c, w := httpmock.CreateTestContext()
@@ -98,11 +99,11 @@ func TestPutController_GivenAnErroredService_WhenCalled_ThenServiceError(t *test
 	expectedErr := errors.New("error")
 
 	reader := new(httpmock.MockReader)
-	reader.On("GetParameter", controller.ParamLevelId).Return("1000").Once()
+	reader.On("GetParameter", controller3.ParamLevelId).Return("1000").Once()
 	reader.On("ReadBody", mock.Anything).Return(nil).Once()
 
 	service := new(servicemock.MockLevelService)
-	service.On("StoreLevel", mock.Anything).Return(model.Level{}, expectedErr)
+	service.On("StoreLevel", mock.Anything).Return(model2.Level{}, expectedErr)
 
 	c, w := httpmock.CreateTestContext()
 	c.Reader = reader
@@ -119,16 +120,16 @@ func TestPutController_GivenAnErroredService_WhenCalled_ThenServiceError(t *test
 }
 
 func TestPutController_GivenAServiceWithTheCalleeId_WhenCalled_ThenStoredLevelIsReturned(t *testing.T) {
-	expectedLevel := model.Level{
+	expectedLevel := model2.Level{
 		Id:          1000,
 		Name:        "Some name",
 		Description: "Some description",
 	}
 
 	reader := new(httpmock.MockReader)
-	reader.On("GetParameter", controller.ParamLevelId).Return("1000").Once()
+	reader.On("GetParameter", controller3.ParamLevelId).Return("1000").Once()
 	reader.On("ReadBody", mock.Anything).Run(func(args mock.Arguments) {
-		lvl := args.Get(0).(*model.Level)
+		lvl := args.Get(0).(*model2.Level)
 		lvl.Id = expectedLevel.Id
 		lvl.Name = expectedLevel.Name
 		lvl.Description = expectedLevel.Description

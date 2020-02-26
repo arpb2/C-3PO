@@ -4,14 +4,15 @@ import (
 	"fmt"
 	"strconv"
 
+	middleware2 "github.com/arpb2/C-3PO/pkg/domain/session/middleware"
+	"github.com/arpb2/C-3PO/pkg/domain/session/token"
+
 	"github.com/arpb2/C-3PO/pkg/presentation/middleware"
 
-	"github.com/arpb2/C-3PO/pkg/domain/auth"
-	"github.com/arpb2/C-3PO/pkg/domain/http"
-	authmiddleware "github.com/arpb2/C-3PO/pkg/domain/middleware/auth"
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
 )
 
-func HandleAuthentication(ctx *http.Context, tokenHandler auth.TokenHandler, strategies ...authmiddleware.AuthenticationStrategy) {
+func HandleAuthentication(ctx *http.Context, tokenHandler token.Handler, strategies ...middleware2.AuthenticationStrategy) {
 	authToken := ctx.GetHeader(middleware.HeaderAuthorization)
 
 	if authToken == "" {

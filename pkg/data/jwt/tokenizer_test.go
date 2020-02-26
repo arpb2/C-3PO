@@ -5,8 +5,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/arpb2/C-3PO/pkg/domain/auth"
-	httpwrapper "github.com/arpb2/C-3PO/pkg/domain/http"
+	token2 "github.com/arpb2/C-3PO/pkg/domain/session/token"
+
+	httpwrapper "github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/xerrors"
 )
@@ -30,7 +31,7 @@ func TestSecret_DefaultValue(t *testing.T) {
 var expectedToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEwMDB9.GVS-KC5nOCHybzzFIIH864u4KcGu-ZSd-96krqTUGWo"
 
 func TestCreate_CreatesExpectedToken(t *testing.T) {
-	token, err := DefaultTokenHandler.Create(&auth.Token{
+	token, err := DefaultTokenHandler.Create(&token2.Token{
 		UserId: 1000,
 	})
 

@@ -1,14 +1,14 @@
 package command
 
 import (
-	"github.com/arpb2/C-3PO/pkg/domain/http"
-	levelservice "github.com/arpb2/C-3PO/pkg/domain/service/level"
-	pipeline2 "github.com/arpb2/C-3PO/pkg/infra/pipeline"
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
+	httppipeline "github.com/arpb2/C-3PO/pkg/domain/infrastructure/pipeline"
+	service2 "github.com/arpb2/C-3PO/pkg/domain/level/service"
 	"github.com/saantiaguilera/go-pipeline"
 )
 
 type writeLevelCommand struct {
-	service levelservice.Service
+	service service2.Service
 }
 
 func (c *writeLevelCommand) Name() string {
@@ -16,7 +16,7 @@ func (c *writeLevelCommand) Name() string {
 }
 
 func (c *writeLevelCommand) Run(ctx pipeline.Context) error {
-	ctxAware := pipeline2.CreateContextAware(ctx)
+	ctxAware := httppipeline.CreateContextAware(ctx)
 
 	levelId, existsLevelId := ctx.GetUInt(TagLevelId)
 	levelData, existsData := ctxAware.GetLevel(TagLevel)
@@ -36,7 +36,7 @@ func (c *writeLevelCommand) Run(ctx pipeline.Context) error {
 	return nil
 }
 
-func CreateWriteLevelCommand(service levelservice.Service) pipeline.Step {
+func CreateWriteLevelCommand(service service2.Service) pipeline.Step {
 	return &writeLevelCommand{
 		service: service,
 	}

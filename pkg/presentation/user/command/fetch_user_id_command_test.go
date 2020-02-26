@@ -3,10 +3,11 @@ package command_test
 import (
 	"testing"
 
+	pipeline2 "github.com/arpb2/C-3PO/pkg/domain/infrastructure/pipeline"
+
 	"github.com/arpb2/C-3PO/pkg/presentation/user/command"
 
-	"github.com/arpb2/C-3PO/pkg/domain/http"
-	"github.com/arpb2/C-3PO/pkg/infra/pipeline"
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
 	http2 "github.com/arpb2/C-3PO/test/mock/http"
 	gopipeline "github.com/saantiaguilera/go-pipeline"
 	"github.com/stretchr/testify/assert"
@@ -33,7 +34,7 @@ func TestFetchUserIdCommand_GivenOneAndAReaderWithoutUserIdParameter_WhenRunning
 	reader := new(http2.MockReader)
 	reader.On("GetParameter", "user_id").Return("", false)
 	ctx := gopipeline.CreateContext()
-	ctx.Set(pipeline.TagHttpReader, reader)
+	ctx.Set(pipeline2.TagHttpReader, reader)
 	cmd := command.CreateFetchUserIdCommand()
 
 	err := cmd.Run(ctx)
@@ -46,7 +47,7 @@ func TestFetchUserIdCommand_GivenOneAndAReaderWithMalformedUserId_WhenRunning_Th
 	reader := new(http2.MockReader)
 	reader.On("GetParameter", "user_id").Return("-1", true)
 	ctx := gopipeline.CreateContext()
-	ctx.Set(pipeline.TagHttpReader, reader)
+	ctx.Set(pipeline2.TagHttpReader, reader)
 	cmd := command.CreateFetchUserIdCommand()
 
 	err := cmd.Run(ctx)
@@ -59,7 +60,7 @@ func TestFetchUserIdCommand_GivenOne_WhenRunning_ThenRawUserIsAddedToContext(t *
 	reader := new(http2.MockReader)
 	reader.On("GetParameter", "user_id").Return("1000", true)
 	ctx := gopipeline.CreateContext()
-	ctx.Set(pipeline.TagHttpReader, reader)
+	ctx.Set(pipeline2.TagHttpReader, reader)
 	cmd := command.CreateFetchUserIdCommand()
 
 	err := cmd.Run(ctx)

@@ -4,10 +4,11 @@ import (
 	"errors"
 	"testing"
 
+	model2 "github.com/arpb2/C-3PO/pkg/domain/level/model"
+
 	levelcommand "github.com/arpb2/C-3PO/pkg/presentation/level/command"
 
-	"github.com/arpb2/C-3PO/pkg/domain/http"
-	"github.com/arpb2/C-3PO/pkg/domain/model"
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
 	"github.com/arpb2/C-3PO/test/mock/service"
 	gopipeline "github.com/saantiaguilera/go-pipeline"
 	"github.com/stretchr/testify/assert"
@@ -33,7 +34,7 @@ func TestWriteLevelCommand_GivenOneAndAContextWithoutLevel_WhenRunning_Then500(t
 
 func TestWriteLevelCommand_GivenOneAndAContextWithoutLevelId_WhenRunning_Then500(t *testing.T) {
 	ctx := gopipeline.CreateContext()
-	ctx.Set(levelcommand.TagLevel, model.Level{})
+	ctx.Set(levelcommand.TagLevel, model2.Level{})
 	cmd := levelcommand.CreateWriteLevelCommand(nil)
 
 	err := cmd.Run(ctx)
@@ -43,12 +44,12 @@ func TestWriteLevelCommand_GivenOneAndAContextWithoutLevelId_WhenRunning_Then500
 
 func TestWriteLevelCommand_GivenOneAndAFailingService_WhenRunning_ThenServiceError(t *testing.T) {
 	ctx := gopipeline.CreateContext()
-	ctx.Set(levelcommand.TagLevel, model.Level{})
+	ctx.Set(levelcommand.TagLevel, model2.Level{})
 	ctx.Set(levelcommand.TagLevelId, uint(1000))
 	expectedErr := errors.New("some error")
-	expectedLevel := model.Level{}
+	expectedLevel := model2.Level{}
 	s := new(service.MockLevelService)
-	s.On("StoreLevel", model.Level{
+	s.On("StoreLevel", model2.Level{
 		Id: 1000,
 	}).Return(expectedLevel, expectedErr)
 	cmd := levelcommand.CreateWriteLevelCommand(s)
@@ -61,11 +62,11 @@ func TestWriteLevelCommand_GivenOneAndAFailingService_WhenRunning_ThenServiceErr
 
 func TestWriteLevelCommand_GivenOne_WhenRunning_ThenContextHasCodeAndReturnsNoError(t *testing.T) {
 	ctx := gopipeline.CreateContext()
-	ctx.Set(levelcommand.TagLevel, model.Level{})
+	ctx.Set(levelcommand.TagLevel, model2.Level{})
 	ctx.Set(levelcommand.TagLevelId, uint(1000))
-	expectedVal := model.Level{}
+	expectedVal := model2.Level{}
 	s := new(service.MockLevelService)
-	s.On("StoreLevel", model.Level{
+	s.On("StoreLevel", model2.Level{
 		Id: 1000,
 	}).Return(expectedVal, nil)
 	cmd := levelcommand.CreateWriteLevelCommand(s)

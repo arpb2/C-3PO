@@ -3,20 +3,22 @@ package controller
 import (
 	"fmt"
 
+	controller2 "github.com/arpb2/C-3PO/pkg/domain/user/controller"
+	"github.com/arpb2/C-3PO/pkg/domain/user/service"
+
 	"github.com/arpb2/C-3PO/pkg/presentation/user/command"
 	"github.com/arpb2/C-3PO/pkg/presentation/user/validation"
 
-	"github.com/arpb2/C-3PO/pkg/domain/controller"
-	"github.com/arpb2/C-3PO/pkg/domain/http"
-	"github.com/arpb2/C-3PO/pkg/domain/pipeline"
-	userservice "github.com/arpb2/C-3PO/pkg/domain/service/user"
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/controller"
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/pipeline"
 	gopipeline "github.com/saantiaguilera/go-pipeline"
 )
 
-func CreatePutController(exec pipeline.HttpPipeline, authMiddleware http.Handler, userService userservice.Service, validations []validation.Validation) controller.Controller {
+func CreatePutController(exec pipeline.HttpPipeline, authMiddleware http.Handler, userService service.Service, validations []validation.Validation) controller.Controller {
 	return controller.Controller{
 		Method: "PUT",
-		Path:   fmt.Sprintf("/users/:%s", controller.ParamUserId),
+		Path:   fmt.Sprintf("/users/:%s", controller2.ParamUserId),
 		Middleware: []http.Handler{
 			authMiddleware,
 		},
@@ -24,7 +26,7 @@ func CreatePutController(exec pipeline.HttpPipeline, authMiddleware http.Handler
 	}
 }
 
-func CreatePutBody(exec pipeline.HttpPipeline, userService userservice.Service, validations []validation.Validation) http.Handler {
+func CreatePutBody(exec pipeline.HttpPipeline, userService service.Service, validations []validation.Validation) http.Handler {
 	fetchUserIdCommand := command.CreateFetchUserIdCommand()
 	fetchUserCommand := command.CreateFetchAuthenticatedUserCommand()
 	validateCommand := command.CreateValidateUserParametersCommand(validations)

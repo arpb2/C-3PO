@@ -1,13 +1,13 @@
 package command
 
 import (
-	userservice "github.com/arpb2/C-3PO/pkg/domain/service/user"
-	httppipeline "github.com/arpb2/C-3PO/pkg/infra/pipeline"
+	httppipeline "github.com/arpb2/C-3PO/pkg/domain/infrastructure/pipeline"
+	service2 "github.com/arpb2/C-3PO/pkg/domain/user/service"
 	"github.com/saantiaguilera/go-pipeline"
 )
 
 type createUserCommand struct {
-	service userservice.Service
+	service service2.Service
 }
 
 func (c *createUserCommand) Name() string {
@@ -33,7 +33,7 @@ func (c *createUserCommand) Run(ctx pipeline.Context) error {
 	return nil
 }
 
-func CreateCreateUserCommand(service userservice.Service) pipeline.Step {
+func CreateCreateUserCommand(service service2.Service) pipeline.Step {
 	return &createUserCommand{
 		service: service,
 	}

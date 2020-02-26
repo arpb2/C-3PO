@@ -4,10 +4,11 @@ import (
 	"errors"
 	"testing"
 
+	model2 "github.com/arpb2/C-3PO/pkg/domain/level/model"
+
 	"github.com/arpb2/C-3PO/pkg/presentation/level/command"
 
-	"github.com/arpb2/C-3PO/pkg/domain/http"
-	"github.com/arpb2/C-3PO/pkg/domain/model"
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
 	"github.com/arpb2/C-3PO/test/mock/service"
 	gopipeline "github.com/saantiaguilera/go-pipeline"
 	"github.com/stretchr/testify/assert"
@@ -36,7 +37,7 @@ func TestGetLevelCommand_GivenOneAndAFailingService_WhenRunning_ThenServiceError
 	ctx.Set(command.TagLevelId, expectedVal)
 	expectedErr := errors.New("some error")
 	s := new(service.MockLevelService)
-	s.On("GetLevel", expectedVal).Return(model.Level{}, expectedErr)
+	s.On("GetLevel", expectedVal).Return(model2.Level{}, expectedErr)
 	cmd := command.CreateGetLevelCommand(s)
 
 	err := cmd.Run(ctx)
@@ -51,7 +52,7 @@ func TestGetLevelCommand_GivenOneAndANoLevelCreatedService_WhenRunning_Then404(t
 	ctx.Set(command.TagLevelId, expectedVal)
 	expectedErr := http.CreateNotFoundError()
 	s := new(service.MockLevelService)
-	s.On("GetLevel", expectedVal).Return(model.Level{}, http.CreateNotFoundError())
+	s.On("GetLevel", expectedVal).Return(model2.Level{}, http.CreateNotFoundError())
 	cmd := command.CreateGetLevelCommand(s)
 
 	err := cmd.Run(ctx)
@@ -61,7 +62,7 @@ func TestGetLevelCommand_GivenOneAndANoLevelCreatedService_WhenRunning_Then404(t
 }
 
 func TestGetLevelCommand_GivenOne_WhenRunning_ThenContextHasLevelAndReturnsNoError(t *testing.T) {
-	expectedVal := model.Level{}
+	expectedVal := model2.Level{}
 	ctx := gopipeline.CreateContext()
 	ctx.Set(command.TagLevelId, uint(1000))
 	s := new(service.MockLevelService)

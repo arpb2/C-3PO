@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	pipeline3 "github.com/arpb2/C-3PO/cmd/uml/infrastructure/pipeline"
+
 	levelcontroller "github.com/arpb2/C-3PO/pkg/presentation/level/controller"
 	sessioncontroller "github.com/arpb2/C-3PO/pkg/presentation/session/controller"
 	usercontroller "github.com/arpb2/C-3PO/pkg/presentation/user/controller"
@@ -11,10 +13,9 @@ import (
 
 	gopipeline "github.com/saantiaguilera/go-pipeline"
 
-	"github.com/arpb2/C-3PO/pkg/domain/controller"
-	"github.com/arpb2/C-3PO/pkg/domain/http"
-	"github.com/arpb2/C-3PO/pkg/domain/pipeline"
-	httppipeline "github.com/arpb2/C-3PO/pkg/infra/pipeline"
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/controller"
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/pipeline"
 )
 
 func createDrawablePipeline(fileName string) pipeline.HttpPipeline {
@@ -29,7 +30,7 @@ func createDrawablePipeline(fileName string) pipeline.HttpPipeline {
 		Type: gopipeline.UMLFormatSVG,
 	})
 
-	return httppipeline.CreateDrawablePipeline(file, graphRenderer)
+	return pipeline3.CreateDrawablePipeline(file, graphRenderer)
 }
 
 func getPipelinedControllers() []controller.Controller {

@@ -1,17 +1,17 @@
 package command
 
 import (
-	"github.com/arpb2/C-3PO/pkg/domain/http"
-	"github.com/arpb2/C-3PO/pkg/domain/model"
-	userlevelservice "github.com/arpb2/C-3PO/pkg/domain/service/user_level"
-	pipeline2 "github.com/arpb2/C-3PO/pkg/infra/pipeline"
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
+	httppipeline "github.com/arpb2/C-3PO/pkg/domain/infrastructure/pipeline"
+	model2 "github.com/arpb2/C-3PO/pkg/domain/user_level/model"
+	service2 "github.com/arpb2/C-3PO/pkg/domain/user_level/service"
 	levelcommand "github.com/arpb2/C-3PO/pkg/presentation/level/command"
 	"github.com/arpb2/C-3PO/pkg/presentation/user/command"
 	"github.com/saantiaguilera/go-pipeline"
 )
 
 type replaceUserLevelCommand struct {
-	service userlevelservice.Service
+	service service2.Service
 }
 
 func (c *replaceUserLevelCommand) Name() string {
@@ -19,7 +19,7 @@ func (c *replaceUserLevelCommand) Name() string {
 }
 
 func (c *replaceUserLevelCommand) Run(ctx pipeline.Context) error {
-	ctxAware := pipeline2.CreateContextAware(ctx)
+	ctxAware := httppipeline.CreateContextAware(ctx)
 
 	levelId, existsLevelId := ctx.GetUInt(levelcommand.TagLevelId)
 	userId, existsUserId := ctx.GetUInt(command.TagUserId)
@@ -29,7 +29,7 @@ func (c *replaceUserLevelCommand) Run(ctx pipeline.Context) error {
 		return http.CreateInternalError()
 	}
 
-	userLevel := model.UserLevel{
+	userLevel := model2.UserLevel{
 		LevelId:       levelId,
 		UserId:        userId,
 		UserLevelData: userLevelData,
@@ -45,7 +45,7 @@ func (c *replaceUserLevelCommand) Run(ctx pipeline.Context) error {
 	return nil
 }
 
-func CreateWriteUserLevelCommand(service userlevelservice.Service) pipeline.Step {
+func CreateWriteUserLevelCommand(service service2.Service) pipeline.Step {
 	return &replaceUserLevelCommand{
 		service: service,
 	}

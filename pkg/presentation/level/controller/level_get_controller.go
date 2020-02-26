@@ -3,23 +3,25 @@ package controller
 import (
 	"fmt"
 
-	"github.com/arpb2/C-3PO/pkg/domain/controller"
-	"github.com/arpb2/C-3PO/pkg/domain/http"
-	"github.com/arpb2/C-3PO/pkg/domain/pipeline"
-	levelservice "github.com/arpb2/C-3PO/pkg/domain/service/level"
+	controller3 "github.com/arpb2/C-3PO/pkg/domain/level/controller"
+	"github.com/arpb2/C-3PO/pkg/domain/level/service"
+
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/controller"
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/pipeline"
 	"github.com/arpb2/C-3PO/pkg/presentation/level/command"
 	gopipeline "github.com/saantiaguilera/go-pipeline"
 )
 
-func CreateGetController(exec pipeline.HttpPipeline, levelService levelservice.Service) controller.Controller {
+func CreateGetController(exec pipeline.HttpPipeline, levelService service.Service) controller.Controller {
 	return controller.Controller{
 		Method: "GET",
-		Path:   fmt.Sprintf("/levels/:%s", controller.ParamLevelId),
+		Path:   fmt.Sprintf("/levels/:%s", controller3.ParamLevelId),
 		Body:   CreateGetBody(exec, levelService),
 	}
 }
 
-func CreateGetBody(exec pipeline.HttpPipeline, levelService levelservice.Service) http.Handler {
+func CreateGetBody(exec pipeline.HttpPipeline, levelService service.Service) http.Handler {
 	fetchLevelIdCommand := command.CreateFetchLevelIdCommand()
 	serviceCommand := command.CreateGetLevelCommand(levelService)
 	renderCommand := command.CreateRenderLevelCommand()

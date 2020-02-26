@@ -3,11 +3,11 @@ package command
 import (
 	"net/http"
 
-	httppipeline "github.com/arpb2/C-3PO/pkg/infra/pipeline"
+	ctxaware "github.com/arpb2/C-3PO/pkg/domain/infrastructure/pipeline"
 
 	"github.com/saantiaguilera/go-pipeline"
 
-	httpwrapper "github.com/arpb2/C-3PO/pkg/domain/http"
+	httpwrapper "github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
 )
 
 type renderUserCommand struct{}
@@ -17,7 +17,7 @@ func (c *renderUserCommand) Name() string {
 }
 
 func (c *renderUserCommand) Run(ctx pipeline.Context) error {
-	ctxAware := httppipeline.CreateContextAware(ctx)
+	ctxAware := ctxaware.CreateContextAware(ctx)
 
 	httpWriter, errWriter := ctxAware.GetWriter()
 	user, errUser := ctxAware.GetUser(TagUser)

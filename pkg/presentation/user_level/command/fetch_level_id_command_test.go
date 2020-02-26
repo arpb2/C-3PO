@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"testing"
 
+	httppipeline "github.com/arpb2/C-3PO/pkg/domain/infrastructure/pipeline"
+	controller3 "github.com/arpb2/C-3PO/pkg/domain/level/controller"
+
 	levelcommand "github.com/arpb2/C-3PO/pkg/presentation/level/command"
 
-	ctrl "github.com/arpb2/C-3PO/pkg/domain/controller"
 	"github.com/arpb2/C-3PO/pkg/presentation/user_level/command"
 
-	"github.com/arpb2/C-3PO/pkg/domain/http"
-	"github.com/arpb2/C-3PO/pkg/infra/pipeline"
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
 	http2 "github.com/arpb2/C-3PO/test/mock/http"
 	gopipeline "github.com/saantiaguilera/go-pipeline"
 	"github.com/stretchr/testify/assert"
@@ -21,7 +22,7 @@ func TestFetchLevelIdCommand_GivenOne_WhenCallingName_ThenItsTheExpected(t *test
 
 	name := cmd.Name()
 
-	assert.Equal(t, fmt.Sprintf("fetch_%s_command", ctrl.ParamLevelId), name)
+	assert.Equal(t, fmt.Sprintf("fetch_%s_command", controller3.ParamLevelId), name)
 }
 
 func TestFetchLevelIdCommand_GivenOneAndAContextWithoutAReader_WhenRunning_Then500(t *testing.T) {
@@ -35,35 +36,35 @@ func TestFetchLevelIdCommand_GivenOneAndAContextWithoutAReader_WhenRunning_Then5
 
 func TestFetchLevelIdCommand_GivenOneAndAReaderWithoutLevelIdParameter_WhenRunning_Then400(t *testing.T) {
 	reader := new(http2.MockReader)
-	reader.On("GetParameter", ctrl.ParamLevelId).Return("", false)
+	reader.On("GetParameter", controller3.ParamLevelId).Return("", false)
 	ctx := gopipeline.CreateContext()
-	ctx.Set(pipeline.TagHttpReader, reader)
+	ctx.Set(httppipeline.TagHttpReader, reader)
 	cmd := command.CreateFetchLevelIdCommand()
 
 	err := cmd.Run(ctx)
 
-	assert.Equal(t, http.CreateBadRequestError(fmt.Sprintf("'%s' empty", ctrl.ParamLevelId)), err)
+	assert.Equal(t, http.CreateBadRequestError(fmt.Sprintf("'%s' empty", controller3.ParamLevelId)), err)
 	reader.AssertExpectations(t)
 }
 
 func TestFetchLevelIdCommand_GivenOneAndAReaderWithMalformedLevelId_WhenRunning_Then400(t *testing.T) {
 	reader := new(http2.MockReader)
-	reader.On("GetParameter", ctrl.ParamLevelId).Return("-1", true)
+	reader.On("GetParameter", controller3.ParamLevelId).Return("-1", true)
 	ctx := gopipeline.CreateContext()
-	ctx.Set(pipeline.TagHttpReader, reader)
+	ctx.Set(httppipeline.TagHttpReader, reader)
 	cmd := command.CreateFetchLevelIdCommand()
 
 	err := cmd.Run(ctx)
 
-	assert.Equal(t, http.CreateBadRequestError(fmt.Sprintf("'%s' malformed, expecting a positive number", ctrl.ParamLevelId)), err)
+	assert.Equal(t, http.CreateBadRequestError(fmt.Sprintf("'%s' malformed, expecting a positive number", controller3.ParamLevelId)), err)
 	reader.AssertExpectations(t)
 }
 
 func TestFetchLevelIdCommand_GivenOne_WhenRunning_ThenRawCodeIsAddedToContext(t *testing.T) {
 	reader := new(http2.MockReader)
-	reader.On("GetParameter", ctrl.ParamLevelId).Return("1000", true)
+	reader.On("GetParameter", controller3.ParamLevelId).Return("1000", true)
 	ctx := gopipeline.CreateContext()
-	ctx.Set(pipeline.TagHttpReader, reader)
+	ctx.Set(httppipeline.TagHttpReader, reader)
 	cmd := command.CreateFetchLevelIdCommand()
 
 	err := cmd.Run(ctx)

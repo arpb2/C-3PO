@@ -7,14 +7,15 @@ import (
 	"net/http"
 	"testing"
 
+	controller3 "github.com/arpb2/C-3PO/pkg/domain/level/controller"
+	controller2 "github.com/arpb2/C-3PO/pkg/domain/user/controller"
+	model2 "github.com/arpb2/C-3PO/pkg/domain/user_level/model"
+	pipeline2 "github.com/arpb2/C-3PO/test/mock/pipeline"
+	"github.com/arpb2/C-3PO/test/mock/token"
+
 	userlevelcontroller "github.com/arpb2/C-3PO/pkg/presentation/user_level/controller"
 
-	"github.com/arpb2/C-3PO/pkg/infra/pipeline"
-
-	"github.com/arpb2/C-3PO/pkg/data/jwt"
-	"github.com/arpb2/C-3PO/pkg/domain/controller"
-	"github.com/arpb2/C-3PO/pkg/domain/model"
-	"github.com/arpb2/C-3PO/pkg/infra/executor"
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/controller"
 	"github.com/arpb2/C-3PO/pkg/presentation/middleware/user/teacher"
 	"github.com/arpb2/C-3PO/test/mock/golden"
 	testhttpwrapper "github.com/arpb2/C-3PO/test/mock/http"
@@ -24,9 +25,9 @@ import (
 
 func createPutController() controller.Controller {
 	return userlevelcontroller.CreatePutController(
-		pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()),
+		pipeline2.CreateDebugHttpPipeline(),
 		teacher.CreateMiddleware(
-			jwt.CreateTokenHandler([]byte("52bfd2de0a2e69dff4517518590ac32a46bd76606ec22a258f99584a6e70aca2")),
+			&token.MockTokenHandler{},
 			nil,
 		),
 		nil,
@@ -38,15 +39,15 @@ func TestUserLevelPutControllerMethodIsPUT(t *testing.T) {
 }
 
 func TestUserLevelPutControllerPathIsAsExpected(t *testing.T) {
-	assert.Equal(t, fmt.Sprintf("/users/:%s/levels/:%s", controller.ParamUserId, controller.ParamLevelId), createPutController().Path)
+	assert.Equal(t, fmt.Sprintf("/users/:%s/levels/:%s", controller2.ParamUserId, controller3.ParamLevelId), createPutController().Path)
 }
 
 func TestUserLevelPutControllerBody_400OnEmptyUserId(t *testing.T) {
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetFormData", "code").Return("", true).Once()
 	reader.On("GetFormData", "workspace").Return("", true).Once()
-	reader.On("GetParameter", controller.ParamLevelId).Return("1000").Once()
-	reader.On("GetParameter", controller.ParamUserId).Return("").Once()
+	reader.On("GetParameter", controller3.ParamLevelId).Return("1000").Once()
+	reader.On("GetParameter", controller2.ParamUserId).Return("").Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
@@ -63,8 +64,8 @@ func TestUserLevelPutControllerBody_400OnMalformedUserId(t *testing.T) {
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetFormData", "code").Return("code", true).Maybe()
 	reader.On("GetFormData", "workspace").Return("workspace", true).Maybe()
-	reader.On("GetParameter", controller.ParamLevelId).Return("1000").Maybe()
-	reader.On("GetParameter", controller.ParamUserId).Return("not a number").Once()
+	reader.On("GetParameter", controller3.ParamLevelId).Return("1000").Maybe()
+	reader.On("GetParameter", controller2.ParamUserId).Return("not a number").Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
@@ -82,8 +83,8 @@ func TestUserLevelPutControllerBody_400OnMalformedLevelId(t *testing.T) {
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetFormData", "code").Return("code", true).Maybe()
 	reader.On("GetFormData", "workspace").Return("workspace", true).Maybe()
-	reader.On("GetParameter", controller.ParamUserId).Return("1000").Once()
-	reader.On("GetParameter", controller.ParamLevelId).Return("not a number").Once()
+	reader.On("GetParameter", controller2.ParamUserId).Return("1000").Once()
+	reader.On("GetParameter", controller3.ParamLevelId).Return("not a number").Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
@@ -101,8 +102,8 @@ func TestUserLevelPutControllerBody_400OnEmptyLevelId(t *testing.T) {
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetFormData", "code").Return("code", true).Maybe()
 	reader.On("GetFormData", "workspace").Return("workspace", true).Maybe()
-	reader.On("GetParameter", controller.ParamUserId).Return("1000").Once()
-	reader.On("GetParameter", controller.ParamLevelId).Return("").Once()
+	reader.On("GetParameter", controller2.ParamUserId).Return("1000").Once()
+	reader.On("GetParameter", controller3.ParamLevelId).Return("").Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
@@ -118,8 +119,8 @@ func TestUserLevelPutControllerBody_400OnEmptyLevelId(t *testing.T) {
 
 func TestUserLevelPutControllerBody_400OnNoCode(t *testing.T) {
 	reader := new(testhttpwrapper.MockReader)
-	reader.On("GetParameter", controller.ParamUserId).Return("1000").Once()
-	reader.On("GetParameter", controller.ParamLevelId).Return("1000").Once()
+	reader.On("GetParameter", controller2.ParamUserId).Return("1000").Once()
+	reader.On("GetParameter", controller3.ParamLevelId).Return("1000").Once()
 	reader.On("GetFormData", "code").Return("", false).Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
@@ -136,8 +137,8 @@ func TestUserLevelPutControllerBody_400OnNoCode(t *testing.T) {
 
 func TestUserLevelPutControllerBody_400OnNoWorkspace(t *testing.T) {
 	reader := new(testhttpwrapper.MockReader)
-	reader.On("GetParameter", controller.ParamUserId).Return("1000").Once()
-	reader.On("GetParameter", controller.ParamLevelId).Return("1000").Once()
+	reader.On("GetParameter", controller2.ParamUserId).Return("1000").Once()
+	reader.On("GetParameter", controller3.ParamLevelId).Return("1000").Once()
 	reader.On("GetFormData", "code").Return("code", true).Once()
 	reader.On("GetFormData", "workspace").Return("", false).Once()
 
@@ -155,17 +156,17 @@ func TestUserLevelPutControllerBody_400OnNoWorkspace(t *testing.T) {
 
 func TestUserLevelPutControllerBody_500OnServiceWriteError(t *testing.T) {
 	userLevelService := new(service.MockUserLevelService)
-	userLevelService.On("GetUserLevel", uint(1000), uint(1000)).Return(model.UserLevel{}, errors.New("whoops error"))
+	userLevelService.On("GetUserLevel", uint(1000), uint(1000)).Return(model2.UserLevel{}, errors.New("whoops error"))
 
 	reader := new(testhttpwrapper.MockReader)
-	reader.On("GetParameter", controller.ParamUserId).Return("1000").Once()
-	reader.On("GetParameter", controller.ParamLevelId).Return("1000").Once()
+	reader.On("GetParameter", controller2.ParamUserId).Return("1000").Once()
+	reader.On("GetParameter", controller3.ParamLevelId).Return("1000").Once()
 	reader.On("GetFormData", "code").Return("sending some code", true).Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
-	userlevelcontroller.CreateGetBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), userLevelService)(c)
+	userlevelcontroller.CreateGetBody(pipeline2.CreateDebugHttpPipeline(), userLevelService)(c)
 
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "internal_server_error.error_write.service.golden.json")
@@ -188,23 +189,23 @@ func main() {
 }
 			`
 	userLevelService := new(service.MockUserLevelService)
-	userLevelService.On("GetUserLevel", uint(1000), uint(1000)).Return(model.UserLevel{
+	userLevelService.On("GetUserLevel", uint(1000), uint(1000)).Return(model2.UserLevel{
 		UserId:  1000,
 		LevelId: 1000,
-		UserLevelData: model.UserLevelData{
+		UserLevelData: model2.UserLevelData{
 			Code: expectedCode,
 		},
 	}, nil)
 
 	reader := new(testhttpwrapper.MockReader)
-	reader.On("GetParameter", controller.ParamUserId).Return("1000").Once()
-	reader.On("GetParameter", controller.ParamLevelId).Return("1000").Once()
+	reader.On("GetParameter", controller2.ParamUserId).Return("1000").Once()
+	reader.On("GetParameter", controller3.ParamLevelId).Return("1000").Once()
 	reader.On("GetFormData", "code").Return(expectedCode, true).Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
-	userlevelcontroller.CreateGetBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), userLevelService)(c)
+	userlevelcontroller.CreateGetBody(pipeline2.CreateDebugHttpPipeline(), userLevelService)(c)
 
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "ok.replace_user_level.golden.json")
@@ -217,23 +218,23 @@ func main() {
 func TestUserLevelPutControllerBody_200OnEmptyUserLevelStoredOnService(t *testing.T) {
 	expectedCode := ""
 	userLevelService := new(service.MockUserLevelService)
-	userLevelService.On("GetUserLevel", uint(1000), uint(1000)).Return(model.UserLevel{
+	userLevelService.On("GetUserLevel", uint(1000), uint(1000)).Return(model2.UserLevel{
 		UserId:  1000,
 		LevelId: 1000,
-		UserLevelData: model.UserLevelData{
+		UserLevelData: model2.UserLevelData{
 			Code: expectedCode,
 		},
 	}, nil)
 
 	reader := new(testhttpwrapper.MockReader)
-	reader.On("GetParameter", controller.ParamUserId).Return("1000").Once()
-	reader.On("GetParameter", controller.ParamLevelId).Return("1000").Once()
+	reader.On("GetParameter", controller2.ParamUserId).Return("1000").Once()
+	reader.On("GetParameter", controller3.ParamLevelId).Return("1000").Once()
 	reader.On("GetFormData", "code").Return(expectedCode, true).Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
 
-	userlevelcontroller.CreateGetBody(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), userLevelService)(c)
+	userlevelcontroller.CreateGetBody(pipeline2.CreateDebugHttpPipeline(), userLevelService)(c)
 
 	actual := bytes.TrimSpace([]byte(w.Body.String()))
 	expected := golden.Get(t, actual, "ok.replace_empty_user_level.golden.json")

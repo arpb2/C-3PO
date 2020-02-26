@@ -4,13 +4,14 @@ import (
 	"errors"
 	"testing"
 
+	model2 "github.com/arpb2/C-3PO/pkg/domain/user_level/model"
+
 	levelcommand "github.com/arpb2/C-3PO/pkg/presentation/level/command"
 
 	"github.com/arpb2/C-3PO/pkg/presentation/user/command"
 	usercommand "github.com/arpb2/C-3PO/pkg/presentation/user_level/command"
 
-	"github.com/arpb2/C-3PO/pkg/domain/http"
-	"github.com/arpb2/C-3PO/pkg/domain/model"
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
 	"github.com/arpb2/C-3PO/test/mock/service"
 	gopipeline "github.com/saantiaguilera/go-pipeline"
 	"github.com/stretchr/testify/assert"
@@ -50,7 +51,7 @@ func TestGetUserLevelCommand_GivenOneAndAFailingService_WhenRunning_ThenServiceE
 	ctx.Set(command.TagUserId, uint(1000))
 	expectedErr := errors.New("some error")
 	s := new(service.MockUserLevelService)
-	s.On("GetUserLevel", uint(1000), uint(1000)).Return(model.UserLevel{}, expectedErr)
+	s.On("GetUserLevel", uint(1000), uint(1000)).Return(model2.UserLevel{}, expectedErr)
 	cmd := usercommand.CreateGetUserLevelCommand(s)
 
 	err := cmd.Run(ctx)
@@ -64,7 +65,7 @@ func TestGetUserLevelCommand_GivenOneAndAServiceWithNoCode_WhenRunning_Then404(t
 	ctx.Set(levelcommand.TagLevelId, uint(1000))
 	ctx.Set(command.TagUserId, uint(1000))
 	s := new(service.MockUserLevelService)
-	s.On("GetUserLevel", uint(1000), uint(1000)).Return(model.UserLevel{}, http.CreateNotFoundError())
+	s.On("GetUserLevel", uint(1000), uint(1000)).Return(model2.UserLevel{}, http.CreateNotFoundError())
 	cmd := usercommand.CreateGetUserLevelCommand(s)
 
 	err := cmd.Run(ctx)
@@ -77,7 +78,7 @@ func TestGetUserLevelCommand_GivenOne_WhenRunning_ThenContextHasCodeAndReturnsNo
 	ctx := gopipeline.CreateContext()
 	ctx.Set(levelcommand.TagLevelId, uint(1000))
 	ctx.Set(command.TagUserId, uint(1000))
-	expectedVal := model.UserLevel{}
+	expectedVal := model2.UserLevel{}
 	s := new(service.MockUserLevelService)
 	s.On("GetUserLevel", uint(1000), uint(1000)).Return(expectedVal, nil)
 	cmd := usercommand.CreateGetUserLevelCommand(s)

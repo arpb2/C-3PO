@@ -7,21 +7,22 @@ import (
 	httpcodes "net/http"
 	"testing"
 
-	"github.com/arpb2/C-3PO/pkg/domain/model"
-	levelservice "github.com/arpb2/C-3PO/pkg/domain/service/level"
-	"github.com/arpb2/C-3PO/pkg/infra/executor"
-	"github.com/arpb2/C-3PO/pkg/infra/pipeline"
+	controller3 "github.com/arpb2/C-3PO/pkg/domain/level/controller"
+	model2 "github.com/arpb2/C-3PO/pkg/domain/level/model"
+	"github.com/arpb2/C-3PO/pkg/domain/level/service"
+	pipeline2 "github.com/arpb2/C-3PO/test/mock/pipeline"
+
 	"github.com/arpb2/C-3PO/test/mock/golden"
 	servicemock "github.com/arpb2/C-3PO/test/mock/service"
 
-	"github.com/arpb2/C-3PO/pkg/domain/controller"
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/controller"
 	level "github.com/arpb2/C-3PO/pkg/presentation/level/controller"
 	httpmock "github.com/arpb2/C-3PO/test/mock/http"
 	"github.com/stretchr/testify/assert"
 )
 
-func createGetController(service levelservice.Service) controller.Controller {
-	return level.CreateGetController(pipeline.CreateHttpPipeline(executor.CreateDebugHttpExecutor()), service)
+func createGetController(service service.Service) controller.Controller {
+	return level.CreateGetController(pipeline2.CreateDebugHttpPipeline(), service)
 }
 
 func TestGetController_IsGet(t *testing.T) {
@@ -29,12 +30,12 @@ func TestGetController_IsGet(t *testing.T) {
 }
 
 func TestGetControllerPath_IsLevels(t *testing.T) {
-	assert.Equal(t, fmt.Sprintf("/levels/:%s", controller.ParamLevelId), createGetController(nil).Path)
+	assert.Equal(t, fmt.Sprintf("/levels/:%s", controller3.ParamLevelId), createGetController(nil).Path)
 }
 
 func TestGetController_GivenNoId_WhenCalled_Then400(t *testing.T) {
 	reader := new(httpmock.MockReader)
-	reader.On("GetParameter", controller.ParamLevelId).Return("").Once()
+	reader.On("GetParameter", controller3.ParamLevelId).Return("").Once()
 
 	c, w := httpmock.CreateTestContext()
 	c.Reader = reader
@@ -51,7 +52,7 @@ func TestGetController_GivenNoId_WhenCalled_Then400(t *testing.T) {
 
 func TestGetController_GivenNoUintId_WhenCalled_Then400(t *testing.T) {
 	reader := new(httpmock.MockReader)
-	reader.On("GetParameter", controller.ParamLevelId).Return("not uint").Once()
+	reader.On("GetParameter", controller3.ParamLevelId).Return("not uint").Once()
 
 	c, w := httpmock.CreateTestContext()
 	c.Reader = reader
@@ -70,10 +71,10 @@ func TestGetController_GivenAnErroredService_WhenCalled_ThenServiceError(t *test
 	expectedErr := errors.New("error")
 
 	reader := new(httpmock.MockReader)
-	reader.On("GetParameter", controller.ParamLevelId).Return("1000").Once()
+	reader.On("GetParameter", controller3.ParamLevelId).Return("1000").Once()
 
 	service := new(servicemock.MockLevelService)
-	service.On("GetLevel", uint(1000)).Return(model.Level{}, expectedErr)
+	service.On("GetLevel", uint(1000)).Return(model2.Level{}, expectedErr)
 
 	c, w := httpmock.CreateTestContext()
 	c.Reader = reader
@@ -90,14 +91,14 @@ func TestGetController_GivenAnErroredService_WhenCalled_ThenServiceError(t *test
 }
 
 func TestGetController_GivenAServiceWithTheCalleeId_WhenCalled_ThenStoredLevelIsReturned(t *testing.T) {
-	expectedLevel := model.Level{
+	expectedLevel := model2.Level{
 		Id:          1000,
 		Name:        "Some name",
 		Description: "Some description",
 	}
 
 	reader := new(httpmock.MockReader)
-	reader.On("GetParameter", controller.ParamLevelId).Return("1000").Once()
+	reader.On("GetParameter", controller3.ParamLevelId).Return("1000").Once()
 
 	service := new(servicemock.MockLevelService)
 	service.On("GetLevel", expectedLevel.Id).Return(expectedLevel, nil)

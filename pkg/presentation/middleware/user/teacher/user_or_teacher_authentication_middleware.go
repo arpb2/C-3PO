@@ -3,14 +3,15 @@ package teacher
 import (
 	"strconv"
 
+	"github.com/arpb2/C-3PO/pkg/domain/session/token"
+	"github.com/arpb2/C-3PO/pkg/domain/teacher/service"
+
 	"github.com/arpb2/C-3PO/pkg/presentation/middleware/user"
 
-	"github.com/arpb2/C-3PO/pkg/domain/auth"
-	"github.com/arpb2/C-3PO/pkg/domain/http"
-	teacherservice "github.com/arpb2/C-3PO/pkg/domain/service/teacher"
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
 )
 
-func CreateMiddleware(tokenHandler auth.TokenHandler, teacherService teacherservice.Service) http.Handler {
+func CreateMiddleware(tokenHandler token.Handler, teacherService service.Service) http.Handler {
 	strategy := &teacherAuthenticationStrategy{
 		teacherService,
 	}
@@ -21,10 +22,10 @@ func CreateMiddleware(tokenHandler auth.TokenHandler, teacherService teacherserv
 }
 
 type teacherAuthenticationStrategy struct {
-	teacherservice.Service
+	service.Service
 }
 
-func (s teacherAuthenticationStrategy) Authenticate(token *auth.Token, userId string) (bool, error) {
+func (s teacherAuthenticationStrategy) Authenticate(token *token.Token, userId string) (bool, error) {
 	students, err := s.Service.GetStudents(token.UserId)
 
 	if err != nil {

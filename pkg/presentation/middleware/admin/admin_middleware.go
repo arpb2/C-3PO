@@ -5,7 +5,7 @@ import (
 
 	"github.com/arpb2/C-3PO/pkg/presentation/middleware"
 
-	"github.com/arpb2/C-3PO/pkg/domain/http"
+	"github.com/arpb2/C-3PO/pkg/domain/infrastructure/http"
 )
 
 func CreateMiddleware(secret []byte) http.Handler {
