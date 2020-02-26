@@ -2,7 +2,7 @@ package teacher_test
 
 import (
 	"errors"
-	controller2 "github.com/arpb2/C-3PO/pkg/presentation/user/controller"
+	"github.com/arpb2/C-3PO/pkg/presentation/user"
 	"net/http"
 	"testing"
 
@@ -63,7 +63,7 @@ func Test_Multi_HandlingOfAuthentication_NoHeader(t *testing.T) {
 	middle(c)
 
 	assert.Equal(t, http.StatusUnauthorized, recorder.Code)
-	assert.Equal(t, "{\"error\":\"unauthorized\"}\n", recorder.Body.String())
+	assert.Equal(t, "{\"error\":\"unauthorized\"}", recorder.Body.String())
 }
 
 func Test_Multi_HandlingOfAuthentication_BadHeader(t *testing.T) {
@@ -81,7 +81,7 @@ func Test_Multi_HandlingOfAuthentication_BadHeader(t *testing.T) {
 	middle(c)
 
 	assert.Equal(t, http.StatusBadRequest, recorder.Code)
-	assert.Equal(t, "{\"error\":\"malformed token\"}\n", recorder.Body.String())
+	assert.Equal(t, "{\"error\":\"malformed token\"}", recorder.Body.String())
 	reader.AssertExpectations(t)
 	tokenHandler.AssertExpectations(t)
 }
@@ -96,7 +96,7 @@ func Test_Multi_HandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
 	service.On("GetStudents", uint(1000)).Return(nil, nil).Once()
 
 	reader := new(http2.MockReader)
-	reader.On("GetParameter", controller2.ParamUserId).Return("1", nil).Once()
+	reader.On("GetParameter", user.ParamUserId).Return("1", nil).Once()
 	reader.On("GetHeader", middleware.HeaderAuthorization).Return("token")
 
 	c, recorder := http2.CreateTestContext()
@@ -107,7 +107,7 @@ func Test_Multi_HandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
 	middle(c)
 
 	assert.Equal(t, http.StatusUnauthorized, recorder.Code)
-	assert.Equal(t, "{\"error\":\"unauthorized\"}\n", recorder.Body.String())
+	assert.Equal(t, "{\"error\":\"unauthorized\"}", recorder.Body.String())
 	service.AssertExpectations(t)
 	reader.AssertExpectations(t)
 	tokenHandler.AssertExpectations(t)
@@ -120,7 +120,7 @@ func Test_Multi_HandlingOfAuthentication_Authorized_SameUser(t *testing.T) {
 	}, nil)
 
 	reader := new(http2.MockReader)
-	reader.On("GetParameter", controller2.ParamUserId).Return("1000", nil).Once()
+	reader.On("GetParameter", user.ParamUserId).Return("1000", nil).Once()
 	reader.On("GetHeader", middleware.HeaderAuthorization).Return("token")
 
 	c, recorder := http2.CreateTestContext()
@@ -152,7 +152,7 @@ func Test_Multi_HandlingOfAuthentication_Authorized_Student(t *testing.T) {
 	}, nil).Once()
 
 	reader := new(http2.MockReader)
-	reader.On("GetParameter", controller2.ParamUserId).Return("1000", nil).Once()
+	reader.On("GetParameter", user.ParamUserId).Return("1000", nil).Once()
 	reader.On("GetHeader", middleware.HeaderAuthorization).Return("token")
 
 	c, recorder := http2.CreateTestContext()
@@ -188,7 +188,7 @@ func Test_Multi_HandlingOfAuthentication_Unauthorized_Student(t *testing.T) {
 	}, nil).Once()
 
 	reader := new(http2.MockReader)
-	reader.On("GetParameter", controller2.ParamUserId).Return("1000", nil).Once()
+	reader.On("GetParameter", user.ParamUserId).Return("1000", nil).Once()
 	reader.On("GetHeader", middleware.HeaderAuthorization).Return("token")
 
 	c, recorder := http2.CreateTestContext()
@@ -199,7 +199,7 @@ func Test_Multi_HandlingOfAuthentication_Unauthorized_Student(t *testing.T) {
 	middle(c)
 
 	assert.Equal(t, http.StatusUnauthorized, recorder.Code)
-	assert.Equal(t, "{\"error\":\"unauthorized\"}\n", recorder.Body.String())
+	assert.Equal(t, "{\"error\":\"unauthorized\"}", recorder.Body.String())
 	service.AssertExpectations(t)
 	reader.AssertExpectations(t)
 	tokenHandler.AssertExpectations(t)
@@ -215,7 +215,7 @@ func Test_Multi_HandlingOfAuthentication_Service_Error(t *testing.T) {
 	service.On("GetStudents", uint(1001)).Return([]model2.User{}, errors.New("whoops this fails")).Once()
 
 	reader := new(http2.MockReader)
-	reader.On("GetParameter", controller2.ParamUserId).Return("1000", nil).Once()
+	reader.On("GetParameter", user.ParamUserId).Return("1000", nil).Once()
 	reader.On("GetHeader", middleware.HeaderAuthorization).Return("token")
 
 	c, recorder := http2.CreateTestContext()
@@ -226,7 +226,7 @@ func Test_Multi_HandlingOfAuthentication_Service_Error(t *testing.T) {
 	middle(c)
 
 	assert.Equal(t, http.StatusInternalServerError, recorder.Code)
-	assert.Equal(t, "{\"error\":\"internal error\"}\n", recorder.Body.String())
+	assert.Equal(t, "{\"error\":\"internal error\"}", recorder.Body.String())
 	service.AssertExpectations(t)
 	reader.AssertExpectations(t)
 	tokenHandler.AssertExpectations(t)

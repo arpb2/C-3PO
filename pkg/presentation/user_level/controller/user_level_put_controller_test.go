@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	controller2 "github.com/arpb2/C-3PO/pkg/presentation/level/controller"
-	controller4 "github.com/arpb2/C-3PO/pkg/presentation/user/controller"
+	"github.com/arpb2/C-3PO/pkg/presentation/level"
+	"github.com/arpb2/C-3PO/pkg/presentation/user"
 	"net/http"
 	"testing"
 
@@ -39,15 +39,15 @@ func TestUserLevelPutControllerMethodIsPUT(t *testing.T) {
 }
 
 func TestUserLevelPutControllerPathIsAsExpected(t *testing.T) {
-	assert.Equal(t, fmt.Sprintf("/users/:%s/levels/:%s", controller4.ParamUserId, controller2.ParamLevelId), createPutController().Path)
+	assert.Equal(t, fmt.Sprintf("/users/:%s/levels/:%s", user.ParamUserId, level.ParamLevelId), createPutController().Path)
 }
 
 func TestUserLevelPutControllerBody_400OnEmptyUserId(t *testing.T) {
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetFormData", "code").Return("", true).Once()
 	reader.On("GetFormData", "workspace").Return("", true).Once()
-	reader.On("GetParameter", controller2.ParamLevelId).Return("1000").Once()
-	reader.On("GetParameter", controller4.ParamUserId).Return("").Once()
+	reader.On("GetParameter", level.ParamLevelId).Return("1000").Once()
+	reader.On("GetParameter", user.ParamUserId).Return("").Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
@@ -64,8 +64,8 @@ func TestUserLevelPutControllerBody_400OnMalformedUserId(t *testing.T) {
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetFormData", "code").Return("code", true).Maybe()
 	reader.On("GetFormData", "workspace").Return("workspace", true).Maybe()
-	reader.On("GetParameter", controller2.ParamLevelId).Return("1000").Maybe()
-	reader.On("GetParameter", controller4.ParamUserId).Return("not a number").Once()
+	reader.On("GetParameter", level.ParamLevelId).Return("1000").Maybe()
+	reader.On("GetParameter", user.ParamUserId).Return("not a number").Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
@@ -83,8 +83,8 @@ func TestUserLevelPutControllerBody_400OnMalformedLevelId(t *testing.T) {
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetFormData", "code").Return("code", true).Maybe()
 	reader.On("GetFormData", "workspace").Return("workspace", true).Maybe()
-	reader.On("GetParameter", controller4.ParamUserId).Return("1000").Once()
-	reader.On("GetParameter", controller2.ParamLevelId).Return("not a number").Once()
+	reader.On("GetParameter", user.ParamUserId).Return("1000").Once()
+	reader.On("GetParameter", level.ParamLevelId).Return("not a number").Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
@@ -102,8 +102,8 @@ func TestUserLevelPutControllerBody_400OnEmptyLevelId(t *testing.T) {
 	reader := new(testhttpwrapper.MockReader)
 	reader.On("GetFormData", "code").Return("code", true).Maybe()
 	reader.On("GetFormData", "workspace").Return("workspace", true).Maybe()
-	reader.On("GetParameter", controller4.ParamUserId).Return("1000").Once()
-	reader.On("GetParameter", controller2.ParamLevelId).Return("").Once()
+	reader.On("GetParameter", user.ParamUserId).Return("1000").Once()
+	reader.On("GetParameter", level.ParamLevelId).Return("").Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
 	c.Reader = reader
@@ -119,8 +119,8 @@ func TestUserLevelPutControllerBody_400OnEmptyLevelId(t *testing.T) {
 
 func TestUserLevelPutControllerBody_400OnNoCode(t *testing.T) {
 	reader := new(testhttpwrapper.MockReader)
-	reader.On("GetParameter", controller4.ParamUserId).Return("1000").Once()
-	reader.On("GetParameter", controller2.ParamLevelId).Return("1000").Once()
+	reader.On("GetParameter", user.ParamUserId).Return("1000").Once()
+	reader.On("GetParameter", level.ParamLevelId).Return("1000").Once()
 	reader.On("GetFormData", "code").Return("", false).Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
@@ -137,8 +137,8 @@ func TestUserLevelPutControllerBody_400OnNoCode(t *testing.T) {
 
 func TestUserLevelPutControllerBody_400OnNoWorkspace(t *testing.T) {
 	reader := new(testhttpwrapper.MockReader)
-	reader.On("GetParameter", controller4.ParamUserId).Return("1000").Once()
-	reader.On("GetParameter", controller2.ParamLevelId).Return("1000").Once()
+	reader.On("GetParameter", user.ParamUserId).Return("1000").Once()
+	reader.On("GetParameter", level.ParamLevelId).Return("1000").Once()
 	reader.On("GetFormData", "code").Return("code", true).Once()
 	reader.On("GetFormData", "workspace").Return("", false).Once()
 
@@ -159,8 +159,8 @@ func TestUserLevelPutControllerBody_500OnServiceWriteError(t *testing.T) {
 	userLevelService.On("GetUserLevel", uint(1000), uint(1000)).Return(model2.UserLevel{}, errors.New("whoops error"))
 
 	reader := new(testhttpwrapper.MockReader)
-	reader.On("GetParameter", controller4.ParamUserId).Return("1000").Once()
-	reader.On("GetParameter", controller2.ParamLevelId).Return("1000").Once()
+	reader.On("GetParameter", user.ParamUserId).Return("1000").Once()
+	reader.On("GetParameter", level.ParamLevelId).Return("1000").Once()
 	reader.On("GetFormData", "code").Return("sending some code", true).Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
@@ -198,8 +198,8 @@ func main() {
 	}, nil)
 
 	reader := new(testhttpwrapper.MockReader)
-	reader.On("GetParameter", controller4.ParamUserId).Return("1000").Once()
-	reader.On("GetParameter", controller2.ParamLevelId).Return("1000").Once()
+	reader.On("GetParameter", user.ParamUserId).Return("1000").Once()
+	reader.On("GetParameter", level.ParamLevelId).Return("1000").Once()
 	reader.On("GetFormData", "code").Return(expectedCode, true).Once()
 
 	c, w := testhttpwrapper.CreateTestContext()
@@ -227,8 +227,8 @@ func TestUserLevelPutControllerBody_200OnEmptyUserLevelStoredOnService(t *testin
 	}, nil)
 
 	reader := new(testhttpwrapper.MockReader)
-	reader.On("GetParameter", controller4.ParamUserId).Return("1000").Once()
-	reader.On("GetParameter", controller2.ParamLevelId).Return("1000").Once()
+	reader.On("GetParameter", user.ParamUserId).Return("1000").Once()
+	reader.On("GetParameter", level.ParamLevelId).Return("1000").Once()
 	reader.On("GetFormData", "code").Return(expectedCode, true).Once()
 
 	c, w := testhttpwrapper.CreateTestContext()

@@ -2,7 +2,7 @@ package command_test
 
 import (
 	"fmt"
-	"github.com/arpb2/C-3PO/pkg/presentation/level/controller"
+	"github.com/arpb2/C-3PO/pkg/presentation/level"
 	"testing"
 
 	pipeline2 "github.com/arpb2/C-3PO/pkg/domain/architecture/pipeline"
@@ -33,33 +33,33 @@ func TestFetchLevelIdCommand_GivenOneAndAContextWithoutAReader_WhenRunning_Then5
 
 func TestFetchLevelIdCommand_GivenOneAndAReaderWithoutLevelIdParameter_WhenRunning_Then400(t *testing.T) {
 	reader := new(http2.MockReader)
-	reader.On("GetParameter", controller.ParamLevelId).Return("", false)
+	reader.On("GetParameter", level.ParamLevelId).Return("", false)
 	ctx := gopipeline.CreateContext()
 	ctx.Set(pipeline2.TagHttpReader, reader)
 	cmd := command.CreateFetchLevelIdCommand()
 
 	err := cmd.Run(ctx)
 
-	assert.Equal(t, http.CreateBadRequestError(fmt.Sprintf("'%s' empty", controller.ParamLevelId)), err)
+	assert.Equal(t, http.CreateBadRequestError(fmt.Sprintf("'%s' empty", level.ParamLevelId)), err)
 	reader.AssertExpectations(t)
 }
 
 func TestFetchLevelIdCommand_GivenOneAndAReaderWithMalformedLevelId_WhenRunning_Then400(t *testing.T) {
 	reader := new(http2.MockReader)
-	reader.On("GetParameter", controller.ParamLevelId).Return("-1", true)
+	reader.On("GetParameter", level.ParamLevelId).Return("-1", true)
 	ctx := gopipeline.CreateContext()
 	ctx.Set(pipeline2.TagHttpReader, reader)
 	cmd := command.CreateFetchLevelIdCommand()
 
 	err := cmd.Run(ctx)
 
-	assert.Equal(t, http.CreateBadRequestError(fmt.Sprintf("'%s' malformed, expecting a positive number", controller.ParamLevelId)), err)
+	assert.Equal(t, http.CreateBadRequestError(fmt.Sprintf("'%s' malformed, expecting a positive number", level.ParamLevelId)), err)
 	reader.AssertExpectations(t)
 }
 
 func TestFetchLevelIdCommand_GivenOne_WhenRunning_ThenRawLevelIsAddedToContext(t *testing.T) {
 	reader := new(http2.MockReader)
-	reader.On("GetParameter", controller.ParamLevelId).Return("1000", true)
+	reader.On("GetParameter", level.ParamLevelId).Return("1000", true)
 	ctx := gopipeline.CreateContext()
 	ctx.Set(pipeline2.TagHttpReader, reader)
 	cmd := command.CreateFetchLevelIdCommand()

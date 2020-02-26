@@ -2,7 +2,7 @@ package user_test
 
 import (
 	"errors"
-	controller2 "github.com/arpb2/C-3PO/pkg/presentation/user/controller"
+	user2 "github.com/arpb2/C-3PO/pkg/presentation/user"
 	"net/http"
 	"testing"
 
@@ -38,7 +38,7 @@ func Test_HandlingOfAuthentication_NoHeader(t *testing.T) {
 	user.HandleAuthentication(c, &mocktoken.MockTokenHandler{})
 
 	assert.Equal(t, http.StatusUnauthorized, recorder.Code)
-	assert.Equal(t, "{\"error\":\"unauthorized\"}\n", recorder.Body.String())
+	assert.Equal(t, "{\"error\":\"unauthorized\"}", recorder.Body.String())
 	reader.AssertExpectations(t)
 }
 
@@ -55,7 +55,7 @@ func Test_HandlingOfAuthentication_BadHeader(t *testing.T) {
 	user.HandleAuthentication(c, tokenHandler)
 
 	assert.Equal(t, http.StatusBadRequest, recorder.Code)
-	assert.Equal(t, "{\"error\":\"malformed token\"}\n", recorder.Body.String())
+	assert.Equal(t, "{\"error\":\"malformed token\"}", recorder.Body.String())
 	reader.AssertExpectations(t)
 	tokenHandler.AssertExpectations(t)
 }
@@ -67,7 +67,7 @@ func Test_HandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
 	}, nil)
 
 	reader := new(http2.MockReader)
-	reader.On("GetParameter", controller2.ParamUserId).Return("1", nil).Once()
+	reader.On("GetParameter", user2.ParamUserId).Return("1", nil).Once()
 	reader.On("GetHeader", middleware.HeaderAuthorization).Return("token")
 
 	c, recorder := http2.CreateTestContext()
@@ -76,7 +76,7 @@ func Test_HandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
 	user.HandleAuthentication(c, tokenHandler)
 
 	assert.Equal(t, http.StatusUnauthorized, recorder.Code)
-	assert.Equal(t, "{\"error\":\"unauthorized\"}\n", recorder.Body.String())
+	assert.Equal(t, "{\"error\":\"unauthorized\"}", recorder.Body.String())
 	reader.AssertExpectations(t)
 	tokenHandler.AssertExpectations(t)
 }
@@ -88,7 +88,7 @@ func Test_HandlingOfAuthentication_Authorized_SameUser(t *testing.T) {
 	}, nil)
 
 	reader := new(http2.MockReader)
-	reader.On("GetParameter", controller2.ParamUserId).Return("1000", nil).Once()
+	reader.On("GetParameter", user2.ParamUserId).Return("1000", nil).Once()
 	reader.On("GetHeader", middleware.HeaderAuthorization).Return("token")
 
 	c, recorder := http2.CreateTestContext()
@@ -113,7 +113,7 @@ func TestStrategy_Error_Halts(t *testing.T) {
 	}), "1001").Return(false, errors.New("whoops this fails")).Once()
 
 	reader := new(http2.MockReader)
-	reader.On("GetParameter", controller2.ParamUserId).Return("1001", nil).Once()
+	reader.On("GetParameter", user2.ParamUserId).Return("1001", nil).Once()
 	reader.On("GetHeader", middleware.HeaderAuthorization).Return("token")
 
 	c, recorder := http2.CreateTestContext()
@@ -122,7 +122,7 @@ func TestStrategy_Error_Halts(t *testing.T) {
 	user.HandleAuthentication(c, tokenHandler, strategy)
 
 	assert.Equal(t, http.StatusInternalServerError, recorder.Code)
-	assert.Equal(t, "{\"error\":\"internal error\"}\n", recorder.Body.String())
+	assert.Equal(t, "{\"error\":\"internal error\"}", recorder.Body.String())
 	strategy.AssertExpectations(t)
 	reader.AssertExpectations(t)
 	tokenHandler.AssertExpectations(t)
@@ -140,7 +140,7 @@ func TestStrategy_Unauthorized_Halts(t *testing.T) {
 	}), "1001").Return(false, nil).Once()
 
 	reader := new(http2.MockReader)
-	reader.On("GetParameter", controller2.ParamUserId).Return("1001", nil).Once()
+	reader.On("GetParameter", user2.ParamUserId).Return("1001", nil).Once()
 	reader.On("GetHeader", middleware.HeaderAuthorization).Return("token")
 
 	c, recorder := http2.CreateTestContext()
@@ -149,7 +149,7 @@ func TestStrategy_Unauthorized_Halts(t *testing.T) {
 	user.HandleAuthentication(c, tokenHandler, strategy)
 
 	assert.Equal(t, http.StatusUnauthorized, recorder.Code)
-	assert.Equal(t, "{\"error\":\"unauthorized\"}\n", recorder.Body.String())
+	assert.Equal(t, "{\"error\":\"unauthorized\"}", recorder.Body.String())
 	strategy.AssertExpectations(t)
 	reader.AssertExpectations(t)
 	tokenHandler.AssertExpectations(t)
@@ -167,7 +167,7 @@ func TestStrategy_Authorized_Continues(t *testing.T) {
 	}), "1001").Return(true, nil).Once()
 
 	reader := new(http2.MockReader)
-	reader.On("GetParameter", controller2.ParamUserId).Return("1001", nil).Once()
+	reader.On("GetParameter", user2.ParamUserId).Return("1001", nil).Once()
 	reader.On("GetHeader", middleware.HeaderAuthorization).Return("token")
 
 	c, recorder := http2.CreateTestContext()

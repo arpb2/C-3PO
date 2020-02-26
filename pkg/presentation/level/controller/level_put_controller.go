@@ -2,6 +2,7 @@ package controller
 
 import (
 	"fmt"
+	"github.com/arpb2/C-3PO/pkg/presentation/level"
 
 	"github.com/arpb2/C-3PO/pkg/domain/level/service"
 
@@ -15,7 +16,7 @@ import (
 func CreatePutController(exec pipeline.HttpPipeline, authMiddleware http.Handler, levelService service.Service) controller.Controller {
 	return controller.Controller{
 		Method: "PUT",
-		Path:   fmt.Sprintf("/levels/:%s", ParamLevelId),
+		Path:   fmt.Sprintf("/levels/:%s", level.ParamLevelId),
 		Middleware: []http.Handler{
 			authMiddleware,
 		},

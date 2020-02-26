@@ -23,6 +23,9 @@ jobs:
     - name: Run goimports
       run: ./hack/verify-go-imports.sh
 
+    - name: Run package imports
+      run: ./hack/verify-go-package-imports.sh
+
     - name: Run govet
       run: ./hack/verify-go-vet.sh
 

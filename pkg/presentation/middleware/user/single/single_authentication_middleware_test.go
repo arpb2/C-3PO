@@ -1,7 +1,7 @@
 package single_test
 
 import (
-	controller2 "github.com/arpb2/C-3PO/pkg/presentation/user/controller"
+	"github.com/arpb2/C-3PO/pkg/presentation/user"
 	"net/http"
 	"testing"
 
@@ -28,7 +28,7 @@ func Test_Single_HandlingOfAuthentication_NoHeader(t *testing.T) {
 	middle(c)
 
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
-	assert.Equal(t, "{\"error\":\"unauthorized\"}\n", w.Body.String())
+	assert.Equal(t, "{\"error\":\"unauthorized\"}", w.Body.String())
 }
 
 func Test_Single_HandlingOfAuthentication_BadHeader(t *testing.T) {
@@ -46,7 +46,7 @@ func Test_Single_HandlingOfAuthentication_BadHeader(t *testing.T) {
 	middle(c)
 
 	assert.Equal(t, http.StatusBadRequest, recorder.Code)
-	assert.Equal(t, "{\"error\":\"malformed token\"}\n", recorder.Body.String())
+	assert.Equal(t, "{\"error\":\"malformed token\"}", recorder.Body.String())
 	reader.AssertExpectations(t)
 	tokenHandler.AssertExpectations(t)
 }
@@ -58,7 +58,7 @@ func Test_Single_HandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
 	}, nil)
 
 	reader := new(http2.MockReader)
-	reader.On("GetParameter", controller2.ParamUserId).Return("1", nil).Once()
+	reader.On("GetParameter", user.ParamUserId).Return("1", nil).Once()
 	reader.On("GetHeader", middleware.HeaderAuthorization).Return("token")
 
 	c, recorder := http2.CreateTestContext()
@@ -69,7 +69,7 @@ func Test_Single_HandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
 	middle(c)
 
 	assert.Equal(t, http.StatusUnauthorized, recorder.Code)
-	assert.Equal(t, "{\"error\":\"unauthorized\"}\n", recorder.Body.String())
+	assert.Equal(t, "{\"error\":\"unauthorized\"}", recorder.Body.String())
 	reader.AssertExpectations(t)
 	tokenHandler.AssertExpectations(t)
 }
@@ -81,7 +81,7 @@ func Test_Single_HandlingOfAuthentication_Authorized_SameUser(t *testing.T) {
 	}, nil)
 
 	reader := new(http2.MockReader)
-	reader.On("GetParameter", controller2.ParamUserId).Return("1000", nil).Once()
+	reader.On("GetParameter", user.ParamUserId).Return("1000", nil).Once()
 	reader.On("GetHeader", middleware.HeaderAuthorization).Return("token")
 
 	c, recorder := http2.CreateTestContext()

@@ -2,10 +2,9 @@ package controller
 
 import (
 	"fmt"
-	controller2 "github.com/arpb2/C-3PO/pkg/presentation/level/controller"
-	controller4 "github.com/arpb2/C-3PO/pkg/presentation/user/controller"
-
 	"github.com/arpb2/C-3PO/pkg/domain/user_level/service"
+	"github.com/arpb2/C-3PO/pkg/presentation/level"
+	"github.com/arpb2/C-3PO/pkg/presentation/user"
 
 	"github.com/arpb2/C-3PO/pkg/presentation/user/command"
 	userlevelcommand "github.com/arpb2/C-3PO/pkg/presentation/user_level/command"
@@ -19,7 +18,7 @@ import (
 func CreateGetController(exec pipeline.HttpPipeline, authMiddleware http.Handler, userLevelService service.Service) controller.Controller {
 	return controller.Controller{
 		Method: "GET",
-		Path:   fmt.Sprintf("/users/:%s/levels/:%s", controller4.ParamUserId, controller2.ParamLevelId),
+		Path:   fmt.Sprintf("/users/:%s/levels/:%s", user.ParamUserId, level.ParamLevelId),
 		Middleware: []http.Handler{
 			authMiddleware,
 		},
