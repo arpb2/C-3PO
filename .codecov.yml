@@ -20,3 +20,4 @@ ignore:
   - "cmd/**/main.go" # Commands
   - "third_party/**/*" # Third party generated files shouldn't be tracked
   - "test/**/*" # Test utilities
+  - "hack/**/*" # Hack utilities
