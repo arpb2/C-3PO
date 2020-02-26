@@ -20,5 +20,5 @@ type teacherService struct {
 }
 
 func (t teacherService) GetStudents(userId uint) (students []model2.User, err error) {
-	panic("implement me")
+	return []model2.User{}, nil
 }

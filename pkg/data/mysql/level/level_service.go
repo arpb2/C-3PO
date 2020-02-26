@@ -38,6 +38,9 @@ func (l *levelService) GetLevel(levelId uint) (level model2.Level, err error) {
 		Get(ctx, levelId)
 
 	if err != nil {
+		if ent.IsNotFound(err) {
+			return lev, http.CreateNotFoundError()
+		}
 		return lev, err
 	}
 
