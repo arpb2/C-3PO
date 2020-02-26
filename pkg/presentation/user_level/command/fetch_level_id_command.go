@@ -2,8 +2,9 @@ package command
 
 import (
 	"fmt"
-	"github.com/arpb2/C-3PO/pkg/presentation/level"
 	"strconv"
+
+	"github.com/arpb2/C-3PO/pkg/presentation/level"
 
 	"github.com/arpb2/C-3PO/pkg/presentation/level/command"
 

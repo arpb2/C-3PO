@@ -2,9 +2,10 @@ package user_test
 
 import (
 	"errors"
-	user2 "github.com/arpb2/C-3PO/pkg/presentation/user"
 	"net/http"
 	"testing"
+
+	user2 "github.com/arpb2/C-3PO/pkg/presentation/user"
 
 	http3 "github.com/arpb2/C-3PO/pkg/domain/architecture/http"
 	"github.com/arpb2/C-3PO/pkg/domain/session/token"

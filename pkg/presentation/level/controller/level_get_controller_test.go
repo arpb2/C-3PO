@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	level2 "github.com/arpb2/C-3PO/pkg/presentation/level"
 	httpcodes "net/http"
 	"testing"
+
+	level2 "github.com/arpb2/C-3PO/pkg/presentation/level"
 
 	model2 "github.com/arpb2/C-3PO/pkg/domain/level/model"
 	"github.com/arpb2/C-3PO/pkg/domain/level/service"

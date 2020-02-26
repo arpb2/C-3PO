@@ -3,8 +3,9 @@ package http
 import (
 	"encoding/json"
 	"fmt"
-	"golang.org/x/xerrors"
 	"net/http/httptest"
+
+	"golang.org/x/xerrors"
 
 	"github.com/arpb2/C-3PO/pkg/domain/architecture/http"
 	"github.com/gin-gonic/gin"

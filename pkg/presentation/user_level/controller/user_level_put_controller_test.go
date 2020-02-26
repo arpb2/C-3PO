@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/arpb2/C-3PO/pkg/presentation/level"
-	"github.com/arpb2/C-3PO/pkg/presentation/user"
 	"net/http"
 	"testing"
+
+	"github.com/arpb2/C-3PO/pkg/presentation/level"
+	"github.com/arpb2/C-3PO/pkg/presentation/user"
 
 	model2 "github.com/arpb2/C-3PO/pkg/domain/user_level/model"
 	pipeline2 "github.com/arpb2/C-3PO/test/mock/pipeline"
