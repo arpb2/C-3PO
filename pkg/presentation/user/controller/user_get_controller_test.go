@@ -18,7 +18,7 @@ import (
 	http2 "github.com/arpb2/C-3PO/pkg/domain/architecture/http"
 
 	"github.com/arpb2/C-3PO/pkg/domain/architecture/controller"
-	"github.com/arpb2/C-3PO/pkg/presentation/middleware/user/single"
+	"github.com/arpb2/C-3PO/pkg/presentation/middleware/auth/user/single"
 	"github.com/arpb2/C-3PO/test/mock/golden"
 	testhttpwrapper "github.com/arpb2/C-3PO/test/mock/http"
 	"github.com/arpb2/C-3PO/test/mock/repository"

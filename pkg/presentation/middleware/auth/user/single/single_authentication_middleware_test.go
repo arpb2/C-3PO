@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/arpb2/C-3PO/pkg/presentation/middleware/auth"
+
 	"github.com/arpb2/C-3PO/pkg/domain/session/repository"
 
 	"github.com/arpb2/C-3PO/pkg/presentation/user"
@@ -12,15 +14,13 @@ import (
 	http2 "github.com/arpb2/C-3PO/test/mock/http"
 	"github.com/arpb2/C-3PO/test/mock/token"
 
-	"github.com/arpb2/C-3PO/pkg/presentation/middleware"
-
-	"github.com/arpb2/C-3PO/pkg/presentation/middleware/user/single"
+	"github.com/arpb2/C-3PO/pkg/presentation/middleware/auth/user/single"
 	"github.com/stretchr/testify/assert"
 )
 
 func Test_Single_HandlingOfAuthentication_NoHeader(t *testing.T) {
 	reader := new(http2.MockReader)
-	reader.On("GetHeader", middleware.HeaderAuthorization).Return("")
+	reader.On("GetHeader", auth.HeaderAuthorization).Return("")
 
 	c, w := http2.CreateTestContext()
 	c.Reader = reader
@@ -38,7 +38,7 @@ func Test_Single_HandlingOfAuthentication_BadHeader(t *testing.T) {
 	tokenHandler.On("Retrieve", "token").Return(nil, http3.CreateBadRequestError("malformed token"))
 
 	reader := new(http2.MockReader)
-	reader.On("GetHeader", middleware.HeaderAuthorization).Return("token")
+	reader.On("GetHeader", auth.HeaderAuthorization).Return("token")
 
 	c, recorder := http2.CreateTestContext()
 	c.Reader = reader
@@ -61,7 +61,7 @@ func Test_Single_HandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
 
 	reader := new(http2.MockReader)
 	reader.On("GetParameter", user.ParamUserId).Return("1", nil).Once()
-	reader.On("GetHeader", middleware.HeaderAuthorization).Return("token")
+	reader.On("GetHeader", auth.HeaderAuthorization).Return("token")
 
 	c, recorder := http2.CreateTestContext()
 	c.Reader = reader
@@ -84,7 +84,7 @@ func Test_Single_HandlingOfAuthentication_Authorized_SameUser(t *testing.T) {
 
 	reader := new(http2.MockReader)
 	reader.On("GetParameter", user.ParamUserId).Return("1000", nil).Once()
-	reader.On("GetHeader", middleware.HeaderAuthorization).Return("token")
+	reader.On("GetHeader", auth.HeaderAuthorization).Return("token")
 
 	c, recorder := http2.CreateTestContext()
 	c.Reader = reader

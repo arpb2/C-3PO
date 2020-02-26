@@ -17,7 +17,7 @@ import (
 	userlevelcontroller "github.com/arpb2/C-3PO/pkg/presentation/user_level/controller"
 
 	"github.com/arpb2/C-3PO/pkg/domain/architecture/controller"
-	"github.com/arpb2/C-3PO/pkg/presentation/middleware/user/teacher"
+	"github.com/arpb2/C-3PO/pkg/presentation/middleware/auth/user/teacher"
 	"github.com/arpb2/C-3PO/test/mock/golden"
 	testhttpwrapper "github.com/arpb2/C-3PO/test/mock/http"
 	"github.com/arpb2/C-3PO/test/mock/repository"

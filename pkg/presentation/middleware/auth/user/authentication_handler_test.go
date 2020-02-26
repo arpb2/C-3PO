@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/arpb2/C-3PO/pkg/presentation/middleware/auth"
+
 	"github.com/arpb2/C-3PO/pkg/domain/session/repository"
 
 	user2 "github.com/arpb2/C-3PO/pkg/presentation/user"
@@ -13,9 +15,7 @@ import (
 	http2 "github.com/arpb2/C-3PO/test/mock/http"
 	mocktoken "github.com/arpb2/C-3PO/test/mock/token"
 
-	"github.com/arpb2/C-3PO/pkg/presentation/middleware"
-
-	"github.com/arpb2/C-3PO/pkg/presentation/middleware/user"
+	"github.com/arpb2/C-3PO/pkg/presentation/middleware/auth/user"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -32,7 +32,7 @@ func (s *MockAuthenticationStrategy) Authenticate(token *repository.Token, userI
 
 func Test_HandlingOfAuthentication_NoHeader(t *testing.T) {
 	reader := new(http2.MockReader)
-	reader.On("GetHeader", middleware.HeaderAuthorization).Return("")
+	reader.On("GetHeader", auth.HeaderAuthorization).Return("")
 
 	c, recorder := http2.CreateTestContext()
 	c.Reader = reader
@@ -49,7 +49,7 @@ func Test_HandlingOfAuthentication_BadHeader(t *testing.T) {
 	tokenHandler.On("Retrieve", "token").Return(nil, http3.CreateBadRequestError("malformed token"))
 
 	reader := new(http2.MockReader)
-	reader.On("GetHeader", middleware.HeaderAuthorization).Return("token")
+	reader.On("GetHeader", auth.HeaderAuthorization).Return("token")
 
 	c, recorder := http2.CreateTestContext()
 	c.Reader = reader
@@ -70,7 +70,7 @@ func Test_HandlingOfAuthentication_UnauthorizedUser(t *testing.T) {
 
 	reader := new(http2.MockReader)
 	reader.On("GetParameter", user2.ParamUserId).Return("1", nil).Once()
-	reader.On("GetHeader", middleware.HeaderAuthorization).Return("token")
+	reader.On("GetHeader", auth.HeaderAuthorization).Return("token")
 
 	c, recorder := http2.CreateTestContext()
 	c.Reader = reader
@@ -91,7 +91,7 @@ func Test_HandlingOfAuthentication_Authorized_SameUser(t *testing.T) {
 
 	reader := new(http2.MockReader)
 	reader.On("GetParameter", user2.ParamUserId).Return("1000", nil).Once()
-	reader.On("GetHeader", middleware.HeaderAuthorization).Return("token")
+	reader.On("GetHeader", auth.HeaderAuthorization).Return("token")
 
 	c, recorder := http2.CreateTestContext()
 	c.Reader = reader
@@ -116,7 +116,7 @@ func TestStrategy_Error_Halts(t *testing.T) {
 
 	reader := new(http2.MockReader)
 	reader.On("GetParameter", user2.ParamUserId).Return("1001", nil).Once()
-	reader.On("GetHeader", middleware.HeaderAuthorization).Return("token")
+	reader.On("GetHeader", auth.HeaderAuthorization).Return("token")
 
 	c, recorder := http2.CreateTestContext()
 	c.Reader = reader
@@ -143,7 +143,7 @@ func TestStrategy_Unauthorized_Halts(t *testing.T) {
 
 	reader := new(http2.MockReader)
 	reader.On("GetParameter", user2.ParamUserId).Return("1001", nil).Once()
-	reader.On("GetHeader", middleware.HeaderAuthorization).Return("token")
+	reader.On("GetHeader", auth.HeaderAuthorization).Return("token")
 
 	c, recorder := http2.CreateTestContext()
 	c.Reader = reader
@@ -170,7 +170,7 @@ func TestStrategy_Authorized_Continues(t *testing.T) {
 
 	reader := new(http2.MockReader)
 	reader.On("GetParameter", user2.ParamUserId).Return("1001", nil).Once()
-	reader.On("GetHeader", middleware.HeaderAuthorization).Return("token")
+	reader.On("GetHeader", auth.HeaderAuthorization).Return("token")
 
 	c, recorder := http2.CreateTestContext()
 	c.Reader = reader

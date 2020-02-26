@@ -4,16 +4,16 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/arpb2/C-3PO/pkg/presentation/middleware/auth"
+
 	"github.com/arpb2/C-3PO/pkg/domain/session/repository"
 
-	middleware2 "github.com/arpb2/C-3PO/pkg/domain/session/middleware"
-	"github.com/arpb2/C-3PO/pkg/presentation/middleware"
-
 	"github.com/arpb2/C-3PO/pkg/domain/architecture/http"
+	middleware2 "github.com/arpb2/C-3PO/pkg/domain/session/middleware"
 )
 
 func HandleAuthentication(ctx *http.Context, tokenHandler repository.TokenRepository, strategies ...middleware2.AuthenticationStrategy) {
-	authToken := ctx.GetHeader(middleware.HeaderAuthorization)
+	authToken := ctx.GetHeader(auth.HeaderAuthorization)
 
 	if authToken == "" {
 		ctx.AbortTransactionWithError(http.CreateUnauthorizedError())

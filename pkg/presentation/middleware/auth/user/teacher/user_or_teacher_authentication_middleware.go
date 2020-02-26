@@ -7,7 +7,7 @@ import (
 
 	teacherrepository "github.com/arpb2/C-3PO/pkg/domain/teacher/repository"
 
-	"github.com/arpb2/C-3PO/pkg/presentation/middleware/user"
+	"github.com/arpb2/C-3PO/pkg/presentation/middleware/auth/user"
 
 	"github.com/arpb2/C-3PO/pkg/domain/architecture/http"
 )

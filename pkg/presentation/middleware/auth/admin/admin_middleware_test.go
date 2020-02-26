@@ -3,16 +3,16 @@ package admin_test
 import (
 	"testing"
 
-	"github.com/arpb2/C-3PO/pkg/presentation/middleware"
+	"github.com/arpb2/C-3PO/pkg/presentation/middleware/auth"
 
 	"github.com/arpb2/C-3PO/pkg/domain/architecture/http"
-	"github.com/arpb2/C-3PO/pkg/presentation/middleware/admin"
+	"github.com/arpb2/C-3PO/pkg/presentation/middleware/auth/admin"
 	httpmock "github.com/arpb2/C-3PO/test/mock/http"
 )
 
 func TestAuthMiddleware_GivenOneWithoutAToken_WhenAuthorizing_ThenItAbortsWithUnauthorized(t *testing.T) {
 	reader := new(httpmock.MockReader)
-	reader.On("GetHeader", middleware.HeaderAuthorization).Return("").Once()
+	reader.On("GetHeader", auth.HeaderAuthorization).Return("").Once()
 	middlew := new(httpmock.MockMiddleware)
 	middlew.On("AbortTransactionWithError", http.CreateUnauthorizedError()).Once()
 	ctx := &http.Context{
@@ -29,7 +29,7 @@ func TestAuthMiddleware_GivenOneWithoutAToken_WhenAuthorizing_ThenItAbortsWithUn
 
 func TestAuthMiddleware_GivenOneWithADifferentToken_WhenAuthorizing_ThenItAbortsWithUnauthorized(t *testing.T) {
 	reader := new(httpmock.MockReader)
-	reader.On("GetHeader", middleware.HeaderAuthorization).Return("not test").Once()
+	reader.On("GetHeader", auth.HeaderAuthorization).Return("not test").Once()
 	middlew := new(httpmock.MockMiddleware)
 	middlew.On("AbortTransactionWithError", http.CreateUnauthorizedError()).Once()
 	ctx := &http.Context{
@@ -46,7 +46,7 @@ func TestAuthMiddleware_GivenOneWithADifferentToken_WhenAuthorizing_ThenItAborts
 
 func TestAuthMiddleware_GivenOneWithTheSameSecretAsToken_WhenAuthorizing_ThenItContinuesTransaction(t *testing.T) {
 	reader := new(httpmock.MockReader)
-	reader.On("GetHeader", middleware.HeaderAuthorization).Return("test").Once()
+	reader.On("GetHeader", auth.HeaderAuthorization).Return("test").Once()
 	middlew := new(httpmock.MockMiddleware)
 	middlew.On("NextHandler").Once()
 	ctx := &http.Context{
