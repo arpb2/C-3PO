@@ -7,13 +7,14 @@ import (
 
 	"golang.org/x/xerrors"
 
-	"github.com/arpb2/C-3PO/pkg/domain/architecture/http"
+	"github.com/arpb2/C-3PO/pkg/domain/http"
 	"github.com/gin-gonic/gin"
 )
 
 type worker struct {
 	recorder *httptest.ResponseRecorder
 	aborted  bool
+	values   map[string]interface{}
 }
 
 func (w *worker) WriteJson(code int, obj interface{}) {
@@ -54,46 +55,54 @@ func (w *worker) WriteStatus(code int) {
 	w.recorder.WriteHeader(code)
 }
 
-func (m *worker) NextHandler() {
+func (w *worker) NextHandler() {
 	// Nothing
 }
 
-func (m *worker) IsAborted() bool {
-	return m.aborted
+func (w *worker) IsAborted() bool {
+	return w.aborted
 }
 
-func (m *worker) AbortTransaction() {
+func (w *worker) AbortTransaction() {
 	defer func() {
-		m.aborted = true
+		w.aborted = true
 	}()
-	if !m.aborted {
-		m.recorder.WriteHeader(500)
+	if !w.aborted {
+		w.recorder.WriteHeader(500)
 	}
 }
 
-func (m *worker) AbortTransactionWithStatus(code int, jsonObj interface{}) {
+func (w *worker) AbortTransactionWithStatus(code int, jsonObj interface{}) {
 	defer func() {
-		m.aborted = true
+		w.aborted = true
 	}()
-	if !m.aborted {
-		m.recorder.WriteHeader(code)
+	if !w.aborted {
+		w.recorder.WriteHeader(code)
 
 		j, err := json.Marshal(jsonObj)
 		if err != nil {
 			panic(err)
 		}
-		_, err = m.recorder.Write(j)
+		_, err = w.recorder.Write(j)
 		if err != nil {
 			panic(err)
 		}
 	}
 }
 
-func (m *worker) AbortTransactionWithError(err error) {
+func (w *worker) SetValue(key string, value interface{}) {
+	w.values[key] = value
+}
+
+func (w *worker) GetValue(key string) interface{} {
+	return w.values[key]
+}
+
+func (w *worker) AbortTransactionWithError(err error) {
 	defer func() {
-		m.aborted = true
+		w.aborted = true
 	}()
-	if !m.aborted {
+	if !w.aborted {
 		var httpError http.Error
 		if xerrors.As(err, &httpError) {
 			if httpError.Code >= 200 && httpError.Code < 300 {
@@ -103,7 +112,7 @@ func (m *worker) AbortTransactionWithError(err error) {
 					httpError.Reason,
 				)
 			} else {
-				m.recorder.WriteHeader(httpError.Code)
+				w.recorder.WriteHeader(httpError.Code)
 
 				j, err := json.Marshal(map[string]string{
 					"error": httpError.Reason,
@@ -111,13 +120,13 @@ func (m *worker) AbortTransactionWithError(err error) {
 				if err != nil {
 					panic(err)
 				}
-				_, err = m.recorder.Write(j)
+				_, err = w.recorder.Write(j)
 				if err != nil {
 					panic(err)
 				}
 			}
 		} else {
-			m.recorder.WriteHeader(500)
+			w.recorder.WriteHeader(500)
 
 			j, err := json.Marshal(map[string]string{
 				"error": "internal error",
@@ -125,7 +134,7 @@ func (m *worker) AbortTransactionWithError(err error) {
 			if err != nil {
 				panic(err)
 			}
-			_, err = m.recorder.Write(j)
+			_, err = w.recorder.Write(j)
 			if err != nil {
 				panic(err)
 			}
@@ -138,6 +147,7 @@ func CreateTestContext() (*http.Context, *httptest.ResponseRecorder) {
 
 	worker := &worker{
 		recorder: httptest.NewRecorder(),
+		values:   make(map[string]interface{}),
 	}
 	ctx := &http.Context{
 		Writer:     worker,

@@ -4,18 +4,23 @@ import (
 	"fmt"
 	"os"
 
-	pipeline3 "github.com/arpb2/C-3PO/cmd/uml/infrastructure/pipeline"
-
-	levelcontroller "github.com/arpb2/C-3PO/pkg/presentation/level/controller"
-	sessioncontroller "github.com/arpb2/C-3PO/pkg/presentation/session/controller"
-	usercontroller "github.com/arpb2/C-3PO/pkg/presentation/user/controller"
-	userlevelcontroller "github.com/arpb2/C-3PO/pkg/presentation/user_level/controller"
+	pipeline2 "github.com/arpb2/C-3PO/pkg/infrastructure/pipeline"
+	"github.com/arpb2/C-3PO/pkg/presentation/level"
+	"github.com/arpb2/C-3PO/pkg/presentation/session"
+	"github.com/arpb2/C-3PO/pkg/presentation/user"
 
 	gopipeline "github.com/saantiaguilera/go-pipeline"
 
-	"github.com/arpb2/C-3PO/pkg/domain/architecture/controller"
-	"github.com/arpb2/C-3PO/pkg/domain/architecture/http"
-	"github.com/arpb2/C-3PO/pkg/domain/architecture/pipeline"
+	"github.com/arpb2/C-3PO/pkg/domain/http"
+	"github.com/arpb2/C-3PO/pkg/domain/pipeline"
+)
+
+const (
+	ParamLevelId = "level_id"
+	ParamUserId  = "user_id"
+
+	PartCode      = "code"
+	PartWorkspace = "workspace"
 )
 
 func createDrawablePipeline(fileName string) pipeline.HttpPipeline {
@@ -30,28 +35,28 @@ func createDrawablePipeline(fileName string) pipeline.HttpPipeline {
 		Type: gopipeline.UMLFormatSVG,
 	})
 
-	return pipeline3.CreateDrawablePipeline(file, graphRenderer)
+	return pipeline2.CreateDrawablePipeline(file, graphRenderer)
 }
 
-func getPipelinedControllers() []controller.Controller {
-	return []controller.Controller{
-		levelcontroller.CreateGetController(createDrawablePipeline("level_get_controller"), nil),
-		levelcontroller.CreatePutController(createDrawablePipeline("level_put_controller"), nil, nil),
+func getPipelinedBodies() []http.Handler {
+	return []http.Handler{
+		level.CreateGetHandler(ParamLevelId, createDrawablePipeline("level_get_controller"), nil),
+		level.CreatePutHandler(ParamLevelId, createDrawablePipeline("level_put_controller"), nil),
 
-		userlevelcontroller.CreateGetController(createDrawablePipeline("user_level_get_controller"), nil, nil),
-		userlevelcontroller.CreatePutController(createDrawablePipeline("user_level_put_controller"), nil, nil),
+		user.CreateGetLevelHandler(ParamUserId, ParamLevelId, createDrawablePipeline("user_level_get_controller"), nil),
+		user.CreatePutLevelHandler(ParamUserId, ParamLevelId, PartCode, PartWorkspace, createDrawablePipeline("user_level_put_controller"), nil),
 
-		sessioncontroller.CreatePostController(createDrawablePipeline("session_post_controller"), nil, nil, nil),
+		session.CreatePostHandler(createDrawablePipeline("session_post_controller"), nil, nil, nil),
 
-		usercontroller.CreateGetController(createDrawablePipeline("user_get_controller"), nil, nil),
-		usercontroller.CreatePostController(createDrawablePipeline("user_post_controller"), nil, nil),
-		usercontroller.CreatePutController(createDrawablePipeline("user_put_controller"), nil, nil, nil),
-		usercontroller.CreateDeleteController(createDrawablePipeline("user_delete_controller"), nil, nil),
+		user.CreateGetUserHandler(ParamUserId, createDrawablePipeline("user_get_controller"), nil),
+		user.CreatePostUserHandler(createDrawablePipeline("user_post_controller"), nil, nil),
+		user.CreatePutUserHandler(ParamUserId, createDrawablePipeline("user_put_controller"), nil, nil),
+		user.CreateDeleteUserHandler(ParamUserId, createDrawablePipeline("user_delete_controller"), nil),
 	}
 }
 
 func main() {
-	for _, c := range getPipelinedControllers() {
-		c.Body(&http.Context{})
+	for _, b := range getPipelinedBodies() {
+		b(&http.Context{})
 	}
 }
