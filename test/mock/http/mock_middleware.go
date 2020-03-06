@@ -26,3 +26,12 @@ func (t *MockMiddleware) AbortTransactionWithError(err error) {
 func (t *MockMiddleware) AbortTransactionWithStatus(code int, jsonObj interface{}) {
 	_ = t.Called(code, jsonObj)
 }
+
+func (t *MockMiddleware) SetValue(key string, value interface{}) {
+	_ = t.Called(key, value)
+}
+
+func (t *MockMiddleware) GetValue(key string) interface{} {
+	args := t.Called(key)
+	return args.Get(0)
+}

@@ -16,17 +16,26 @@ if [[ -n "${diff}" ]]; then
   exit 1
 fi
 
-# Check that the presentation files don't depend on the data ones
-diff=$(grep -iRl "github.com/arpb2/C-3PO/pkg/data" ./pkg/presentation || true)
+# Check that the infrastructure files don't depend on presentation ones
+diff=$(grep -iRl "github.com/arpb2/C-3PO/pkg/presentation" ./pkg/infrastructure || true)
 if [[ -n "${diff}" ]]; then
   echo "${diff}" >&2
   echo >&2
-  echo "Presentation files shouldn't depend on data ones" >&2
+  echo "Infrastructure files shouldn't depend on presentation ones" >&2
+  exit 1
+fi
+
+# Check that the presentation files don't depend on the infrastructure ones
+diff=$(grep -iRl "github.com/arpb2/C-3PO/pkg/infrastructure" ./pkg/presentation || true)
+if [[ -n "${diff}" ]]; then
+  echo "${diff}" >&2
+  echo >&2
+  echo "Presentation files shouldn't depend on infrastructure ones" >&2
   exit 1
 fi
 
 # Check that the domain files don't depend on the presentation/data ones
-diff=$(grep -iERl "github.com/arpb2/C-3PO/pkg/(presentation|data)" ./pkg/domain || true)
+diff=$(grep -iERl "github.com/arpb2/C-3PO/pkg/(presentation|data|infrastructure)" ./pkg/domain || true)
 if [[ -n "${diff}" ]]; then
   echo "${diff}" >&2
   echo >&2
@@ -40,15 +49,6 @@ if [[ -n "${diff}" ]]; then
   echo "${diff}" >&2
   echo >&2
   echo "Pkg files shouldn't depend on cmd ones" >&2
-  exit 1
-fi
-
-# Check that the test (mock) files don't depend on presentation / data ones
-diff=$(grep -iERl "github.com/arpb2/C-3PO/pkg/(presentation|data)" ./test || true)
-if [[ -n "${diff}" ]]; then
-  echo "${diff}" >&2
-  echo >&2
-  echo "Test mock files shouldn't depend on data / presentation ones" >&2
   exit 1
 fi
 
