@@ -1,7 +1,6 @@
 package pipeline
 
 import (
-	"fmt"
 	"io"
 
 	"github.com/arpb2/C-3PO/pkg/domain/http"
@@ -26,9 +25,5 @@ func (h *drawablePipeline) Run(context *http.Context, stage pipeline.Stage) {
 
 	stage.Draw(graphDiagram)
 
-	err := h.Renderer.Render(graphDiagram, h.Writer)
-
-	if err != nil {
-		fmt.Print(err.Error())
-	}
+	_ = h.Renderer.Render(graphDiagram, h.Writer)
 }

@@ -12,11 +12,7 @@ import (
 	"golang.org/x/xerrors"
 )
 
-var defaultSha = "52bfd2de0a2e69dff4517518590ac32a46bd76606ec22a258f99584a6e70aca2"
-
-var DefaultTokenHandler = tokenRepository{
-	Secret: []byte("52bfd2de0a2e69dff4517518590ac32a46bd76606ec22a258f99584a6e70aca2"),
-}
+var defaultSha = []byte("52bfd2de0a2e69dff4517518590ac32a46bd76606ec22a258f99584a6e70aca2")
 
 func TestSecret_DefaultValue(t *testing.T) {
 	err := os.Unsetenv("JWT_SECRET")
@@ -25,13 +21,13 @@ func TestSecret_DefaultValue(t *testing.T) {
 
 	secret := []byte("52bfd2de0a2e69dff4517518590ac32a46bd76606ec22a258f99584a6e70aca2")
 
-	assert.Equal(t, []byte(defaultSha), secret)
+	assert.Equal(t, defaultSha, secret)
 }
 
 var expectedToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEwMDB9.GVS-KC5nOCHybzzFIIH864u4KcGu-ZSd-96krqTUGWo"
 
 func TestCreate_CreatesExpectedToken(t *testing.T) {
-	token, err := DefaultTokenHandler.Create(&session.Token{
+	token, err := CreateTokenRepository(defaultSha).Create(&session.Token{
 		UserId: 1000,
 	})
 
@@ -40,14 +36,14 @@ func TestCreate_CreatesExpectedToken(t *testing.T) {
 }
 
 func TestRetrieve_GetsExpectedUserId(t *testing.T) {
-	token, err := DefaultTokenHandler.Retrieve(expectedToken)
+	token, err := CreateTokenRepository(defaultSha).Retrieve(expectedToken)
 
 	assert.Nil(t, err)
 	assert.Equal(t, uint(1000), token.UserId)
 }
 
 func TestRetrieve_OnBadToken(t *testing.T) {
-	token, err := DefaultTokenHandler.Retrieve("bad token")
+	token, err := CreateTokenRepository(defaultSha).Retrieve("bad token")
 
 	assert.NotNil(t, err)
 

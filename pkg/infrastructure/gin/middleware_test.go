@@ -89,3 +89,27 @@ func TestMiddleware_GivenOne_WhenGoingToNext_ThenItsFinishedBecauseItsTheLast(t 
 
 	assert.Equal(t, 200, recorder.Code)
 }
+
+func TestMiddleware_GivenOne_WhenSettingAValue_ThenItCanBeGetted(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	recorder := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(recorder)
+	middleware := gin2.CreateMiddleware(c)
+
+	middleware.SetValue("key", 1)
+
+	assert.Equal(t, 1, middleware.GetValue("key"))
+}
+
+func TestMiddleware_GivenOne_WhenSettingTwoValues_ThenTheyAreIndexedByKeyCorrectly(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	recorder := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(recorder)
+	middleware := gin2.CreateMiddleware(c)
+
+	middleware.SetValue("key", 1)
+	middleware.SetValue("another", "test")
+
+	assert.Equal(t, 1, middleware.GetValue("key"))
+	assert.Equal(t, "test", middleware.GetValue("another"))
+}

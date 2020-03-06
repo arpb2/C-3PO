@@ -3,6 +3,8 @@ package pipeline_test
 import (
 	"testing"
 
+	"github.com/arpb2/C-3PO/pkg/domain/model/level"
+
 	"github.com/arpb2/C-3PO/pkg/domain/model/session"
 	"github.com/arpb2/C-3PO/pkg/domain/model/user"
 
@@ -272,6 +274,39 @@ func TestContextAware_GivenOneWithAUserLevelData_WhenGettingIt_ThenItReturnsItAn
 	ctxAware := pipeline.CreateContextAware(ctx)
 
 	val, err := ctxAware.GetUserLevelData("tag")
+
+	assert.Equal(t, expectedVal, val)
+	assert.Nil(t, err)
+}
+
+func TestContextAware_GivenOneWithNoLevelData_WhenGettingIt_ThenItReturnsNilAndInternalError(t *testing.T) {
+	ctx := gopipeline.CreateContext()
+	ctxAware := pipeline.CreateContextAware(ctx)
+
+	val, err := ctxAware.GetLevel("tag")
+
+	assert.Equal(t, level.Level{}, val)
+	assert.Equal(t, http.CreateInternalError(), err)
+}
+
+func TestContextAware_GivenOneWithSomethingDifferentThanLevelData_WhenGettingIt_ThenItReturnsNilAndInternalError(t *testing.T) {
+	ctx := gopipeline.CreateContext()
+	ctx.Set("tag", "string")
+	ctxAware := pipeline.CreateContextAware(ctx)
+
+	val, err := ctxAware.GetLevel("tag")
+
+	assert.Equal(t, level.Level{}, val)
+	assert.Equal(t, http.CreateInternalError(), err)
+}
+
+func TestContextAware_GivenOneWithALevelData_WhenGettingIt_ThenItReturnsItAndNoError(t *testing.T) {
+	expectedVal := level.Level{}
+	ctx := gopipeline.CreateContext()
+	ctx.Set("tag", expectedVal)
+	ctxAware := pipeline.CreateContextAware(ctx)
+
+	val, err := ctxAware.GetLevel("tag")
 
 	assert.Equal(t, expectedVal, val)
 	assert.Nil(t, err)

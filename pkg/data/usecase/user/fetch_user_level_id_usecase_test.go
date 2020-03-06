@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/arpb2/C-3PO/pkg/data/usecase/user"
+
 	level2 "github.com/arpb2/C-3PO/pkg/data/usecase/level"
 
 	httppipeline "github.com/arpb2/C-3PO/pkg/domain/pipeline"
@@ -15,7 +17,7 @@ import (
 )
 
 func TestFetchLevelIdUseCase_GivenOne_WhenCallingName_ThenItsTheExpected(t *testing.T) {
-	useCase := level2.CreateFetchLevelIdUseCase("level_id")
+	useCase := user.CreateFetchLevelIdUseCase("level_id")
 
 	name := useCase.Name()
 
@@ -24,7 +26,7 @@ func TestFetchLevelIdUseCase_GivenOne_WhenCallingName_ThenItsTheExpected(t *test
 
 func TestFetchLevelIdUseCase_GivenOneAndAContextWithoutAReader_WhenRunning_Then500(t *testing.T) {
 	ctx := gopipeline.CreateContext()
-	useCase := level2.CreateFetchLevelIdUseCase("level_id")
+	useCase := user.CreateFetchLevelIdUseCase("level_id")
 
 	err := useCase.Run(ctx)
 
@@ -36,7 +38,7 @@ func TestFetchLevelIdUseCase_GivenOneAndAReaderWithoutLevelIdParameter_WhenRunni
 	reader.On("GetParameter", "level_id").Return("", false)
 	ctx := gopipeline.CreateContext()
 	ctx.Set(httppipeline.TagHttpReader, reader)
-	useCase := level2.CreateFetchLevelIdUseCase("level_id")
+	useCase := user.CreateFetchLevelIdUseCase("level_id")
 
 	err := useCase.Run(ctx)
 
@@ -49,7 +51,7 @@ func TestFetchLevelIdUseCase_GivenOneAndAReaderWithMalformedLevelId_WhenRunning_
 	reader.On("GetParameter", "level_id").Return("-1", true)
 	ctx := gopipeline.CreateContext()
 	ctx.Set(httppipeline.TagHttpReader, reader)
-	useCase := level2.CreateFetchLevelIdUseCase("level_id")
+	useCase := user.CreateFetchLevelIdUseCase("level_id")
 
 	err := useCase.Run(ctx)
 
@@ -62,7 +64,7 @@ func TestFetchLevelIdUseCase_GivenOne_WhenRunning_ThenRawCodeIsAddedToContext(t 
 	reader.On("GetParameter", "level_id").Return("1000", true)
 	ctx := gopipeline.CreateContext()
 	ctx.Set(httppipeline.TagHttpReader, reader)
-	useCase := level2.CreateFetchLevelIdUseCase("level_id")
+	useCase := user.CreateFetchLevelIdUseCase("level_id")
 
 	err := useCase.Run(ctx)
 	val, exists := ctx.Get(level2.TagLevelId)
