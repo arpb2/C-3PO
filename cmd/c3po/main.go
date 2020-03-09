@@ -124,35 +124,35 @@ func main() {
 
 	/****** User routes ******/
 	engine.GET(
-		fmt.Sprintf("/users/:%s", ParamUserId), //TODO Refactor param into injectable
+		fmt.Sprintf("/users/:%s", ParamUserId),
 		singleAuthMiddleware, userGetHandler,
 	)
 	engine.POST("/users", userPostHandler)
 	engine.PUT(
-		fmt.Sprintf("/users/:%s", ParamUserId), //TODO Refactor param into injectable,
+		fmt.Sprintf("/users/:%s", ParamUserId),
 		singleAuthMiddleware, userPutHandler)
 	engine.DELETE(
-		fmt.Sprintf("/users/:%s", ParamUserId), //TODO Refactor param into injectable
+		fmt.Sprintf("/users/:%s", ParamUserId),
 		singleAuthMiddleware, userDeleteHandler,
 	)
 
 	/****** User level routes ******/
 	engine.GET(
-		fmt.Sprintf("/users/:%s/levels/:%s", ParamUserId, ParamLevelId), //TODO Refactor param into injectable
+		fmt.Sprintf("/users/:%s/levels/:%s", ParamUserId, ParamLevelId),
 		teacherAuthMiddleware, userLevelGetHandler,
 	)
 	engine.PUT(
-		fmt.Sprintf("/users/:%s/levels/:%s", ParamUserId, ParamLevelId), //TODO Refactor param into injectable
+		fmt.Sprintf("/users/:%s/levels/:%s", ParamUserId, ParamLevelId),
 		teacherAuthMiddleware, userLevelPutHandler,
 	)
 
 	/****** Level routes ******/
 	engine.GET(
-		fmt.Sprintf("/levels/:%s", ParamLevelId), //TODO Refactor param into injectable
+		fmt.Sprintf("/levels/:%s", ParamLevelId),
 		levelGetHandler,
 	)
 	engine.PUT(
-		fmt.Sprintf("/levels/:%s", ParamLevelId), //TODO Refactor param into injectable
+		fmt.Sprintf("/levels/:%s", ParamLevelId),
 		adminAuthMiddleware, levelPutHandler,
 	)
 

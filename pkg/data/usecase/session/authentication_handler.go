@@ -1,6 +1,7 @@
 package session
 
 import (
+	"log"
 	"strconv"
 
 	"github.com/arpb2/C-3PO/pkg/data/repository/session"
@@ -31,9 +32,9 @@ func HandleTokenizedAuthentication(authHeader, userId string, tokenHandler sessi
 		authenticated, err := strategy.Authenticate(token, userId)
 
 		// If any of our strategies has an error we will instantly fail the authentication process.
-		// TODO: In a future consider silently dismissing this, logging it somewhere but giving the user a 401.
 		if err != nil {
-			return err
+			log.Fatalln(err)
+			return http.CreateUnauthorizedError()
 		}
 
 		// If at least one of the strategies considers us authenticated, then we can continue.
