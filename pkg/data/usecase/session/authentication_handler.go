@@ -1,7 +1,7 @@
 package session
 
 import (
-	"log"
+	"fmt"
 	"strconv"
 
 	"github.com/arpb2/C-3PO/pkg/data/repository/session"
@@ -33,7 +33,7 @@ func HandleTokenizedAuthentication(authHeader, userId string, tokenHandler sessi
 
 		// If any of our strategies has an error we will instantly fail the authentication process.
 		if err != nil {
-			log.Fatalln(err)
+			fmt.Println(err)
 			return http.CreateUnauthorizedError()
 		}
 

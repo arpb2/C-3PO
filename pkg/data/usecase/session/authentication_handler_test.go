@@ -69,15 +69,14 @@ func TestStrategy_Error_Halts(t *testing.T) {
 		UserId: 1000,
 	}, nil)
 
-	expectedErr := errors.New("whoops this fails")
 	strategy := new(MockAuthenticationStrategy)
 	strategy.On("Authenticate", mock.MatchedBy(func(token *session.Token) bool {
 		return token.UserId == uint(1000)
-	}), "1001").Return(false, expectedErr).Once()
+	}), "1001").Return(false, errors.New("whoops this fails")).Once()
 
 	err := session2.HandleTokenizedAuthentication("token", "1001", tokenHandler, strategy)
 
-	assert.Equal(t, expectedErr, err)
+	assert.Equal(t, http3.CreateUnauthorizedError(), err)
 	strategy.AssertExpectations(t)
 	tokenHandler.AssertExpectations(t)
 }

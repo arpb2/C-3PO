@@ -158,15 +158,14 @@ func Test_Multi_HandlingOfAuthentication_Repository_Error(t *testing.T) {
 		UserId: 1001,
 	}, nil)
 
-	expectedErr := errors.New("whoops this fails")
 	repository := new(MockTeacherRepository)
-	repository.On("GetStudents", uint(1001)).Return([]user2.User{}, expectedErr).Once()
+	repository.On("GetStudents", uint(1001)).Return([]user2.User{}, errors.New("whoops this fails")).Once()
 
 	middle := session.CreateTeacherAuthenticationUseCase(tokenHandler, repository)
 
 	err := middle("token", "1000")
 
-	assert.Equal(t, expectedErr, err)
+	assert.Equal(t, http3.CreateUnauthorizedError(), err)
 	repository.AssertExpectations(t)
 	tokenHandler.AssertExpectations(t)
 }
