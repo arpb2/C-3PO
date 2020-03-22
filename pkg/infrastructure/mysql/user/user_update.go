@@ -29,9 +29,21 @@ func updateUser(tx *ent.Tx, ctx context.Context, user user2.User) (*ent.User, er
 	result, err := updateOp.
 		SetUpdatedAt(time.Now()).
 		Save(ctx)
-	if err != nil || result == nil {
+
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, http.CreateNotFoundError()
+		}
+		if ent.IsConstraintError(err) {
+			return nil, http.CreateBadRequestError("constraint error")
+		}
 		return nil, mysql.Rollback(tx, err)
 	}
+
+	if result == nil {
+		return nil, mysql.Rollback(tx, err)
+	}
+
 	return result, nil
 }
 
@@ -71,9 +83,20 @@ func updateCredential(tx *ent.Tx, ctx context.Context, userId uint, hash []byte)
 		SetPasswordHash(hash).
 		Save(ctx)
 
-	if err != nil || matches != 1 {
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return http.CreateNotFoundError()
+		}
+		if ent.IsConstraintError(err) {
+			return http.CreateBadRequestError("constraint error")
+		}
 		return mysql.Rollback(tx, err)
 	}
+
+	if matches != 1 {
+		return mysql.Rollback(tx, err)
+	}
+
 	return nil
 }
 
