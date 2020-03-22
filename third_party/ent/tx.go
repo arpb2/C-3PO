@@ -5,7 +5,6 @@ package ent
 import (
 	"context"
 
-	"github.com/arpb2/C-3PO/third_party/ent/migrate"
 	"github.com/facebookincubator/ent/dialect"
 )
 
@@ -34,14 +33,16 @@ func (tx *Tx) Rollback() error {
 
 // Client returns a Client that binds to current transaction.
 func (tx *Tx) Client() *Client {
-	return &Client{
-		config:     tx.config,
-		Schema:     migrate.NewSchema(tx.driver),
-		Credential: NewCredentialClient(tx.config),
-		Level:      NewLevelClient(tx.config),
-		User:       NewUserClient(tx.config),
-		UserLevel:  NewUserLevelClient(tx.config),
-	}
+	client := &Client{config: tx.config}
+	client.init()
+	return client
+}
+
+func (tx *Tx) init() {
+	tx.Credential = NewCredentialClient(tx.config)
+	tx.Level = NewLevelClient(tx.config)
+	tx.User = NewUserClient(tx.config)
+	tx.UserLevel = NewUserLevelClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

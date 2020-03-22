@@ -143,19 +143,19 @@ func (ul *UserLevel) assignValues(values ...interface{}) error {
 
 // QueryDeveloper queries the developer edge of the UserLevel.
 func (ul *UserLevel) QueryDeveloper() *UserQuery {
-	return (&UserLevelClient{ul.config}).QueryDeveloper(ul)
+	return (&UserLevelClient{config: ul.config}).QueryDeveloper(ul)
 }
 
 // QueryLevel queries the level edge of the UserLevel.
 func (ul *UserLevel) QueryLevel() *LevelQuery {
-	return (&UserLevelClient{ul.config}).QueryLevel(ul)
+	return (&UserLevelClient{config: ul.config}).QueryLevel(ul)
 }
 
 // Update returns a builder for updating this UserLevel.
 // Note that, you need to call UserLevel.Unwrap() before calling this method, if this UserLevel
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (ul *UserLevel) Update() *UserLevelUpdateOne {
-	return (&UserLevelClient{ul.config}).UpdateOne(ul)
+	return (&UserLevelClient{config: ul.config}).UpdateOne(ul)
 }
 
 // Unwrap unwraps the entity that was returned from a transaction after it was closed,

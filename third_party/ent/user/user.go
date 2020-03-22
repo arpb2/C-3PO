@@ -3,26 +3,26 @@
 package user
 
 import (
+	"fmt"
 	"time"
-
-	"github.com/arpb2/C-3PO/third_party/ent/schema"
 )
 
 const (
 	// Label holds the string label denoting the user type in the database.
 	Label = "user"
 	// FieldID holds the string denoting the id field in the database.
-	FieldID = "id"
-	// FieldEmail holds the string denoting the email vertex property in the database.
-	FieldEmail = "email"
-	// FieldName holds the string denoting the name vertex property in the database.
-	FieldName = "name"
-	// FieldSurname holds the string denoting the surname vertex property in the database.
-	FieldSurname = "surname"
-	// FieldCreatedAt holds the string denoting the created_at vertex property in the database.
-	FieldCreatedAt = "created_at"
-	// FieldUpdatedAt holds the string denoting the updated_at vertex property in the database.
+	FieldID        = "id"         // FieldType holds the string denoting the type vertex property in the database.
+	FieldType      = "type"       // FieldEmail holds the string denoting the email vertex property in the database.
+	FieldEmail     = "email"      // FieldName holds the string denoting the name vertex property in the database.
+	FieldName      = "name"       // FieldSurname holds the string denoting the surname vertex property in the database.
+	FieldSurname   = "surname"    // FieldCreatedAt holds the string denoting the created_at vertex property in the database.
+	FieldCreatedAt = "created_at" // FieldUpdatedAt holds the string denoting the updated_at vertex property in the database.
 	FieldUpdatedAt = "updated_at"
+
+	// EdgeLevels holds the string denoting the levels edge name in mutations.
+	EdgeLevels = "levels"
+	// EdgeCredentials holds the string denoting the credentials edge name in mutations.
+	EdgeCredentials = "credentials"
 
 	// Table holds the table name of the user in the database.
 	Table = "users"
@@ -45,6 +45,7 @@ const (
 // Columns holds all SQL columns for user fields.
 var Columns = []string{
 	FieldID,
+	FieldType,
 	FieldEmail,
 	FieldName,
 	FieldSurname,
@@ -53,32 +54,39 @@ var Columns = []string{
 }
 
 var (
-	fields = schema.User{}.Fields()
-
-	// descEmail is the schema descriptor for email field.
-	descEmail = fields[1].Descriptor()
 	// EmailValidator is a validator for the "email" field. It is called by the builders before save.
-	EmailValidator = descEmail.Validators[0].(func(string) error)
-
-	// descName is the schema descriptor for name field.
-	descName = fields[2].Descriptor()
+	EmailValidator func(string) error
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
-	NameValidator = descName.Validators[0].(func(string) error)
-
-	// descSurname is the schema descriptor for surname field.
-	descSurname = fields[3].Descriptor()
+	NameValidator func(string) error
 	// SurnameValidator is a validator for the "surname" field. It is called by the builders before save.
-	SurnameValidator = descSurname.Validators[0].(func(string) error)
-
-	// descCreatedAt is the schema descriptor for created_at field.
-	descCreatedAt = fields[4].Descriptor()
+	SurnameValidator func(string) error
 	// DefaultCreatedAt holds the default value on creation for the created_at field.
-	DefaultCreatedAt = descCreatedAt.Default.(func() time.Time)
-
-	// descUpdatedAt is the schema descriptor for updated_at field.
-	descUpdatedAt = fields[5].Descriptor()
+	DefaultCreatedAt func() time.Time
 	// DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	DefaultUpdatedAt = descUpdatedAt.Default.(func() time.Time)
+	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	UpdateDefaultUpdatedAt = descUpdatedAt.UpdateDefault.(func() time.Time)
+	UpdateDefaultUpdatedAt func() time.Time
 )
+
+// Type defines the type for the type enum field.
+type Type string
+
+// Type values.
+const (
+	TypeTeacher Type = "teacher"
+	TypeStudent Type = "student"
+)
+
+func (s Type) String() string {
+	return string(s)
+}
+
+// TypeValidator is a validator for the "_type" field enum values. It is called by the builders before save.
+func TypeValidator(_type Type) error {
+	switch _type {
+	case TypeTeacher, TypeStudent:
+		return nil
+	default:
+		return fmt.Errorf("user: invalid enum value for type field: %q", _type)
+	}
+}

@@ -73,6 +73,7 @@ func TestUserPostControllerBody_200OnUserStoredOnRepository(t *testing.T) {
 	expectedUser := &user.AuthenticatedUser{
 		User: user.User{
 			Id:      1000,
+			Type:    user.TypeStudent,
 			Email:   "test@email.com",
 			Name:    "TestName",
 			Surname: "TestSurname",

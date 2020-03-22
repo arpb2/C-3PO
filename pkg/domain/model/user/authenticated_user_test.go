@@ -10,11 +10,12 @@ import (
 )
 
 func TestAuthenticatedUser_ToJson(t *testing.T) {
-	expectedJson := `{"id":0,"email":"test@email.com","name":"test name","surname":"test surname","password":"test password"}`
+	expectedJson := `{"id":0,"type":"student","email":"test@email.com","name":"test name","surname":"test surname","password":"test password"}`
 
 	user := &user2.AuthenticatedUser{
 		User: user2.User{
 			Id:      0,
+			Type:    user2.TypeStudent,
 			Name:    "test name",
 			Surname: "test surname",
 			Email:   "test@email.com",
@@ -32,6 +33,7 @@ func TestAuthenticatedUser_FromJson(t *testing.T) {
 	expectedUser := &user2.AuthenticatedUser{
 		User: user2.User{
 			Id:      0,
+			Type:    user2.TypeStudent,
 			Name:    "test name",
 			Surname: "test surname",
 			Email:   "test@email.com",
@@ -39,7 +41,7 @@ func TestAuthenticatedUser_FromJson(t *testing.T) {
 		Password: "test password",
 	}
 
-	data := `{"id":0,"email":"test@email.com","name":"test name","surname":"test surname","password":"test password"}`
+	data := `{"id":0,"type":"student","email":"test@email.com","name":"test name","surname":"test surname","password":"test password"}`
 	var user user2.AuthenticatedUser
 
 	err := json.Unmarshal([]byte(data), &user)

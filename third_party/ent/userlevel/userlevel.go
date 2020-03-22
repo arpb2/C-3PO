@@ -4,23 +4,22 @@ package userlevel
 
 import (
 	"time"
-
-	"github.com/arpb2/C-3PO/third_party/ent/schema"
 )
 
 const (
 	// Label holds the string label denoting the userlevel type in the database.
 	Label = "user_level"
 	// FieldID holds the string denoting the id field in the database.
-	FieldID = "id"
-	// FieldCreatedAt holds the string denoting the created_at vertex property in the database.
-	FieldCreatedAt = "created_at"
-	// FieldUpdatedAt holds the string denoting the updated_at vertex property in the database.
-	FieldUpdatedAt = "updated_at"
-	// FieldCode holds the string denoting the code vertex property in the database.
-	FieldCode = "code"
-	// FieldWorkspace holds the string denoting the workspace vertex property in the database.
+	FieldID        = "id"         // FieldCreatedAt holds the string denoting the created_at vertex property in the database.
+	FieldCreatedAt = "created_at" // FieldUpdatedAt holds the string denoting the updated_at vertex property in the database.
+	FieldUpdatedAt = "updated_at" // FieldCode holds the string denoting the code vertex property in the database.
+	FieldCode      = "code"       // FieldWorkspace holds the string denoting the workspace vertex property in the database.
 	FieldWorkspace = "workspace"
+
+	// EdgeDeveloper holds the string denoting the developer edge name in mutations.
+	EdgeDeveloper = "developer"
+	// EdgeLevel holds the string denoting the level edge name in mutations.
+	EdgeLevel = "level"
 
 	// Table holds the table name of the userlevel in the database.
 	Table = "user_levels"
@@ -56,27 +55,14 @@ var ForeignKeys = []string{
 }
 
 var (
-	fields = schema.UserLevel{}.Fields()
-
-	// descCreatedAt is the schema descriptor for created_at field.
-	descCreatedAt = fields[0].Descriptor()
 	// DefaultCreatedAt holds the default value on creation for the created_at field.
-	DefaultCreatedAt = descCreatedAt.Default.(func() time.Time)
-
-	// descUpdatedAt is the schema descriptor for updated_at field.
-	descUpdatedAt = fields[1].Descriptor()
+	DefaultCreatedAt func() time.Time
 	// DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	DefaultUpdatedAt = descUpdatedAt.Default.(func() time.Time)
+	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	UpdateDefaultUpdatedAt = descUpdatedAt.UpdateDefault.(func() time.Time)
-
-	// descCode is the schema descriptor for code field.
-	descCode = fields[2].Descriptor()
+	UpdateDefaultUpdatedAt func() time.Time
 	// CodeValidator is a validator for the "code" field. It is called by the builders before save.
-	CodeValidator = descCode.Validators[0].(func(string) error)
-
-	// descWorkspace is the schema descriptor for workspace field.
-	descWorkspace = fields[3].Descriptor()
+	CodeValidator func(string) error
 	// WorkspaceValidator is a validator for the "workspace" field. It is called by the builders before save.
-	WorkspaceValidator = descWorkspace.Validators[0].(func(string) error)
+	WorkspaceValidator func(string) error
 )

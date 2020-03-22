@@ -3,6 +3,8 @@ package schema
 import (
 	"time"
 
+	"github.com/arpb2/C-3PO/pkg/domain/model/user"
+
 	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/schema/edge"
 	"github.com/facebookincubator/ent/schema/field"
@@ -16,6 +18,10 @@ type User struct {
 func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.Uint("id").Unique().Immutable(),
+		field.Enum("type").Values(
+			string(user.TypeTeacher),
+			string(user.TypeStudent),
+		).Immutable(),
 		field.String("email").NotEmpty().Unique(),
 		field.String("name").NotEmpty(),
 		field.String("surname").NotEmpty(),

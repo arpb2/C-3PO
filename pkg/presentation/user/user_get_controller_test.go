@@ -108,6 +108,7 @@ func TestUserGetControllerBody_400OnNoUserStoredInRepository(t *testing.T) {
 func TestUserGetControllerBody_200OnUserStoredOnRepository(t *testing.T) {
 	expectedUser := user2.User{
 		Id:      1000,
+		Type:    user2.TypeStudent,
 		Email:   "test@email.com",
 		Name:    "TestName",
 		Surname: "TestSurname",

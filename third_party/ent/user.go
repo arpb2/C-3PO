@@ -17,6 +17,8 @@ type User struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uint `json:"id,omitempty"`
+	// Type holds the value of the "type" field.
+	Type user.Type `json:"type,omitempty"`
 	// Email holds the value of the "email" field.
 	Email string `json:"email,omitempty"`
 	// Name holds the value of the "name" field.
@@ -70,6 +72,7 @@ func (e UserEdges) CredentialsOrErr() (*Credential, error) {
 func (*User) scanValues() []interface{} {
 	return []interface{}{
 		&sql.NullInt64{},  // id
+		&sql.NullString{}, // type
 		&sql.NullString{}, // email
 		&sql.NullString{}, // name
 		&sql.NullString{}, // surname
@@ -91,27 +94,32 @@ func (u *User) assignValues(values ...interface{}) error {
 	u.ID = uint(value.Int64)
 	values = values[1:]
 	if value, ok := values[0].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field email", values[0])
+		return fmt.Errorf("unexpected type %T for field type", values[0])
+	} else if value.Valid {
+		u.Type = user.Type(value.String)
+	}
+	if value, ok := values[1].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field email", values[1])
 	} else if value.Valid {
 		u.Email = value.String
 	}
-	if value, ok := values[1].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field name", values[1])
+	if value, ok := values[2].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field name", values[2])
 	} else if value.Valid {
 		u.Name = value.String
 	}
-	if value, ok := values[2].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field surname", values[2])
+	if value, ok := values[3].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field surname", values[3])
 	} else if value.Valid {
 		u.Surname = value.String
 	}
-	if value, ok := values[3].(*sql.NullTime); !ok {
-		return fmt.Errorf("unexpected type %T for field created_at", values[3])
+	if value, ok := values[4].(*sql.NullTime); !ok {
+		return fmt.Errorf("unexpected type %T for field created_at", values[4])
 	} else if value.Valid {
 		u.CreatedAt = value.Time
 	}
-	if value, ok := values[4].(*sql.NullTime); !ok {
-		return fmt.Errorf("unexpected type %T for field updated_at", values[4])
+	if value, ok := values[5].(*sql.NullTime); !ok {
+		return fmt.Errorf("unexpected type %T for field updated_at", values[5])
 	} else if value.Valid {
 		u.UpdatedAt = value.Time
 	}
@@ -120,19 +128,19 @@ func (u *User) assignValues(values ...interface{}) error {
 
 // QueryLevels queries the levels edge of the User.
 func (u *User) QueryLevels() *UserLevelQuery {
-	return (&UserClient{u.config}).QueryLevels(u)
+	return (&UserClient{config: u.config}).QueryLevels(u)
 }
 
 // QueryCredentials queries the credentials edge of the User.
 func (u *User) QueryCredentials() *CredentialQuery {
-	return (&UserClient{u.config}).QueryCredentials(u)
+	return (&UserClient{config: u.config}).QueryCredentials(u)
 }
 
 // Update returns a builder for updating this User.
 // Note that, you need to call User.Unwrap() before calling this method, if this User
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (u *User) Update() *UserUpdateOne {
-	return (&UserClient{u.config}).UpdateOne(u)
+	return (&UserClient{config: u.config}).UpdateOne(u)
 }
 
 // Unwrap unwraps the entity that was returned from a transaction after it was closed,
@@ -151,6 +159,8 @@ func (u *User) String() string {
 	var builder strings.Builder
 	builder.WriteString("User(")
 	builder.WriteString(fmt.Sprintf("id=%v", u.ID))
+	builder.WriteString(", type=")
+	builder.WriteString(fmt.Sprintf("%v", u.Type))
 	builder.WriteString(", email=")
 	builder.WriteString(u.Email)
 	builder.WriteString(", name=")

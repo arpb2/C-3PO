@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/arpb2/C-3PO/third_party/ent/level"
 	"github.com/arpb2/C-3PO/third_party/ent/predicate"
@@ -15,6 +16,8 @@ import (
 // LevelDelete is the builder for deleting a Level entity.
 type LevelDelete struct {
 	config
+	hooks      []Hook
+	mutation   *LevelMutation
 	predicates []predicate.Level
 }
 
@@ -26,7 +29,30 @@ func (ld *LevelDelete) Where(ps ...predicate.Level) *LevelDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (ld *LevelDelete) Exec(ctx context.Context) (int, error) {
-	return ld.sqlExec(ctx)
+	var (
+		err      error
+		affected int
+	)
+	if len(ld.hooks) == 0 {
+		affected, err = ld.sqlExec(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*LevelMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			ld.mutation = mutation
+			affected, err = ld.sqlExec(ctx)
+			return affected, err
+		})
+		for i := len(ld.hooks) - 1; i >= 0; i-- {
+			mut = ld.hooks[i](mut)
+		}
+		if _, err := mut.Mutate(ctx, ld.mutation); err != nil {
+			return 0, err
+		}
+	}
+	return affected, err
 }
 
 // ExecX is like Exec, but panics if an error occurs.

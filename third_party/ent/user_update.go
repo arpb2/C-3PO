@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
@@ -20,16 +19,9 @@ import (
 // UserUpdate is the builder for updating User entities.
 type UserUpdate struct {
 	config
-	email   *string
-	name    *string
-	surname *string
-
-	updated_at         *time.Time
-	levels             map[int]struct{}
-	credentials        map[int]struct{}
-	removedLevels      map[int]struct{}
-	clearedCredentials bool
-	predicates         []predicate.User
+	hooks      []Hook
+	mutation   *UserMutation
+	predicates []predicate.User
 }
 
 // Where adds a new predicate for the builder.
@@ -40,36 +32,31 @@ func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 
 // SetEmail sets the email field.
 func (uu *UserUpdate) SetEmail(s string) *UserUpdate {
-	uu.email = &s
+	uu.mutation.SetEmail(s)
 	return uu
 }
 
 // SetName sets the name field.
 func (uu *UserUpdate) SetName(s string) *UserUpdate {
-	uu.name = &s
+	uu.mutation.SetName(s)
 	return uu
 }
 
 // SetSurname sets the surname field.
 func (uu *UserUpdate) SetSurname(s string) *UserUpdate {
-	uu.surname = &s
+	uu.mutation.SetSurname(s)
 	return uu
 }
 
 // SetUpdatedAt sets the updated_at field.
 func (uu *UserUpdate) SetUpdatedAt(t time.Time) *UserUpdate {
-	uu.updated_at = &t
+	uu.mutation.SetUpdatedAt(t)
 	return uu
 }
 
 // AddLevelIDs adds the levels edge to UserLevel by ids.
 func (uu *UserUpdate) AddLevelIDs(ids ...int) *UserUpdate {
-	if uu.levels == nil {
-		uu.levels = make(map[int]struct{})
-	}
-	for i := range ids {
-		uu.levels[ids[i]] = struct{}{}
-	}
+	uu.mutation.AddLevelIDs(ids...)
 	return uu
 }
 
@@ -84,10 +71,7 @@ func (uu *UserUpdate) AddLevels(u ...*UserLevel) *UserUpdate {
 
 // SetCredentialsID sets the credentials edge to Credential by id.
 func (uu *UserUpdate) SetCredentialsID(id int) *UserUpdate {
-	if uu.credentials == nil {
-		uu.credentials = make(map[int]struct{})
-	}
-	uu.credentials[id] = struct{}{}
+	uu.mutation.SetCredentialsID(id)
 	return uu
 }
 
@@ -106,12 +90,7 @@ func (uu *UserUpdate) SetCredentials(c *Credential) *UserUpdate {
 
 // RemoveLevelIDs removes the levels edge to UserLevel by ids.
 func (uu *UserUpdate) RemoveLevelIDs(ids ...int) *UserUpdate {
-	if uu.removedLevels == nil {
-		uu.removedLevels = make(map[int]struct{})
-	}
-	for i := range ids {
-		uu.removedLevels[ids[i]] = struct{}{}
-	}
+	uu.mutation.RemoveLevelIDs(ids...)
 	return uu
 }
 
@@ -126,35 +105,56 @@ func (uu *UserUpdate) RemoveLevels(u ...*UserLevel) *UserUpdate {
 
 // ClearCredentials clears the credentials edge to Credential.
 func (uu *UserUpdate) ClearCredentials() *UserUpdate {
-	uu.clearedCredentials = true
+	uu.mutation.ClearCredentials()
 	return uu
 }
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
-	if uu.email != nil {
-		if err := user.EmailValidator(*uu.email); err != nil {
+	if v, ok := uu.mutation.Email(); ok {
+		if err := user.EmailValidator(v); err != nil {
 			return 0, fmt.Errorf("ent: validator failed for field \"email\": %v", err)
 		}
 	}
-	if uu.name != nil {
-		if err := user.NameValidator(*uu.name); err != nil {
+	if v, ok := uu.mutation.Name(); ok {
+		if err := user.NameValidator(v); err != nil {
 			return 0, fmt.Errorf("ent: validator failed for field \"name\": %v", err)
 		}
 	}
-	if uu.surname != nil {
-		if err := user.SurnameValidator(*uu.surname); err != nil {
+	if v, ok := uu.mutation.Surname(); ok {
+		if err := user.SurnameValidator(v); err != nil {
 			return 0, fmt.Errorf("ent: validator failed for field \"surname\": %v", err)
 		}
 	}
-	if uu.updated_at == nil {
+	if _, ok := uu.mutation.UpdatedAt(); !ok {
 		v := user.UpdateDefaultUpdatedAt()
-		uu.updated_at = &v
+		uu.mutation.SetUpdatedAt(v)
 	}
-	if len(uu.credentials) > 1 {
-		return 0, errors.New("ent: multiple assignments on a unique edge \"credentials\"")
+
+	var (
+		err      error
+		affected int
+	)
+	if len(uu.hooks) == 0 {
+		affected, err = uu.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*UserMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			uu.mutation = mutation
+			affected, err = uu.sqlSave(ctx)
+			return affected, err
+		})
+		for i := len(uu.hooks) - 1; i >= 0; i-- {
+			mut = uu.hooks[i](mut)
+		}
+		if _, err := mut.Mutate(ctx, uu.mutation); err != nil {
+			return 0, err
+		}
 	}
-	return uu.sqlSave(ctx)
+	return affected, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -197,35 +197,35 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value := uu.email; value != nil {
+	if value, ok := uu.mutation.Email(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldEmail,
 		})
 	}
-	if value := uu.name; value != nil {
+	if value, ok := uu.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldName,
 		})
 	}
-	if value := uu.surname; value != nil {
+	if value, ok := uu.mutation.Surname(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldSurname,
 		})
 	}
-	if value := uu.updated_at; value != nil {
+	if value, ok := uu.mutation.UpdatedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldUpdatedAt,
 		})
 	}
-	if nodes := uu.removedLevels; len(nodes) > 0 {
+	if nodes := uu.mutation.RemovedLevelsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -239,12 +239,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.levels; len(nodes) > 0 {
+	if nodes := uu.mutation.LevelsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -258,12 +258,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uu.clearedCredentials {
+	if uu.mutation.CredentialsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -279,7 +279,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.credentials; len(nodes) > 0 {
+	if nodes := uu.mutation.CredentialsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -293,13 +293,15 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
+		if _, ok := err.(*sqlgraph.NotFoundError); ok {
+			err = &NotFoundError{user.Label}
+		} else if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}
 		return 0, err
@@ -310,50 +312,37 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // UserUpdateOne is the builder for updating a single User entity.
 type UserUpdateOne struct {
 	config
-	id      uint
-	email   *string
-	name    *string
-	surname *string
-
-	updated_at         *time.Time
-	levels             map[int]struct{}
-	credentials        map[int]struct{}
-	removedLevels      map[int]struct{}
-	clearedCredentials bool
+	hooks    []Hook
+	mutation *UserMutation
 }
 
 // SetEmail sets the email field.
 func (uuo *UserUpdateOne) SetEmail(s string) *UserUpdateOne {
-	uuo.email = &s
+	uuo.mutation.SetEmail(s)
 	return uuo
 }
 
 // SetName sets the name field.
 func (uuo *UserUpdateOne) SetName(s string) *UserUpdateOne {
-	uuo.name = &s
+	uuo.mutation.SetName(s)
 	return uuo
 }
 
 // SetSurname sets the surname field.
 func (uuo *UserUpdateOne) SetSurname(s string) *UserUpdateOne {
-	uuo.surname = &s
+	uuo.mutation.SetSurname(s)
 	return uuo
 }
 
 // SetUpdatedAt sets the updated_at field.
 func (uuo *UserUpdateOne) SetUpdatedAt(t time.Time) *UserUpdateOne {
-	uuo.updated_at = &t
+	uuo.mutation.SetUpdatedAt(t)
 	return uuo
 }
 
 // AddLevelIDs adds the levels edge to UserLevel by ids.
 func (uuo *UserUpdateOne) AddLevelIDs(ids ...int) *UserUpdateOne {
-	if uuo.levels == nil {
-		uuo.levels = make(map[int]struct{})
-	}
-	for i := range ids {
-		uuo.levels[ids[i]] = struct{}{}
-	}
+	uuo.mutation.AddLevelIDs(ids...)
 	return uuo
 }
 
@@ -368,10 +357,7 @@ func (uuo *UserUpdateOne) AddLevels(u ...*UserLevel) *UserUpdateOne {
 
 // SetCredentialsID sets the credentials edge to Credential by id.
 func (uuo *UserUpdateOne) SetCredentialsID(id int) *UserUpdateOne {
-	if uuo.credentials == nil {
-		uuo.credentials = make(map[int]struct{})
-	}
-	uuo.credentials[id] = struct{}{}
+	uuo.mutation.SetCredentialsID(id)
 	return uuo
 }
 
@@ -390,12 +376,7 @@ func (uuo *UserUpdateOne) SetCredentials(c *Credential) *UserUpdateOne {
 
 // RemoveLevelIDs removes the levels edge to UserLevel by ids.
 func (uuo *UserUpdateOne) RemoveLevelIDs(ids ...int) *UserUpdateOne {
-	if uuo.removedLevels == nil {
-		uuo.removedLevels = make(map[int]struct{})
-	}
-	for i := range ids {
-		uuo.removedLevels[ids[i]] = struct{}{}
-	}
+	uuo.mutation.RemoveLevelIDs(ids...)
 	return uuo
 }
 
@@ -410,35 +391,56 @@ func (uuo *UserUpdateOne) RemoveLevels(u ...*UserLevel) *UserUpdateOne {
 
 // ClearCredentials clears the credentials edge to Credential.
 func (uuo *UserUpdateOne) ClearCredentials() *UserUpdateOne {
-	uuo.clearedCredentials = true
+	uuo.mutation.ClearCredentials()
 	return uuo
 }
 
 // Save executes the query and returns the updated entity.
 func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
-	if uuo.email != nil {
-		if err := user.EmailValidator(*uuo.email); err != nil {
+	if v, ok := uuo.mutation.Email(); ok {
+		if err := user.EmailValidator(v); err != nil {
 			return nil, fmt.Errorf("ent: validator failed for field \"email\": %v", err)
 		}
 	}
-	if uuo.name != nil {
-		if err := user.NameValidator(*uuo.name); err != nil {
+	if v, ok := uuo.mutation.Name(); ok {
+		if err := user.NameValidator(v); err != nil {
 			return nil, fmt.Errorf("ent: validator failed for field \"name\": %v", err)
 		}
 	}
-	if uuo.surname != nil {
-		if err := user.SurnameValidator(*uuo.surname); err != nil {
+	if v, ok := uuo.mutation.Surname(); ok {
+		if err := user.SurnameValidator(v); err != nil {
 			return nil, fmt.Errorf("ent: validator failed for field \"surname\": %v", err)
 		}
 	}
-	if uuo.updated_at == nil {
+	if _, ok := uuo.mutation.UpdatedAt(); !ok {
 		v := user.UpdateDefaultUpdatedAt()
-		uuo.updated_at = &v
+		uuo.mutation.SetUpdatedAt(v)
 	}
-	if len(uuo.credentials) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"credentials\"")
+
+	var (
+		err  error
+		node *User
+	)
+	if len(uuo.hooks) == 0 {
+		node, err = uuo.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*UserMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			uuo.mutation = mutation
+			node, err = uuo.sqlSave(ctx)
+			return node, err
+		})
+		for i := len(uuo.hooks) - 1; i >= 0; i-- {
+			mut = uuo.hooks[i](mut)
+		}
+		if _, err := mut.Mutate(ctx, uuo.mutation); err != nil {
+			return nil, err
+		}
 	}
-	return uuo.sqlSave(ctx)
+	return node, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -469,41 +471,45 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			Table:   user.Table,
 			Columns: user.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Value:  uuo.id,
 				Type:   field.TypeUint,
 				Column: user.FieldID,
 			},
 		},
 	}
-	if value := uuo.email; value != nil {
+	id, ok := uuo.mutation.ID()
+	if !ok {
+		return nil, fmt.Errorf("missing User.ID for update")
+	}
+	_spec.Node.ID.Value = id
+	if value, ok := uuo.mutation.Email(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldEmail,
 		})
 	}
-	if value := uuo.name; value != nil {
+	if value, ok := uuo.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldName,
 		})
 	}
-	if value := uuo.surname; value != nil {
+	if value, ok := uuo.mutation.Surname(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldSurname,
 		})
 	}
-	if value := uuo.updated_at; value != nil {
+	if value, ok := uuo.mutation.UpdatedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldUpdatedAt,
 		})
 	}
-	if nodes := uuo.removedLevels; len(nodes) > 0 {
+	if nodes := uuo.mutation.RemovedLevelsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -517,12 +523,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.levels; len(nodes) > 0 {
+	if nodes := uuo.mutation.LevelsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -536,12 +542,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uuo.clearedCredentials {
+	if uuo.mutation.CredentialsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -557,7 +563,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.credentials; len(nodes) > 0 {
+	if nodes := uuo.mutation.CredentialsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -571,7 +577,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -580,7 +586,9 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 	_spec.Assign = u.assignValues
 	_spec.ScanValues = u.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, uuo.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
+		if _, ok := err.(*sqlgraph.NotFoundError); ok {
+			err = &NotFoundError{user.Label}
+		} else if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}
 		return nil, err

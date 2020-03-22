@@ -92,6 +92,7 @@ func TestUserPutControllerBody_500OnRepositoryCreateError(t *testing.T) {
 		return true
 	})).Return(user2.User{
 		Id:      1234,
+		Type:    user2.TypeStudent,
 		Email:   "test@email.com",
 		Name:    "test name",
 		Surname: "test surname",
@@ -159,6 +160,7 @@ func TestUserPutControllerBody_400OnIdSpecified(t *testing.T) {
 func TestUserPutControllerBody_200OnUserStoredOnRepository(t *testing.T) {
 	expectedUser := user2.User{
 		Id:      1000,
+		Type:    user2.TypeStudent,
 		Email:   "test@email.com",
 		Name:    "TestName",
 		Surname: "TestSurname",
