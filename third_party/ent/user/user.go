@@ -73,8 +73,8 @@ type Type string
 
 // Type values.
 const (
-	TypeStudent Type = "student"
 	TypeTeacher Type = "teacher"
+	TypeStudent Type = "student"
 )
 
 func (s Type) String() string {
@@ -84,7 +84,7 @@ func (s Type) String() string {
 // TypeValidator is a validator for the "_type" field enum values. It is called by the builders before save.
 func TypeValidator(_type Type) error {
 	switch _type {
-	case TypeStudent, TypeTeacher:
+	case TypeTeacher, TypeStudent:
 		return nil
 	default:
 		return fmt.Errorf("user: invalid enum value for type field: %q", _type)
