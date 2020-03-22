@@ -1,18 +1,13 @@
 package user
 
 import (
-	"fmt"
-
 	"github.com/arpb2/C-3PO/pkg/domain/http"
 	"github.com/arpb2/C-3PO/pkg/domain/model/user"
 	httppipeline "github.com/arpb2/C-3PO/pkg/domain/pipeline"
 	"github.com/saantiaguilera/go-pipeline"
 )
 
-type fetchCodeUseCase struct {
-	CodePartParam      string
-	WorkspacePartParam string
-}
+type fetchCodeUseCase struct{}
 
 func (c *fetchCodeUseCase) Name() string {
 	return "fetch_user_level_data_usecase"
@@ -27,28 +22,17 @@ func (c *fetchCodeUseCase) Run(ctx pipeline.Context) error {
 		return err
 	}
 
-	code, exists := httpReader.GetFormData(c.CodePartParam)
+	var ulData user.LevelData
+	err = httpReader.ReadBody(&ulData)
 
-	if !exists {
-		return http.CreateBadRequestError(fmt.Sprintf("'%s' part not found", c.CodePartParam))
+	if err != nil {
+		return http.CreateBadRequestError("error reading user level json")
 	}
 
-	workspace, exists := httpReader.GetFormData(c.WorkspacePartParam)
-
-	if !exists {
-		return http.CreateBadRequestError(fmt.Sprintf("'%s' part not found", c.WorkspacePartParam))
-	}
-
-	ctx.Set(TagUserLevelData, user.LevelData{
-		Code:      code,
-		Workspace: workspace,
-	})
+	ctx.Set(TagUserLevelData, ulData)
 	return nil
 }
 
-func CreateFetchCodeUseCase(codePartParam, workspacePartParam string) pipeline.Step {
-	return &fetchCodeUseCase{
-		CodePartParam:      codePartParam,
-		WorkspacePartParam: workspacePartParam,
-	}
+func CreateFetchCodeUseCase() pipeline.Step {
+	return &fetchCodeUseCase{}
 }

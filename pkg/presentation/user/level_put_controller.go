@@ -9,12 +9,12 @@ import (
 )
 
 func CreatePutLevelHandler(
-	paramUserId, paramLevelId, codePartParam, workspacePartParam string,
+	paramUserId, paramLevelId string,
 	exec pipeline.HttpPipeline,
 	userLevelRepository user2.LevelRepository,
 ) http.Handler {
 	fetchUserIdUseCase := user.CreateFetchUserIdUseCase(paramUserId)
-	fetchCodeUseCase := user.CreateFetchCodeUseCase(codePartParam, workspacePartParam)
+	fetchCodeUseCase := user.CreateFetchCodeUseCase()
 	fetchLevelIdUseCase := user.CreateFetchLevelIdUseCase(paramLevelId)
 	repositoryUseCase := user.CreateWriteUserLevelUseCase(userLevelRepository)
 	renderUseCase := user.CreateRenderUserLevelUseCase()
