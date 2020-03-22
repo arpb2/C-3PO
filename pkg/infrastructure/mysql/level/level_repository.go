@@ -79,5 +79,9 @@ func (l *levelRepository) StoreLevel(lvl level.Level) (result level.Level, err e
 			Save(ctx)
 	}
 
+	if err != nil && ent.IsConstraintError(err) {
+		return lvl, http.CreateBadRequestError("constraint error")
+	}
+
 	return lvl, err
 }

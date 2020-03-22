@@ -5,6 +5,8 @@ import (
 	"crypto/rand"
 	"io"
 
+	"github.com/arpb2/C-3PO/pkg/domain/http"
+
 	"github.com/arpb2/C-3PO/pkg/domain/model/user"
 
 	"github.com/arpb2/C-3PO/pkg/infrastructure/mysql"
@@ -23,9 +25,17 @@ func createUser(tx *ent.Tx, ctx context.Context, user user.User) (*ent.User, err
 		SetEmail(user.Email).
 		Save(ctx)
 
-	if err != nil || result == nil {
+	if err != nil {
+		if ent.IsConstraintError(err) {
+			return nil, http.CreateBadRequestError("constraint error")
+		}
 		return nil, mysql.Rollback(tx, err)
 	}
+
+	if result == nil {
+		return nil, mysql.Rollback(tx, err)
+	}
+
 	return result, nil
 }
 
@@ -47,7 +57,14 @@ func createCredential(tx *ent.Tx, ctx context.Context, holder *ent.User, user us
 		SetPasswordHash(hash).
 		Save(ctx)
 
-	if err != nil || credential == nil {
+	if err != nil {
+		if ent.IsConstraintError(err) {
+			return http.CreateBadRequestError("constraint error")
+		}
+		return mysql.Rollback(tx, err)
+	}
+
+	if credential == nil {
 		return mysql.Rollback(tx, err)
 	}
 	return nil
