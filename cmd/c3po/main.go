@@ -81,6 +81,8 @@ func main() {
 	emptyPasswordValidation := validation.EmptyPassword
 	emptySurnameValidation := validation.EmptySurname
 	idProvidedValidation := validation.IdProvided
+	malformedTypeValidation := validation.MalformedType
+	typeProvidedValidation := validation.TypeProvided
 	securePasswordValidation := validation.SecurePassword
 
 	healthGetHandler := health.CreateGetHandler()
@@ -97,9 +99,11 @@ func main() {
 		emptyPasswordValidation,
 		securePasswordValidation,
 		idProvidedValidation,
+		malformedTypeValidation,
 	})
 	userPutHandler := user.CreatePutUserHandler(ParamUserId, httpPipeline, userRepository, []validation.Validation{
 		idProvidedValidation,
+		typeProvidedValidation,
 		securePasswordValidation,
 	})
 	userDeleteHandler := user.CreateDeleteUserHandler(ParamUserId, httpPipeline, userRepository)
