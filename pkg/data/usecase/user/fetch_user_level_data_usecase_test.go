@@ -1,7 +1,10 @@
 package user_test
 
 import (
+	"errors"
 	"testing"
+
+	"github.com/stretchr/testify/mock"
 
 	"github.com/arpb2/C-3PO/pkg/data/usecase/user"
 	user2 "github.com/arpb2/C-3PO/pkg/domain/model/user"
@@ -14,7 +17,7 @@ import (
 )
 
 func TestFetchCodeUseCase_GivenOne_WhenCallingName_ThenItsTheExpected(t *testing.T) {
-	useCase := user.CreateFetchCodeUseCase("code", "workspace")
+	useCase := user.CreateFetchCodeUseCase()
 
 	name := useCase.Name()
 
@@ -23,47 +26,36 @@ func TestFetchCodeUseCase_GivenOne_WhenCallingName_ThenItsTheExpected(t *testing
 
 func TestFetchCodeUseCase_GivenOneAndAContextWithoutAReader_WhenRunning_Then500(t *testing.T) {
 	ctx := gopipeline.CreateContext()
-	useCase := user.CreateFetchCodeUseCase("code", "workspace")
+	useCase := user.CreateFetchCodeUseCase()
 
 	err := useCase.Run(ctx)
 
 	assert.Equal(t, http.CreateInternalError(), err)
 }
 
-func TestFetchCodeUseCase_GivenOneAndAReaderWithoutCodePart_WhenRunning_Then400(t *testing.T) {
+func TestFetchCodeUseCase_GivenOneAndAReaderThatFails_WhenRunning_Then400(t *testing.T) {
 	reader := new(http2.MockReader)
-	reader.On("GetFormData", "code").Return("", false)
+	reader.On("ReadBody", mock.Anything).Return(errors.New("some error"))
 	ctx := gopipeline.CreateContext()
 	ctx.Set(pipeline2.TagHttpReader, reader)
-	useCase := user.CreateFetchCodeUseCase("code", "workspace")
+	useCase := user.CreateFetchCodeUseCase()
 
 	err := useCase.Run(ctx)
 
-	assert.Equal(t, http.CreateBadRequestError("'code' part not found"), err)
-	reader.AssertExpectations(t)
-}
-
-func TestFetchCodeUseCase_GivenOneAndAReaderWithoutWorkspacePart_WhenRunning_Then400(t *testing.T) {
-	reader := new(http2.MockReader)
-	reader.On("GetFormData", "code").Return("code", true)
-	reader.On("GetFormData", "workspace").Return("", false)
-	ctx := gopipeline.CreateContext()
-	ctx.Set(pipeline2.TagHttpReader, reader)
-	useCase := user.CreateFetchCodeUseCase("code", "workspace")
-
-	err := useCase.Run(ctx)
-
-	assert.Equal(t, http.CreateBadRequestError("'workspace' part not found"), err)
+	assert.Equal(t, http.CreateBadRequestError("error reading user level json"), err)
 	reader.AssertExpectations(t)
 }
 
 func TestFetchCodeUseCase_GivenOne_WhenRunning_ThenRawCodeIsAddedToContext(t *testing.T) {
 	reader := new(http2.MockReader)
-	reader.On("GetFormData", "code").Return("test raw code", true)
-	reader.On("GetFormData", "workspace").Return("test workspace", true)
+	reader.On("ReadBody", mock.Anything).Run(func(args mock.Arguments) {
+		ul := args.Get(0).(*user2.LevelData)
+		ul.Code = "test raw code"
+		ul.Workspace = "test workspace"
+	}).Return(nil)
 	ctx := gopipeline.CreateContext()
 	ctx.Set(pipeline2.TagHttpReader, reader)
-	useCase := user.CreateFetchCodeUseCase("code", "workspace")
+	useCase := user.CreateFetchCodeUseCase()
 
 	err := useCase.Run(ctx)
 	val, exists := ctx.Get(user.TagUserLevelData)

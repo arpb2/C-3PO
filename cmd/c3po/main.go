@@ -33,9 +33,6 @@ const (
 	ParamLevelId = "level_id"
 	ParamUserId  = "user_id"
 
-	PartCode      = "code"
-	PartWorkspace = "workspace"
-
 	defaultPort = "8080"
 )
 
@@ -106,7 +103,6 @@ func main() {
 	userLevelGetHandler := user.CreateGetLevelHandler(ParamUserId, ParamLevelId, httpPipeline, userLevelRepository)
 	userLevelPutHandler := user.CreatePutLevelHandler(
 		ParamUserId, ParamLevelId,
-		PartCode, PartWorkspace,
 		httpPipeline,
 		userLevelRepository,
 	)
