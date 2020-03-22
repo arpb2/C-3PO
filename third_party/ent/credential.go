@@ -101,14 +101,14 @@ func (c *Credential) assignValues(values ...interface{}) error {
 
 // QueryHolder queries the holder edge of the Credential.
 func (c *Credential) QueryHolder() *UserQuery {
-	return (&CredentialClient{c.config}).QueryHolder(c)
+	return (&CredentialClient{config: c.config}).QueryHolder(c)
 }
 
 // Update returns a builder for updating this Credential.
 // Note that, you need to call Credential.Unwrap() before calling this method, if this Credential
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (c *Credential) Update() *CredentialUpdateOne {
-	return (&CredentialClient{c.config}).UpdateOne(c)
+	return (&CredentialClient{config: c.config}).UpdateOne(c)
 }
 
 // Unwrap unwraps the entity that was returned from a transaction after it was closed,

@@ -16,16 +16,13 @@ import (
 // LevelCreate is the builder for creating a Level entity.
 type LevelCreate struct {
 	config
-	id          *uint
-	created_at  *time.Time
-	updated_at  *time.Time
-	name        *string
-	description *string
+	mutation *LevelMutation
+	hooks    []Hook
 }
 
 // SetCreatedAt sets the created_at field.
 func (lc *LevelCreate) SetCreatedAt(t time.Time) *LevelCreate {
-	lc.created_at = &t
+	lc.mutation.SetCreatedAt(t)
 	return lc
 }
 
@@ -39,7 +36,7 @@ func (lc *LevelCreate) SetNillableCreatedAt(t *time.Time) *LevelCreate {
 
 // SetUpdatedAt sets the updated_at field.
 func (lc *LevelCreate) SetUpdatedAt(t time.Time) *LevelCreate {
-	lc.updated_at = &t
+	lc.mutation.SetUpdatedAt(t)
 	return lc
 }
 
@@ -53,45 +50,72 @@ func (lc *LevelCreate) SetNillableUpdatedAt(t *time.Time) *LevelCreate {
 
 // SetName sets the name field.
 func (lc *LevelCreate) SetName(s string) *LevelCreate {
-	lc.name = &s
+	lc.mutation.SetName(s)
 	return lc
 }
 
 // SetDescription sets the description field.
 func (lc *LevelCreate) SetDescription(s string) *LevelCreate {
-	lc.description = &s
+	lc.mutation.SetDescription(s)
 	return lc
 }
 
 // SetID sets the id field.
 func (lc *LevelCreate) SetID(u uint) *LevelCreate {
-	lc.id = &u
+	lc.mutation.SetID(u)
 	return lc
 }
 
 // Save creates the Level in the database.
 func (lc *LevelCreate) Save(ctx context.Context) (*Level, error) {
-	if lc.created_at == nil {
+	if _, ok := lc.mutation.CreatedAt(); !ok {
 		v := level.DefaultCreatedAt()
-		lc.created_at = &v
+		lc.mutation.SetCreatedAt(v)
 	}
-	if lc.updated_at == nil {
+	if _, ok := lc.mutation.UpdatedAt(); !ok {
 		v := level.DefaultUpdatedAt()
-		lc.updated_at = &v
+		lc.mutation.SetUpdatedAt(v)
 	}
-	if lc.name == nil {
+	if _, ok := lc.mutation.Name(); !ok {
 		return nil, errors.New("ent: missing required field \"name\"")
 	}
-	if err := level.NameValidator(*lc.name); err != nil {
-		return nil, fmt.Errorf("ent: validator failed for field \"name\": %v", err)
+	if v, ok := lc.mutation.Name(); ok {
+		if err := level.NameValidator(v); err != nil {
+			return nil, fmt.Errorf("ent: validator failed for field \"name\": %v", err)
+		}
 	}
-	if lc.description == nil {
+	if _, ok := lc.mutation.Description(); !ok {
 		return nil, errors.New("ent: missing required field \"description\"")
 	}
-	if err := level.DescriptionValidator(*lc.description); err != nil {
-		return nil, fmt.Errorf("ent: validator failed for field \"description\": %v", err)
+	if v, ok := lc.mutation.Description(); ok {
+		if err := level.DescriptionValidator(v); err != nil {
+			return nil, fmt.Errorf("ent: validator failed for field \"description\": %v", err)
+		}
 	}
-	return lc.sqlSave(ctx)
+	var (
+		err  error
+		node *Level
+	)
+	if len(lc.hooks) == 0 {
+		node, err = lc.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*LevelMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			lc.mutation = mutation
+			node, err = lc.sqlSave(ctx)
+			return node, err
+		})
+		for i := len(lc.hooks) - 1; i >= 0; i-- {
+			mut = lc.hooks[i](mut)
+		}
+		if _, err := mut.Mutate(ctx, lc.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -114,41 +138,41 @@ func (lc *LevelCreate) sqlSave(ctx context.Context) (*Level, error) {
 			},
 		}
 	)
-	if value := lc.id; value != nil {
-		l.ID = *value
-		_spec.ID.Value = *value
+	if id, ok := lc.mutation.ID(); ok {
+		l.ID = id
+		_spec.ID.Value = id
 	}
-	if value := lc.created_at; value != nil {
+	if value, ok := lc.mutation.CreatedAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
-			Value:  *value,
+			Value:  value,
 			Column: level.FieldCreatedAt,
 		})
-		l.CreatedAt = *value
+		l.CreatedAt = value
 	}
-	if value := lc.updated_at; value != nil {
+	if value, ok := lc.mutation.UpdatedAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
-			Value:  *value,
+			Value:  value,
 			Column: level.FieldUpdatedAt,
 		})
-		l.UpdatedAt = *value
+		l.UpdatedAt = value
 	}
-	if value := lc.name; value != nil {
+	if value, ok := lc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: level.FieldName,
 		})
-		l.Name = *value
+		l.Name = value
 	}
-	if value := lc.description; value != nil {
+	if value, ok := lc.mutation.Description(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: level.FieldDescription,
 		})
-		l.Description = *value
+		l.Description = value
 	}
 	if err := sqlgraph.CreateNode(ctx, lc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {

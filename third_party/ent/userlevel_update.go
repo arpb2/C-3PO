@@ -20,15 +20,9 @@ import (
 // UserLevelUpdate is the builder for updating UserLevel entities.
 type UserLevelUpdate struct {
 	config
-
-	updated_at       *time.Time
-	code             *string
-	workspace        *string
-	developer        map[uint]struct{}
-	level            map[uint]struct{}
-	clearedDeveloper bool
-	clearedLevel     bool
-	predicates       []predicate.UserLevel
+	hooks      []Hook
+	mutation   *UserLevelMutation
+	predicates []predicate.UserLevel
 }
 
 // Where adds a new predicate for the builder.
@@ -39,28 +33,25 @@ func (ulu *UserLevelUpdate) Where(ps ...predicate.UserLevel) *UserLevelUpdate {
 
 // SetUpdatedAt sets the updated_at field.
 func (ulu *UserLevelUpdate) SetUpdatedAt(t time.Time) *UserLevelUpdate {
-	ulu.updated_at = &t
+	ulu.mutation.SetUpdatedAt(t)
 	return ulu
 }
 
 // SetCode sets the code field.
 func (ulu *UserLevelUpdate) SetCode(s string) *UserLevelUpdate {
-	ulu.code = &s
+	ulu.mutation.SetCode(s)
 	return ulu
 }
 
 // SetWorkspace sets the workspace field.
 func (ulu *UserLevelUpdate) SetWorkspace(s string) *UserLevelUpdate {
-	ulu.workspace = &s
+	ulu.mutation.SetWorkspace(s)
 	return ulu
 }
 
 // SetDeveloperID sets the developer edge to User by id.
 func (ulu *UserLevelUpdate) SetDeveloperID(id uint) *UserLevelUpdate {
-	if ulu.developer == nil {
-		ulu.developer = make(map[uint]struct{})
-	}
-	ulu.developer[id] = struct{}{}
+	ulu.mutation.SetDeveloperID(id)
 	return ulu
 }
 
@@ -71,10 +62,7 @@ func (ulu *UserLevelUpdate) SetDeveloper(u *User) *UserLevelUpdate {
 
 // SetLevelID sets the level edge to Level by id.
 func (ulu *UserLevelUpdate) SetLevelID(id uint) *UserLevelUpdate {
-	if ulu.level == nil {
-		ulu.level = make(map[uint]struct{})
-	}
-	ulu.level[id] = struct{}{}
+	ulu.mutation.SetLevelID(id)
 	return ulu
 }
 
@@ -85,45 +73,64 @@ func (ulu *UserLevelUpdate) SetLevel(l *Level) *UserLevelUpdate {
 
 // ClearDeveloper clears the developer edge to User.
 func (ulu *UserLevelUpdate) ClearDeveloper() *UserLevelUpdate {
-	ulu.clearedDeveloper = true
+	ulu.mutation.ClearDeveloper()
 	return ulu
 }
 
 // ClearLevel clears the level edge to Level.
 func (ulu *UserLevelUpdate) ClearLevel() *UserLevelUpdate {
-	ulu.clearedLevel = true
+	ulu.mutation.ClearLevel()
 	return ulu
 }
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (ulu *UserLevelUpdate) Save(ctx context.Context) (int, error) {
-	if ulu.updated_at == nil {
+	if _, ok := ulu.mutation.UpdatedAt(); !ok {
 		v := userlevel.UpdateDefaultUpdatedAt()
-		ulu.updated_at = &v
+		ulu.mutation.SetUpdatedAt(v)
 	}
-	if ulu.code != nil {
-		if err := userlevel.CodeValidator(*ulu.code); err != nil {
+	if v, ok := ulu.mutation.Code(); ok {
+		if err := userlevel.CodeValidator(v); err != nil {
 			return 0, fmt.Errorf("ent: validator failed for field \"code\": %v", err)
 		}
 	}
-	if ulu.workspace != nil {
-		if err := userlevel.WorkspaceValidator(*ulu.workspace); err != nil {
+	if v, ok := ulu.mutation.Workspace(); ok {
+		if err := userlevel.WorkspaceValidator(v); err != nil {
 			return 0, fmt.Errorf("ent: validator failed for field \"workspace\": %v", err)
 		}
 	}
-	if len(ulu.developer) > 1 {
-		return 0, errors.New("ent: multiple assignments on a unique edge \"developer\"")
-	}
-	if ulu.clearedDeveloper && ulu.developer == nil {
+
+	if _, ok := ulu.mutation.DeveloperID(); ulu.mutation.DeveloperCleared() && !ok {
 		return 0, errors.New("ent: clearing a unique edge \"developer\"")
 	}
-	if len(ulu.level) > 1 {
-		return 0, errors.New("ent: multiple assignments on a unique edge \"level\"")
-	}
-	if ulu.clearedLevel && ulu.level == nil {
+
+	if _, ok := ulu.mutation.LevelID(); ulu.mutation.LevelCleared() && !ok {
 		return 0, errors.New("ent: clearing a unique edge \"level\"")
 	}
-	return ulu.sqlSave(ctx)
+	var (
+		err      error
+		affected int
+	)
+	if len(ulu.hooks) == 0 {
+		affected, err = ulu.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*UserLevelMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			ulu.mutation = mutation
+			affected, err = ulu.sqlSave(ctx)
+			return affected, err
+		})
+		for i := len(ulu.hooks) - 1; i >= 0; i-- {
+			mut = ulu.hooks[i](mut)
+		}
+		if _, err := mut.Mutate(ctx, ulu.mutation); err != nil {
+			return 0, err
+		}
+	}
+	return affected, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -166,28 +173,28 @@ func (ulu *UserLevelUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value := ulu.updated_at; value != nil {
+	if value, ok := ulu.mutation.UpdatedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
-			Value:  *value,
+			Value:  value,
 			Column: userlevel.FieldUpdatedAt,
 		})
 	}
-	if value := ulu.code; value != nil {
+	if value, ok := ulu.mutation.Code(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: userlevel.FieldCode,
 		})
 	}
-	if value := ulu.workspace; value != nil {
+	if value, ok := ulu.mutation.Workspace(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: userlevel.FieldWorkspace,
 		})
 	}
-	if ulu.clearedDeveloper {
+	if ulu.mutation.DeveloperCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -203,7 +210,7 @@ func (ulu *UserLevelUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ulu.developer; len(nodes) > 0 {
+	if nodes := ulu.mutation.DeveloperIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -217,12 +224,12 @@ func (ulu *UserLevelUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if ulu.clearedLevel {
+	if ulu.mutation.LevelCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -238,7 +245,7 @@ func (ulu *UserLevelUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ulu.level; len(nodes) > 0 {
+	if nodes := ulu.mutation.LevelIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -252,13 +259,15 @@ func (ulu *UserLevelUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, ulu.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
+		if _, ok := err.(*sqlgraph.NotFoundError); ok {
+			err = &NotFoundError{userlevel.Label}
+		} else if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}
 		return 0, err
@@ -269,41 +278,31 @@ func (ulu *UserLevelUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // UserLevelUpdateOne is the builder for updating a single UserLevel entity.
 type UserLevelUpdateOne struct {
 	config
-	id int
-
-	updated_at       *time.Time
-	code             *string
-	workspace        *string
-	developer        map[uint]struct{}
-	level            map[uint]struct{}
-	clearedDeveloper bool
-	clearedLevel     bool
+	hooks    []Hook
+	mutation *UserLevelMutation
 }
 
 // SetUpdatedAt sets the updated_at field.
 func (uluo *UserLevelUpdateOne) SetUpdatedAt(t time.Time) *UserLevelUpdateOne {
-	uluo.updated_at = &t
+	uluo.mutation.SetUpdatedAt(t)
 	return uluo
 }
 
 // SetCode sets the code field.
 func (uluo *UserLevelUpdateOne) SetCode(s string) *UserLevelUpdateOne {
-	uluo.code = &s
+	uluo.mutation.SetCode(s)
 	return uluo
 }
 
 // SetWorkspace sets the workspace field.
 func (uluo *UserLevelUpdateOne) SetWorkspace(s string) *UserLevelUpdateOne {
-	uluo.workspace = &s
+	uluo.mutation.SetWorkspace(s)
 	return uluo
 }
 
 // SetDeveloperID sets the developer edge to User by id.
 func (uluo *UserLevelUpdateOne) SetDeveloperID(id uint) *UserLevelUpdateOne {
-	if uluo.developer == nil {
-		uluo.developer = make(map[uint]struct{})
-	}
-	uluo.developer[id] = struct{}{}
+	uluo.mutation.SetDeveloperID(id)
 	return uluo
 }
 
@@ -314,10 +313,7 @@ func (uluo *UserLevelUpdateOne) SetDeveloper(u *User) *UserLevelUpdateOne {
 
 // SetLevelID sets the level edge to Level by id.
 func (uluo *UserLevelUpdateOne) SetLevelID(id uint) *UserLevelUpdateOne {
-	if uluo.level == nil {
-		uluo.level = make(map[uint]struct{})
-	}
-	uluo.level[id] = struct{}{}
+	uluo.mutation.SetLevelID(id)
 	return uluo
 }
 
@@ -328,45 +324,64 @@ func (uluo *UserLevelUpdateOne) SetLevel(l *Level) *UserLevelUpdateOne {
 
 // ClearDeveloper clears the developer edge to User.
 func (uluo *UserLevelUpdateOne) ClearDeveloper() *UserLevelUpdateOne {
-	uluo.clearedDeveloper = true
+	uluo.mutation.ClearDeveloper()
 	return uluo
 }
 
 // ClearLevel clears the level edge to Level.
 func (uluo *UserLevelUpdateOne) ClearLevel() *UserLevelUpdateOne {
-	uluo.clearedLevel = true
+	uluo.mutation.ClearLevel()
 	return uluo
 }
 
 // Save executes the query and returns the updated entity.
 func (uluo *UserLevelUpdateOne) Save(ctx context.Context) (*UserLevel, error) {
-	if uluo.updated_at == nil {
+	if _, ok := uluo.mutation.UpdatedAt(); !ok {
 		v := userlevel.UpdateDefaultUpdatedAt()
-		uluo.updated_at = &v
+		uluo.mutation.SetUpdatedAt(v)
 	}
-	if uluo.code != nil {
-		if err := userlevel.CodeValidator(*uluo.code); err != nil {
+	if v, ok := uluo.mutation.Code(); ok {
+		if err := userlevel.CodeValidator(v); err != nil {
 			return nil, fmt.Errorf("ent: validator failed for field \"code\": %v", err)
 		}
 	}
-	if uluo.workspace != nil {
-		if err := userlevel.WorkspaceValidator(*uluo.workspace); err != nil {
+	if v, ok := uluo.mutation.Workspace(); ok {
+		if err := userlevel.WorkspaceValidator(v); err != nil {
 			return nil, fmt.Errorf("ent: validator failed for field \"workspace\": %v", err)
 		}
 	}
-	if len(uluo.developer) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"developer\"")
-	}
-	if uluo.clearedDeveloper && uluo.developer == nil {
+
+	if _, ok := uluo.mutation.DeveloperID(); uluo.mutation.DeveloperCleared() && !ok {
 		return nil, errors.New("ent: clearing a unique edge \"developer\"")
 	}
-	if len(uluo.level) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"level\"")
-	}
-	if uluo.clearedLevel && uluo.level == nil {
+
+	if _, ok := uluo.mutation.LevelID(); uluo.mutation.LevelCleared() && !ok {
 		return nil, errors.New("ent: clearing a unique edge \"level\"")
 	}
-	return uluo.sqlSave(ctx)
+	var (
+		err  error
+		node *UserLevel
+	)
+	if len(uluo.hooks) == 0 {
+		node, err = uluo.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*UserLevelMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			uluo.mutation = mutation
+			node, err = uluo.sqlSave(ctx)
+			return node, err
+		})
+		for i := len(uluo.hooks) - 1; i >= 0; i-- {
+			mut = uluo.hooks[i](mut)
+		}
+		if _, err := mut.Mutate(ctx, uluo.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -397,34 +412,38 @@ func (uluo *UserLevelUpdateOne) sqlSave(ctx context.Context) (ul *UserLevel, err
 			Table:   userlevel.Table,
 			Columns: userlevel.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Value:  uluo.id,
 				Type:   field.TypeInt,
 				Column: userlevel.FieldID,
 			},
 		},
 	}
-	if value := uluo.updated_at; value != nil {
+	id, ok := uluo.mutation.ID()
+	if !ok {
+		return nil, fmt.Errorf("missing UserLevel.ID for update")
+	}
+	_spec.Node.ID.Value = id
+	if value, ok := uluo.mutation.UpdatedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
-			Value:  *value,
+			Value:  value,
 			Column: userlevel.FieldUpdatedAt,
 		})
 	}
-	if value := uluo.code; value != nil {
+	if value, ok := uluo.mutation.Code(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: userlevel.FieldCode,
 		})
 	}
-	if value := uluo.workspace; value != nil {
+	if value, ok := uluo.mutation.Workspace(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: userlevel.FieldWorkspace,
 		})
 	}
-	if uluo.clearedDeveloper {
+	if uluo.mutation.DeveloperCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -440,7 +459,7 @@ func (uluo *UserLevelUpdateOne) sqlSave(ctx context.Context) (ul *UserLevel, err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uluo.developer; len(nodes) > 0 {
+	if nodes := uluo.mutation.DeveloperIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -454,12 +473,12 @@ func (uluo *UserLevelUpdateOne) sqlSave(ctx context.Context) (ul *UserLevel, err
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uluo.clearedLevel {
+	if uluo.mutation.LevelCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -475,7 +494,7 @@ func (uluo *UserLevelUpdateOne) sqlSave(ctx context.Context) (ul *UserLevel, err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uluo.level; len(nodes) > 0 {
+	if nodes := uluo.mutation.LevelIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -489,7 +508,7 @@ func (uluo *UserLevelUpdateOne) sqlSave(ctx context.Context) (ul *UserLevel, err
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -498,7 +517,9 @@ func (uluo *UserLevelUpdateOne) sqlSave(ctx context.Context) (ul *UserLevel, err
 	_spec.Assign = ul.assignValues
 	_spec.ScanValues = ul.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, uluo.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
+		if _, ok := err.(*sqlgraph.NotFoundError); ok {
+			err = &NotFoundError{userlevel.Label}
+		} else if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}
 		return nil, err

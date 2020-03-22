@@ -18,17 +18,13 @@ import (
 // UserLevelCreate is the builder for creating a UserLevel entity.
 type UserLevelCreate struct {
 	config
-	created_at *time.Time
-	updated_at *time.Time
-	code       *string
-	workspace  *string
-	developer  map[uint]struct{}
-	level      map[uint]struct{}
+	mutation *UserLevelMutation
+	hooks    []Hook
 }
 
 // SetCreatedAt sets the created_at field.
 func (ulc *UserLevelCreate) SetCreatedAt(t time.Time) *UserLevelCreate {
-	ulc.created_at = &t
+	ulc.mutation.SetCreatedAt(t)
 	return ulc
 }
 
@@ -42,7 +38,7 @@ func (ulc *UserLevelCreate) SetNillableCreatedAt(t *time.Time) *UserLevelCreate 
 
 // SetUpdatedAt sets the updated_at field.
 func (ulc *UserLevelCreate) SetUpdatedAt(t time.Time) *UserLevelCreate {
-	ulc.updated_at = &t
+	ulc.mutation.SetUpdatedAt(t)
 	return ulc
 }
 
@@ -56,22 +52,19 @@ func (ulc *UserLevelCreate) SetNillableUpdatedAt(t *time.Time) *UserLevelCreate 
 
 // SetCode sets the code field.
 func (ulc *UserLevelCreate) SetCode(s string) *UserLevelCreate {
-	ulc.code = &s
+	ulc.mutation.SetCode(s)
 	return ulc
 }
 
 // SetWorkspace sets the workspace field.
 func (ulc *UserLevelCreate) SetWorkspace(s string) *UserLevelCreate {
-	ulc.workspace = &s
+	ulc.mutation.SetWorkspace(s)
 	return ulc
 }
 
 // SetDeveloperID sets the developer edge to User by id.
 func (ulc *UserLevelCreate) SetDeveloperID(id uint) *UserLevelCreate {
-	if ulc.developer == nil {
-		ulc.developer = make(map[uint]struct{})
-	}
-	ulc.developer[id] = struct{}{}
+	ulc.mutation.SetDeveloperID(id)
 	return ulc
 }
 
@@ -82,10 +75,7 @@ func (ulc *UserLevelCreate) SetDeveloper(u *User) *UserLevelCreate {
 
 // SetLevelID sets the level edge to Level by id.
 func (ulc *UserLevelCreate) SetLevelID(id uint) *UserLevelCreate {
-	if ulc.level == nil {
-		ulc.level = make(map[uint]struct{})
-	}
-	ulc.level[id] = struct{}{}
+	ulc.mutation.SetLevelID(id)
 	return ulc
 }
 
@@ -96,39 +86,60 @@ func (ulc *UserLevelCreate) SetLevel(l *Level) *UserLevelCreate {
 
 // Save creates the UserLevel in the database.
 func (ulc *UserLevelCreate) Save(ctx context.Context) (*UserLevel, error) {
-	if ulc.created_at == nil {
+	if _, ok := ulc.mutation.CreatedAt(); !ok {
 		v := userlevel.DefaultCreatedAt()
-		ulc.created_at = &v
+		ulc.mutation.SetCreatedAt(v)
 	}
-	if ulc.updated_at == nil {
+	if _, ok := ulc.mutation.UpdatedAt(); !ok {
 		v := userlevel.DefaultUpdatedAt()
-		ulc.updated_at = &v
+		ulc.mutation.SetUpdatedAt(v)
 	}
-	if ulc.code == nil {
+	if _, ok := ulc.mutation.Code(); !ok {
 		return nil, errors.New("ent: missing required field \"code\"")
 	}
-	if err := userlevel.CodeValidator(*ulc.code); err != nil {
-		return nil, fmt.Errorf("ent: validator failed for field \"code\": %v", err)
+	if v, ok := ulc.mutation.Code(); ok {
+		if err := userlevel.CodeValidator(v); err != nil {
+			return nil, fmt.Errorf("ent: validator failed for field \"code\": %v", err)
+		}
 	}
-	if ulc.workspace == nil {
+	if _, ok := ulc.mutation.Workspace(); !ok {
 		return nil, errors.New("ent: missing required field \"workspace\"")
 	}
-	if err := userlevel.WorkspaceValidator(*ulc.workspace); err != nil {
-		return nil, fmt.Errorf("ent: validator failed for field \"workspace\": %v", err)
+	if v, ok := ulc.mutation.Workspace(); ok {
+		if err := userlevel.WorkspaceValidator(v); err != nil {
+			return nil, fmt.Errorf("ent: validator failed for field \"workspace\": %v", err)
+		}
 	}
-	if len(ulc.developer) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"developer\"")
-	}
-	if ulc.developer == nil {
+	if _, ok := ulc.mutation.DeveloperID(); !ok {
 		return nil, errors.New("ent: missing required edge \"developer\"")
 	}
-	if len(ulc.level) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"level\"")
-	}
-	if ulc.level == nil {
+	if _, ok := ulc.mutation.LevelID(); !ok {
 		return nil, errors.New("ent: missing required edge \"level\"")
 	}
-	return ulc.sqlSave(ctx)
+	var (
+		err  error
+		node *UserLevel
+	)
+	if len(ulc.hooks) == 0 {
+		node, err = ulc.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*UserLevelMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			ulc.mutation = mutation
+			node, err = ulc.sqlSave(ctx)
+			return node, err
+		})
+		for i := len(ulc.hooks) - 1; i >= 0; i-- {
+			mut = ulc.hooks[i](mut)
+		}
+		if _, err := mut.Mutate(ctx, ulc.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -151,39 +162,39 @@ func (ulc *UserLevelCreate) sqlSave(ctx context.Context) (*UserLevel, error) {
 			},
 		}
 	)
-	if value := ulc.created_at; value != nil {
+	if value, ok := ulc.mutation.CreatedAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
-			Value:  *value,
+			Value:  value,
 			Column: userlevel.FieldCreatedAt,
 		})
-		ul.CreatedAt = *value
+		ul.CreatedAt = value
 	}
-	if value := ulc.updated_at; value != nil {
+	if value, ok := ulc.mutation.UpdatedAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
-			Value:  *value,
+			Value:  value,
 			Column: userlevel.FieldUpdatedAt,
 		})
-		ul.UpdatedAt = *value
+		ul.UpdatedAt = value
 	}
-	if value := ulc.code; value != nil {
+	if value, ok := ulc.mutation.Code(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: userlevel.FieldCode,
 		})
-		ul.Code = *value
+		ul.Code = value
 	}
-	if value := ulc.workspace; value != nil {
+	if value, ok := ulc.mutation.Workspace(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: userlevel.FieldWorkspace,
 		})
-		ul.Workspace = *value
+		ul.Workspace = value
 	}
-	if nodes := ulc.developer; len(nodes) > 0 {
+	if nodes := ulc.mutation.DeveloperIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -197,12 +208,12 @@ func (ulc *UserLevelCreate) sqlSave(ctx context.Context) (*UserLevel, error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := ulc.level; len(nodes) > 0 {
+	if nodes := ulc.mutation.LevelIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -216,7 +227,7 @@ func (ulc *UserLevelCreate) sqlSave(ctx context.Context) (*UserLevel, error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)

@@ -17,11 +17,9 @@ import (
 // LevelUpdate is the builder for updating Level entities.
 type LevelUpdate struct {
 	config
-
-	updated_at  *time.Time
-	name        *string
-	description *string
-	predicates  []predicate.Level
+	hooks      []Hook
+	mutation   *LevelMutation
+	predicates []predicate.Level
 }
 
 // Where adds a new predicate for the builder.
@@ -32,39 +30,62 @@ func (lu *LevelUpdate) Where(ps ...predicate.Level) *LevelUpdate {
 
 // SetUpdatedAt sets the updated_at field.
 func (lu *LevelUpdate) SetUpdatedAt(t time.Time) *LevelUpdate {
-	lu.updated_at = &t
+	lu.mutation.SetUpdatedAt(t)
 	return lu
 }
 
 // SetName sets the name field.
 func (lu *LevelUpdate) SetName(s string) *LevelUpdate {
-	lu.name = &s
+	lu.mutation.SetName(s)
 	return lu
 }
 
 // SetDescription sets the description field.
 func (lu *LevelUpdate) SetDescription(s string) *LevelUpdate {
-	lu.description = &s
+	lu.mutation.SetDescription(s)
 	return lu
 }
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (lu *LevelUpdate) Save(ctx context.Context) (int, error) {
-	if lu.updated_at == nil {
+	if _, ok := lu.mutation.UpdatedAt(); !ok {
 		v := level.UpdateDefaultUpdatedAt()
-		lu.updated_at = &v
+		lu.mutation.SetUpdatedAt(v)
 	}
-	if lu.name != nil {
-		if err := level.NameValidator(*lu.name); err != nil {
+	if v, ok := lu.mutation.Name(); ok {
+		if err := level.NameValidator(v); err != nil {
 			return 0, fmt.Errorf("ent: validator failed for field \"name\": %v", err)
 		}
 	}
-	if lu.description != nil {
-		if err := level.DescriptionValidator(*lu.description); err != nil {
+	if v, ok := lu.mutation.Description(); ok {
+		if err := level.DescriptionValidator(v); err != nil {
 			return 0, fmt.Errorf("ent: validator failed for field \"description\": %v", err)
 		}
 	}
-	return lu.sqlSave(ctx)
+	var (
+		err      error
+		affected int
+	)
+	if len(lu.hooks) == 0 {
+		affected, err = lu.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*LevelMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			lu.mutation = mutation
+			affected, err = lu.sqlSave(ctx)
+			return affected, err
+		})
+		for i := len(lu.hooks) - 1; i >= 0; i-- {
+			mut = lu.hooks[i](mut)
+		}
+		if _, err := mut.Mutate(ctx, lu.mutation); err != nil {
+			return 0, err
+		}
+	}
+	return affected, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -107,29 +128,31 @@ func (lu *LevelUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value := lu.updated_at; value != nil {
+	if value, ok := lu.mutation.UpdatedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
-			Value:  *value,
+			Value:  value,
 			Column: level.FieldUpdatedAt,
 		})
 	}
-	if value := lu.name; value != nil {
+	if value, ok := lu.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: level.FieldName,
 		})
 	}
-	if value := lu.description; value != nil {
+	if value, ok := lu.mutation.Description(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: level.FieldDescription,
 		})
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, lu.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
+		if _, ok := err.(*sqlgraph.NotFoundError); ok {
+			err = &NotFoundError{level.Label}
+		} else if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}
 		return 0, err
@@ -140,48 +163,68 @@ func (lu *LevelUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // LevelUpdateOne is the builder for updating a single Level entity.
 type LevelUpdateOne struct {
 	config
-	id uint
-
-	updated_at  *time.Time
-	name        *string
-	description *string
+	hooks    []Hook
+	mutation *LevelMutation
 }
 
 // SetUpdatedAt sets the updated_at field.
 func (luo *LevelUpdateOne) SetUpdatedAt(t time.Time) *LevelUpdateOne {
-	luo.updated_at = &t
+	luo.mutation.SetUpdatedAt(t)
 	return luo
 }
 
 // SetName sets the name field.
 func (luo *LevelUpdateOne) SetName(s string) *LevelUpdateOne {
-	luo.name = &s
+	luo.mutation.SetName(s)
 	return luo
 }
 
 // SetDescription sets the description field.
 func (luo *LevelUpdateOne) SetDescription(s string) *LevelUpdateOne {
-	luo.description = &s
+	luo.mutation.SetDescription(s)
 	return luo
 }
 
 // Save executes the query and returns the updated entity.
 func (luo *LevelUpdateOne) Save(ctx context.Context) (*Level, error) {
-	if luo.updated_at == nil {
+	if _, ok := luo.mutation.UpdatedAt(); !ok {
 		v := level.UpdateDefaultUpdatedAt()
-		luo.updated_at = &v
+		luo.mutation.SetUpdatedAt(v)
 	}
-	if luo.name != nil {
-		if err := level.NameValidator(*luo.name); err != nil {
+	if v, ok := luo.mutation.Name(); ok {
+		if err := level.NameValidator(v); err != nil {
 			return nil, fmt.Errorf("ent: validator failed for field \"name\": %v", err)
 		}
 	}
-	if luo.description != nil {
-		if err := level.DescriptionValidator(*luo.description); err != nil {
+	if v, ok := luo.mutation.Description(); ok {
+		if err := level.DescriptionValidator(v); err != nil {
 			return nil, fmt.Errorf("ent: validator failed for field \"description\": %v", err)
 		}
 	}
-	return luo.sqlSave(ctx)
+	var (
+		err  error
+		node *Level
+	)
+	if len(luo.hooks) == 0 {
+		node, err = luo.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*LevelMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			luo.mutation = mutation
+			node, err = luo.sqlSave(ctx)
+			return node, err
+		})
+		for i := len(luo.hooks) - 1; i >= 0; i-- {
+			mut = luo.hooks[i](mut)
+		}
+		if _, err := mut.Mutate(ctx, luo.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -212,30 +255,34 @@ func (luo *LevelUpdateOne) sqlSave(ctx context.Context) (l *Level, err error) {
 			Table:   level.Table,
 			Columns: level.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Value:  luo.id,
 				Type:   field.TypeUint,
 				Column: level.FieldID,
 			},
 		},
 	}
-	if value := luo.updated_at; value != nil {
+	id, ok := luo.mutation.ID()
+	if !ok {
+		return nil, fmt.Errorf("missing Level.ID for update")
+	}
+	_spec.Node.ID.Value = id
+	if value, ok := luo.mutation.UpdatedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
-			Value:  *value,
+			Value:  value,
 			Column: level.FieldUpdatedAt,
 		})
 	}
-	if value := luo.name; value != nil {
+	if value, ok := luo.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: level.FieldName,
 		})
 	}
-	if value := luo.description; value != nil {
+	if value, ok := luo.mutation.Description(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: level.FieldDescription,
 		})
 	}
@@ -243,7 +290,9 @@ func (luo *LevelUpdateOne) sqlSave(ctx context.Context) (l *Level, err error) {
 	_spec.Assign = l.assignValues
 	_spec.ScanValues = l.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, luo.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
+		if _, ok := err.(*sqlgraph.NotFoundError); ok {
+			err = &NotFoundError{level.Label}
+		} else if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}
 		return nil, err

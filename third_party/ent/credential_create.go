@@ -5,6 +5,7 @@ package ent
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/arpb2/C-3PO/third_party/ent/credential"
 	"github.com/arpb2/C-3PO/third_party/ent/user"
@@ -15,29 +16,25 @@ import (
 // CredentialCreate is the builder for creating a Credential entity.
 type CredentialCreate struct {
 	config
-	salt          *[]byte
-	password_hash *[]byte
-	holder        map[uint]struct{}
+	mutation *CredentialMutation
+	hooks    []Hook
 }
 
 // SetSalt sets the salt field.
 func (cc *CredentialCreate) SetSalt(b []byte) *CredentialCreate {
-	cc.salt = &b
+	cc.mutation.SetSalt(b)
 	return cc
 }
 
 // SetPasswordHash sets the password_hash field.
 func (cc *CredentialCreate) SetPasswordHash(b []byte) *CredentialCreate {
-	cc.password_hash = &b
+	cc.mutation.SetPasswordHash(b)
 	return cc
 }
 
 // SetHolderID sets the holder edge to User by id.
 func (cc *CredentialCreate) SetHolderID(id uint) *CredentialCreate {
-	if cc.holder == nil {
-		cc.holder = make(map[uint]struct{})
-	}
-	cc.holder[id] = struct{}{}
+	cc.mutation.SetHolderID(id)
 	return cc
 }
 
@@ -48,19 +45,39 @@ func (cc *CredentialCreate) SetHolder(u *User) *CredentialCreate {
 
 // Save creates the Credential in the database.
 func (cc *CredentialCreate) Save(ctx context.Context) (*Credential, error) {
-	if cc.salt == nil {
+	if _, ok := cc.mutation.Salt(); !ok {
 		return nil, errors.New("ent: missing required field \"salt\"")
 	}
-	if cc.password_hash == nil {
+	if _, ok := cc.mutation.PasswordHash(); !ok {
 		return nil, errors.New("ent: missing required field \"password_hash\"")
 	}
-	if len(cc.holder) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"holder\"")
-	}
-	if cc.holder == nil {
+	if _, ok := cc.mutation.HolderID(); !ok {
 		return nil, errors.New("ent: missing required edge \"holder\"")
 	}
-	return cc.sqlSave(ctx)
+	var (
+		err  error
+		node *Credential
+	)
+	if len(cc.hooks) == 0 {
+		node, err = cc.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*CredentialMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			cc.mutation = mutation
+			node, err = cc.sqlSave(ctx)
+			return node, err
+		})
+		for i := len(cc.hooks) - 1; i >= 0; i-- {
+			mut = cc.hooks[i](mut)
+		}
+		if _, err := mut.Mutate(ctx, cc.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -83,23 +100,23 @@ func (cc *CredentialCreate) sqlSave(ctx context.Context) (*Credential, error) {
 			},
 		}
 	)
-	if value := cc.salt; value != nil {
+	if value, ok := cc.mutation.Salt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeBytes,
-			Value:  *value,
+			Value:  value,
 			Column: credential.FieldSalt,
 		})
-		c.Salt = *value
+		c.Salt = value
 	}
-	if value := cc.password_hash; value != nil {
+	if value, ok := cc.mutation.PasswordHash(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeBytes,
-			Value:  *value,
+			Value:  value,
 			Column: credential.FieldPasswordHash,
 		})
-		c.PasswordHash = *value
+		c.PasswordHash = value
 	}
-	if nodes := cc.holder; len(nodes) > 0 {
+	if nodes := cc.mutation.HolderIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -113,7 +130,7 @@ func (cc *CredentialCreate) sqlSave(ctx context.Context) (*Credential, error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)

@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/arpb2/C-3PO/third_party/ent/predicate"
 	"github.com/arpb2/C-3PO/third_party/ent/userlevel"
@@ -15,6 +16,8 @@ import (
 // UserLevelDelete is the builder for deleting a UserLevel entity.
 type UserLevelDelete struct {
 	config
+	hooks      []Hook
+	mutation   *UserLevelMutation
 	predicates []predicate.UserLevel
 }
 
@@ -26,7 +29,30 @@ func (uld *UserLevelDelete) Where(ps ...predicate.UserLevel) *UserLevelDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (uld *UserLevelDelete) Exec(ctx context.Context) (int, error) {
-	return uld.sqlExec(ctx)
+	var (
+		err      error
+		affected int
+	)
+	if len(uld.hooks) == 0 {
+		affected, err = uld.sqlExec(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*UserLevelMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			uld.mutation = mutation
+			affected, err = uld.sqlExec(ctx)
+			return affected, err
+		})
+		for i := len(uld.hooks) - 1; i >= 0; i-- {
+			mut = uld.hooks[i](mut)
+		}
+		if _, err := mut.Mutate(ctx, uld.mutation); err != nil {
+			return 0, err
+		}
+	}
+	return affected, err
 }
 
 // ExecX is like Exec, but panics if an error occurs.

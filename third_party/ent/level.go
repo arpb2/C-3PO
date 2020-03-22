@@ -76,7 +76,7 @@ func (l *Level) assignValues(values ...interface{}) error {
 // Note that, you need to call Level.Unwrap() before calling this method, if this Level
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (l *Level) Update() *LevelUpdateOne {
-	return (&LevelClient{l.config}).UpdateOne(l)
+	return (&LevelClient{config: l.config}).UpdateOne(l)
 }
 
 // Unwrap unwraps the entity that was returned from a transaction after it was closed,

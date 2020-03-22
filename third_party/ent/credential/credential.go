@@ -6,11 +6,12 @@ const (
 	// Label holds the string label denoting the credential type in the database.
 	Label = "credential"
 	// FieldID holds the string denoting the id field in the database.
-	FieldID = "id"
-	// FieldSalt holds the string denoting the salt vertex property in the database.
-	FieldSalt = "salt"
-	// FieldPasswordHash holds the string denoting the password_hash vertex property in the database.
+	FieldID           = "id"   // FieldSalt holds the string denoting the salt vertex property in the database.
+	FieldSalt         = "salt" // FieldPasswordHash holds the string denoting the password_hash vertex property in the database.
 	FieldPasswordHash = "password_hash"
+
+	// EdgeHolder holds the string denoting the holder edge name in mutations.
+	EdgeHolder = "holder"
 
 	// Table holds the table name of the credential in the database.
 	Table = "credentials"

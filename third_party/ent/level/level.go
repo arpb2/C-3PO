@@ -4,22 +4,16 @@ package level
 
 import (
 	"time"
-
-	"github.com/arpb2/C-3PO/third_party/ent/schema"
 )
 
 const (
 	// Label holds the string label denoting the level type in the database.
 	Label = "level"
 	// FieldID holds the string denoting the id field in the database.
-	FieldID = "id"
-	// FieldCreatedAt holds the string denoting the created_at vertex property in the database.
-	FieldCreatedAt = "created_at"
-	// FieldUpdatedAt holds the string denoting the updated_at vertex property in the database.
-	FieldUpdatedAt = "updated_at"
-	// FieldName holds the string denoting the name vertex property in the database.
-	FieldName = "name"
-	// FieldDescription holds the string denoting the description vertex property in the database.
+	FieldID          = "id"         // FieldCreatedAt holds the string denoting the created_at vertex property in the database.
+	FieldCreatedAt   = "created_at" // FieldUpdatedAt holds the string denoting the updated_at vertex property in the database.
+	FieldUpdatedAt   = "updated_at" // FieldName holds the string denoting the name vertex property in the database.
+	FieldName        = "name"       // FieldDescription holds the string denoting the description vertex property in the database.
 	FieldDescription = "description"
 
 	// Table holds the table name of the level in the database.
@@ -36,27 +30,14 @@ var Columns = []string{
 }
 
 var (
-	fields = schema.Level{}.Fields()
-
-	// descCreatedAt is the schema descriptor for created_at field.
-	descCreatedAt = fields[1].Descriptor()
 	// DefaultCreatedAt holds the default value on creation for the created_at field.
-	DefaultCreatedAt = descCreatedAt.Default.(func() time.Time)
-
-	// descUpdatedAt is the schema descriptor for updated_at field.
-	descUpdatedAt = fields[2].Descriptor()
+	DefaultCreatedAt func() time.Time
 	// DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	DefaultUpdatedAt = descUpdatedAt.Default.(func() time.Time)
+	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	UpdateDefaultUpdatedAt = descUpdatedAt.UpdateDefault.(func() time.Time)
-
-	// descName is the schema descriptor for name field.
-	descName = fields[3].Descriptor()
+	UpdateDefaultUpdatedAt func() time.Time
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
-	NameValidator = descName.Validators[0].(func(string) error)
-
-	// descDescription is the schema descriptor for description field.
-	descDescription = fields[4].Descriptor()
+	NameValidator func(string) error
 	// DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
-	DescriptionValidator = descDescription.Validators[0].(func(string) error)
+	DescriptionValidator func(string) error
 )

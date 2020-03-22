@@ -16,6 +16,7 @@ type User struct {
 func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.Uint("id").Unique().Immutable(),
+		field.Enum("type").Values("student", "teacher").Immutable(),
 		field.String("email").NotEmpty().Unique(),
 		field.String("name").NotEmpty(),
 		field.String("surname").NotEmpty(),

@@ -5,6 +5,7 @@ package ent
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/arpb2/C-3PO/third_party/ent/credential"
 	"github.com/arpb2/C-3PO/third_party/ent/predicate"
@@ -17,11 +18,9 @@ import (
 // CredentialUpdate is the builder for updating Credential entities.
 type CredentialUpdate struct {
 	config
-
-	password_hash *[]byte
-	holder        map[uint]struct{}
-	clearedHolder bool
-	predicates    []predicate.Credential
+	hooks      []Hook
+	mutation   *CredentialMutation
+	predicates []predicate.Credential
 }
 
 // Where adds a new predicate for the builder.
@@ -32,16 +31,13 @@ func (cu *CredentialUpdate) Where(ps ...predicate.Credential) *CredentialUpdate 
 
 // SetPasswordHash sets the password_hash field.
 func (cu *CredentialUpdate) SetPasswordHash(b []byte) *CredentialUpdate {
-	cu.password_hash = &b
+	cu.mutation.SetPasswordHash(b)
 	return cu
 }
 
 // SetHolderID sets the holder edge to User by id.
 func (cu *CredentialUpdate) SetHolderID(id uint) *CredentialUpdate {
-	if cu.holder == nil {
-		cu.holder = make(map[uint]struct{})
-	}
-	cu.holder[id] = struct{}{}
+	cu.mutation.SetHolderID(id)
 	return cu
 }
 
@@ -52,19 +48,40 @@ func (cu *CredentialUpdate) SetHolder(u *User) *CredentialUpdate {
 
 // ClearHolder clears the holder edge to User.
 func (cu *CredentialUpdate) ClearHolder() *CredentialUpdate {
-	cu.clearedHolder = true
+	cu.mutation.ClearHolder()
 	return cu
 }
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (cu *CredentialUpdate) Save(ctx context.Context) (int, error) {
-	if len(cu.holder) > 1 {
-		return 0, errors.New("ent: multiple assignments on a unique edge \"holder\"")
-	}
-	if cu.clearedHolder && cu.holder == nil {
+
+	if _, ok := cu.mutation.HolderID(); cu.mutation.HolderCleared() && !ok {
 		return 0, errors.New("ent: clearing a unique edge \"holder\"")
 	}
-	return cu.sqlSave(ctx)
+	var (
+		err      error
+		affected int
+	)
+	if len(cu.hooks) == 0 {
+		affected, err = cu.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*CredentialMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			cu.mutation = mutation
+			affected, err = cu.sqlSave(ctx)
+			return affected, err
+		})
+		for i := len(cu.hooks) - 1; i >= 0; i-- {
+			mut = cu.hooks[i](mut)
+		}
+		if _, err := mut.Mutate(ctx, cu.mutation); err != nil {
+			return 0, err
+		}
+	}
+	return affected, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -107,14 +124,14 @@ func (cu *CredentialUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value := cu.password_hash; value != nil {
+	if value, ok := cu.mutation.PasswordHash(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeBytes,
-			Value:  *value,
+			Value:  value,
 			Column: credential.FieldPasswordHash,
 		})
 	}
-	if cu.clearedHolder {
+	if cu.mutation.HolderCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -130,7 +147,7 @@ func (cu *CredentialUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cu.holder; len(nodes) > 0 {
+	if nodes := cu.mutation.HolderIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -144,13 +161,15 @@ func (cu *CredentialUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
+		if _, ok := err.(*sqlgraph.NotFoundError); ok {
+			err = &NotFoundError{credential.Label}
+		} else if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}
 		return 0, err
@@ -161,25 +180,19 @@ func (cu *CredentialUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // CredentialUpdateOne is the builder for updating a single Credential entity.
 type CredentialUpdateOne struct {
 	config
-	id int
-
-	password_hash *[]byte
-	holder        map[uint]struct{}
-	clearedHolder bool
+	hooks    []Hook
+	mutation *CredentialMutation
 }
 
 // SetPasswordHash sets the password_hash field.
 func (cuo *CredentialUpdateOne) SetPasswordHash(b []byte) *CredentialUpdateOne {
-	cuo.password_hash = &b
+	cuo.mutation.SetPasswordHash(b)
 	return cuo
 }
 
 // SetHolderID sets the holder edge to User by id.
 func (cuo *CredentialUpdateOne) SetHolderID(id uint) *CredentialUpdateOne {
-	if cuo.holder == nil {
-		cuo.holder = make(map[uint]struct{})
-	}
-	cuo.holder[id] = struct{}{}
+	cuo.mutation.SetHolderID(id)
 	return cuo
 }
 
@@ -190,19 +203,40 @@ func (cuo *CredentialUpdateOne) SetHolder(u *User) *CredentialUpdateOne {
 
 // ClearHolder clears the holder edge to User.
 func (cuo *CredentialUpdateOne) ClearHolder() *CredentialUpdateOne {
-	cuo.clearedHolder = true
+	cuo.mutation.ClearHolder()
 	return cuo
 }
 
 // Save executes the query and returns the updated entity.
 func (cuo *CredentialUpdateOne) Save(ctx context.Context) (*Credential, error) {
-	if len(cuo.holder) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"holder\"")
-	}
-	if cuo.clearedHolder && cuo.holder == nil {
+
+	if _, ok := cuo.mutation.HolderID(); cuo.mutation.HolderCleared() && !ok {
 		return nil, errors.New("ent: clearing a unique edge \"holder\"")
 	}
-	return cuo.sqlSave(ctx)
+	var (
+		err  error
+		node *Credential
+	)
+	if len(cuo.hooks) == 0 {
+		node, err = cuo.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*CredentialMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			cuo.mutation = mutation
+			node, err = cuo.sqlSave(ctx)
+			return node, err
+		})
+		for i := len(cuo.hooks) - 1; i >= 0; i-- {
+			mut = cuo.hooks[i](mut)
+		}
+		if _, err := mut.Mutate(ctx, cuo.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -233,20 +267,24 @@ func (cuo *CredentialUpdateOne) sqlSave(ctx context.Context) (c *Credential, err
 			Table:   credential.Table,
 			Columns: credential.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Value:  cuo.id,
 				Type:   field.TypeInt,
 				Column: credential.FieldID,
 			},
 		},
 	}
-	if value := cuo.password_hash; value != nil {
+	id, ok := cuo.mutation.ID()
+	if !ok {
+		return nil, fmt.Errorf("missing Credential.ID for update")
+	}
+	_spec.Node.ID.Value = id
+	if value, ok := cuo.mutation.PasswordHash(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeBytes,
-			Value:  *value,
+			Value:  value,
 			Column: credential.FieldPasswordHash,
 		})
 	}
-	if cuo.clearedHolder {
+	if cuo.mutation.HolderCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -262,7 +300,7 @@ func (cuo *CredentialUpdateOne) sqlSave(ctx context.Context) (c *Credential, err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cuo.holder; len(nodes) > 0 {
+	if nodes := cuo.mutation.HolderIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -276,7 +314,7 @@ func (cuo *CredentialUpdateOne) sqlSave(ctx context.Context) (c *Credential, err
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -285,7 +323,9 @@ func (cuo *CredentialUpdateOne) sqlSave(ctx context.Context) (c *Credential, err
 	_spec.Assign = c.assignValues
 	_spec.ScanValues = c.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, cuo.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
+		if _, ok := err.(*sqlgraph.NotFoundError); ok {
+			err = &NotFoundError{credential.Label}
+		} else if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}
 		return nil, err

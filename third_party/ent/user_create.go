@@ -18,37 +18,37 @@ import (
 // UserCreate is the builder for creating a User entity.
 type UserCreate struct {
 	config
-	id          *uint
-	email       *string
-	name        *string
-	surname     *string
-	created_at  *time.Time
-	updated_at  *time.Time
-	levels      map[int]struct{}
-	credentials map[int]struct{}
+	mutation *UserMutation
+	hooks    []Hook
+}
+
+// SetType sets the type field.
+func (uc *UserCreate) SetType(u user.Type) *UserCreate {
+	uc.mutation.SetType(u)
+	return uc
 }
 
 // SetEmail sets the email field.
 func (uc *UserCreate) SetEmail(s string) *UserCreate {
-	uc.email = &s
+	uc.mutation.SetEmail(s)
 	return uc
 }
 
 // SetName sets the name field.
 func (uc *UserCreate) SetName(s string) *UserCreate {
-	uc.name = &s
+	uc.mutation.SetName(s)
 	return uc
 }
 
 // SetSurname sets the surname field.
 func (uc *UserCreate) SetSurname(s string) *UserCreate {
-	uc.surname = &s
+	uc.mutation.SetSurname(s)
 	return uc
 }
 
 // SetCreatedAt sets the created_at field.
 func (uc *UserCreate) SetCreatedAt(t time.Time) *UserCreate {
-	uc.created_at = &t
+	uc.mutation.SetCreatedAt(t)
 	return uc
 }
 
@@ -62,7 +62,7 @@ func (uc *UserCreate) SetNillableCreatedAt(t *time.Time) *UserCreate {
 
 // SetUpdatedAt sets the updated_at field.
 func (uc *UserCreate) SetUpdatedAt(t time.Time) *UserCreate {
-	uc.updated_at = &t
+	uc.mutation.SetUpdatedAt(t)
 	return uc
 }
 
@@ -76,18 +76,13 @@ func (uc *UserCreate) SetNillableUpdatedAt(t *time.Time) *UserCreate {
 
 // SetID sets the id field.
 func (uc *UserCreate) SetID(u uint) *UserCreate {
-	uc.id = &u
+	uc.mutation.SetID(u)
 	return uc
 }
 
 // AddLevelIDs adds the levels edge to UserLevel by ids.
 func (uc *UserCreate) AddLevelIDs(ids ...int) *UserCreate {
-	if uc.levels == nil {
-		uc.levels = make(map[int]struct{})
-	}
-	for i := range ids {
-		uc.levels[ids[i]] = struct{}{}
-	}
+	uc.mutation.AddLevelIDs(ids...)
 	return uc
 }
 
@@ -102,10 +97,7 @@ func (uc *UserCreate) AddLevels(u ...*UserLevel) *UserCreate {
 
 // SetCredentialsID sets the credentials edge to Credential by id.
 func (uc *UserCreate) SetCredentialsID(id int) *UserCreate {
-	if uc.credentials == nil {
-		uc.credentials = make(map[int]struct{})
-	}
-	uc.credentials[id] = struct{}{}
+	uc.mutation.SetCredentialsID(id)
 	return uc
 }
 
@@ -124,36 +116,70 @@ func (uc *UserCreate) SetCredentials(c *Credential) *UserCreate {
 
 // Save creates the User in the database.
 func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
-	if uc.email == nil {
+	if _, ok := uc.mutation.GetType(); !ok {
+		return nil, errors.New("ent: missing required field \"type\"")
+	}
+	if v, ok := uc.mutation.GetType(); ok {
+		if err := user.TypeValidator(v); err != nil {
+			return nil, fmt.Errorf("ent: validator failed for field \"type\": %v", err)
+		}
+	}
+	if _, ok := uc.mutation.Email(); !ok {
 		return nil, errors.New("ent: missing required field \"email\"")
 	}
-	if err := user.EmailValidator(*uc.email); err != nil {
-		return nil, fmt.Errorf("ent: validator failed for field \"email\": %v", err)
+	if v, ok := uc.mutation.Email(); ok {
+		if err := user.EmailValidator(v); err != nil {
+			return nil, fmt.Errorf("ent: validator failed for field \"email\": %v", err)
+		}
 	}
-	if uc.name == nil {
+	if _, ok := uc.mutation.Name(); !ok {
 		return nil, errors.New("ent: missing required field \"name\"")
 	}
-	if err := user.NameValidator(*uc.name); err != nil {
-		return nil, fmt.Errorf("ent: validator failed for field \"name\": %v", err)
+	if v, ok := uc.mutation.Name(); ok {
+		if err := user.NameValidator(v); err != nil {
+			return nil, fmt.Errorf("ent: validator failed for field \"name\": %v", err)
+		}
 	}
-	if uc.surname == nil {
+	if _, ok := uc.mutation.Surname(); !ok {
 		return nil, errors.New("ent: missing required field \"surname\"")
 	}
-	if err := user.SurnameValidator(*uc.surname); err != nil {
-		return nil, fmt.Errorf("ent: validator failed for field \"surname\": %v", err)
+	if v, ok := uc.mutation.Surname(); ok {
+		if err := user.SurnameValidator(v); err != nil {
+			return nil, fmt.Errorf("ent: validator failed for field \"surname\": %v", err)
+		}
 	}
-	if uc.created_at == nil {
+	if _, ok := uc.mutation.CreatedAt(); !ok {
 		v := user.DefaultCreatedAt()
-		uc.created_at = &v
+		uc.mutation.SetCreatedAt(v)
 	}
-	if uc.updated_at == nil {
+	if _, ok := uc.mutation.UpdatedAt(); !ok {
 		v := user.DefaultUpdatedAt()
-		uc.updated_at = &v
+		uc.mutation.SetUpdatedAt(v)
 	}
-	if len(uc.credentials) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"credentials\"")
+	var (
+		err  error
+		node *User
+	)
+	if len(uc.hooks) == 0 {
+		node, err = uc.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*UserMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			uc.mutation = mutation
+			node, err = uc.sqlSave(ctx)
+			return node, err
+		})
+		for i := len(uc.hooks) - 1; i >= 0; i-- {
+			mut = uc.hooks[i](mut)
+		}
+		if _, err := mut.Mutate(ctx, uc.mutation); err != nil {
+			return nil, err
+		}
 	}
-	return uc.sqlSave(ctx)
+	return node, err
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -176,51 +202,59 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			},
 		}
 	)
-	if value := uc.id; value != nil {
-		u.ID = *value
-		_spec.ID.Value = *value
+	if id, ok := uc.mutation.ID(); ok {
+		u.ID = id
+		_spec.ID.Value = id
 	}
-	if value := uc.email; value != nil {
+	if value, ok := uc.mutation.GetType(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: user.FieldType,
+		})
+		u.Type = value
+	}
+	if value, ok := uc.mutation.Email(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldEmail,
 		})
-		u.Email = *value
+		u.Email = value
 	}
-	if value := uc.name; value != nil {
+	if value, ok := uc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldName,
 		})
-		u.Name = *value
+		u.Name = value
 	}
-	if value := uc.surname; value != nil {
+	if value, ok := uc.mutation.Surname(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldSurname,
 		})
-		u.Surname = *value
+		u.Surname = value
 	}
-	if value := uc.created_at; value != nil {
+	if value, ok := uc.mutation.CreatedAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldCreatedAt,
 		})
-		u.CreatedAt = *value
+		u.CreatedAt = value
 	}
-	if value := uc.updated_at; value != nil {
+	if value, ok := uc.mutation.UpdatedAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldUpdatedAt,
 		})
-		u.UpdatedAt = *value
+		u.UpdatedAt = value
 	}
-	if nodes := uc.levels; len(nodes) > 0 {
+	if nodes := uc.mutation.LevelsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -234,12 +268,12 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.credentials; len(nodes) > 0 {
+	if nodes := uc.mutation.CredentialsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -253,7 +287,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)

@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/arpb2/C-3PO/third_party/ent/credential"
 	"github.com/arpb2/C-3PO/third_party/ent/predicate"
@@ -15,6 +16,8 @@ import (
 // CredentialDelete is the builder for deleting a Credential entity.
 type CredentialDelete struct {
 	config
+	hooks      []Hook
+	mutation   *CredentialMutation
 	predicates []predicate.Credential
 }
 
@@ -26,7 +29,30 @@ func (cd *CredentialDelete) Where(ps ...predicate.Credential) *CredentialDelete 
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (cd *CredentialDelete) Exec(ctx context.Context) (int, error) {
-	return cd.sqlExec(ctx)
+	var (
+		err      error
+		affected int
+	)
+	if len(cd.hooks) == 0 {
+		affected, err = cd.sqlExec(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*CredentialMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			cd.mutation = mutation
+			affected, err = cd.sqlExec(ctx)
+			return affected, err
+		})
+		for i := len(cd.hooks) - 1; i >= 0; i-- {
+			mut = cd.hooks[i](mut)
+		}
+		if _, err := mut.Mutate(ctx, cd.mutation); err != nil {
+			return 0, err
+		}
+	}
+	return affected, err
 }
 
 // ExecX is like Exec, but panics if an error occurs.

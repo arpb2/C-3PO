@@ -278,12 +278,12 @@ func (uq *UserQuery) WithCredentials(opts ...func(*CredentialQuery)) *UserQuery 
 // Example:
 //
 //	var v []struct {
-//		Email string `json:"email,omitempty"`
+//		Type user.Type `json:"type,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.User.Query().
-//		GroupBy(user.FieldEmail).
+//		GroupBy(user.FieldType).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -299,11 +299,11 @@ func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
 // Example:
 //
 //	var v []struct {
-//		Email string `json:"email,omitempty"`
+//		Type user.Type `json:"type,omitempty"`
 //	}
 //
 //	client.User.Query().
-//		Select(user.FieldEmail).
+//		Select(user.FieldType).
 //		Scan(ctx, &v)
 //
 func (uq *UserQuery) Select(field string, fields ...string) *UserSelect {
