@@ -4,12 +4,13 @@ import (
 	"context"
 	"time"
 
+	"github.com/arpb2/C-3PO/third_party/ent/level"
+
 	user3 "github.com/arpb2/C-3PO/pkg/data/repository/user"
 	user2 "github.com/arpb2/C-3PO/pkg/domain/model/user"
 
 	"github.com/arpb2/C-3PO/pkg/domain/http"
 	"github.com/arpb2/C-3PO/third_party/ent"
-	"github.com/arpb2/C-3PO/third_party/ent/level"
 	"github.com/arpb2/C-3PO/third_party/ent/user"
 	"github.com/arpb2/C-3PO/third_party/ent/userlevel"
 )

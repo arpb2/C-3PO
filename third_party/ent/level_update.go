@@ -9,6 +9,7 @@ import (
 
 	"github.com/arpb2/C-3PO/third_party/ent/level"
 	"github.com/arpb2/C-3PO/third_party/ent/predicate"
+	"github.com/arpb2/C-3PO/third_party/ent/schema"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/schema/field"
@@ -43,6 +44,12 @@ func (lu *LevelUpdate) SetName(s string) *LevelUpdate {
 // SetDescription sets the description field.
 func (lu *LevelUpdate) SetDescription(s string) *LevelUpdate {
 	lu.mutation.SetDescription(s)
+	return lu
+}
+
+// SetDefinition sets the definition field.
+func (lu *LevelUpdate) SetDefinition(sd *schema.LevelDefinition) *LevelUpdate {
+	lu.mutation.SetDefinition(sd)
 	return lu
 }
 
@@ -149,6 +156,13 @@ func (lu *LevelUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: level.FieldDescription,
 		})
 	}
+	if value, ok := lu.mutation.Definition(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: level.FieldDefinition,
+		})
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, lu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{level.Label}
@@ -182,6 +196,12 @@ func (luo *LevelUpdateOne) SetName(s string) *LevelUpdateOne {
 // SetDescription sets the description field.
 func (luo *LevelUpdateOne) SetDescription(s string) *LevelUpdateOne {
 	luo.mutation.SetDescription(s)
+	return luo
+}
+
+// SetDefinition sets the definition field.
+func (luo *LevelUpdateOne) SetDefinition(sd *schema.LevelDefinition) *LevelUpdateOne {
+	luo.mutation.SetDefinition(sd)
 	return luo
 }
 
@@ -284,6 +304,13 @@ func (luo *LevelUpdateOne) sqlSave(ctx context.Context) (l *Level, err error) {
 			Type:   field.TypeString,
 			Value:  value,
 			Column: level.FieldDescription,
+		})
+	}
+	if value, ok := luo.mutation.Definition(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: level.FieldDefinition,
 		})
 	}
 	l = &Level{config: luo.config}

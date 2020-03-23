@@ -3,9 +3,13 @@ package schema
 import (
 	"time"
 
+	"github.com/arpb2/C-3PO/pkg/domain/model/level"
+
 	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/schema/field"
 )
+
+type LevelDefinition level.Definition
 
 // Level holds the schema definition for the Level entity.
 type Level struct {
@@ -19,6 +23,7 @@ func (Level) Fields() []ent.Field {
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 		field.String("name").NotEmpty(),
 		field.String("description").NotEmpty(),
+		field.JSON("definition", &LevelDefinition{}),
 	}
 }
 

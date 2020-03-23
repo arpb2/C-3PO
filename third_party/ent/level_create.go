@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/arpb2/C-3PO/third_party/ent/level"
+	"github.com/arpb2/C-3PO/third_party/ent/schema"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/schema/field"
 )
@@ -60,6 +61,12 @@ func (lc *LevelCreate) SetDescription(s string) *LevelCreate {
 	return lc
 }
 
+// SetDefinition sets the definition field.
+func (lc *LevelCreate) SetDefinition(sd *schema.LevelDefinition) *LevelCreate {
+	lc.mutation.SetDefinition(sd)
+	return lc
+}
+
 // SetID sets the id field.
 func (lc *LevelCreate) SetID(u uint) *LevelCreate {
 	lc.mutation.SetID(u)
@@ -91,6 +98,9 @@ func (lc *LevelCreate) Save(ctx context.Context) (*Level, error) {
 		if err := level.DescriptionValidator(v); err != nil {
 			return nil, fmt.Errorf("ent: validator failed for field \"description\": %v", err)
 		}
+	}
+	if _, ok := lc.mutation.Definition(); !ok {
+		return nil, errors.New("ent: missing required field \"definition\"")
 	}
 	var (
 		err  error
@@ -173,6 +183,14 @@ func (lc *LevelCreate) sqlSave(ctx context.Context) (*Level, error) {
 			Column: level.FieldDescription,
 		})
 		l.Description = value
+	}
+	if value, ok := lc.mutation.Definition(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: level.FieldDefinition,
+		})
+		l.Definition = value
 	}
 	if err := sqlgraph.CreateNode(ctx, lc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {

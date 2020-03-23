@@ -10,11 +10,12 @@ const (
 	// Label holds the string label denoting the level type in the database.
 	Label = "level"
 	// FieldID holds the string denoting the id field in the database.
-	FieldID          = "id"         // FieldCreatedAt holds the string denoting the created_at vertex property in the database.
-	FieldCreatedAt   = "created_at" // FieldUpdatedAt holds the string denoting the updated_at vertex property in the database.
-	FieldUpdatedAt   = "updated_at" // FieldName holds the string denoting the name vertex property in the database.
-	FieldName        = "name"       // FieldDescription holds the string denoting the description vertex property in the database.
-	FieldDescription = "description"
+	FieldID          = "id"          // FieldCreatedAt holds the string denoting the created_at vertex property in the database.
+	FieldCreatedAt   = "created_at"  // FieldUpdatedAt holds the string denoting the updated_at vertex property in the database.
+	FieldUpdatedAt   = "updated_at"  // FieldName holds the string denoting the name vertex property in the database.
+	FieldName        = "name"        // FieldDescription holds the string denoting the description vertex property in the database.
+	FieldDescription = "description" // FieldDefinition holds the string denoting the definition vertex property in the database.
+	FieldDefinition  = "definition"
 
 	// Table holds the table name of the level in the database.
 	Table = "levels"
@@ -27,6 +28,7 @@ var Columns = []string{
 	FieldUpdatedAt,
 	FieldName,
 	FieldDescription,
+	FieldDefinition,
 }
 
 var (

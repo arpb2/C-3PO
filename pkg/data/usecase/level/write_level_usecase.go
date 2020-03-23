@@ -26,13 +26,13 @@ func (c *writeLevelUseCase) Run(ctx pipeline.Context) error {
 	}
 
 	levelData.Id = levelId
-	level, err := c.repository.StoreLevel(levelData)
+	lvl, err := c.repository.StoreLevel(levelData)
 
 	if err != nil {
 		return err
 	}
 
-	ctx.Set(TagLevel, level)
+	ctx.Set(TagLevel, lvl)
 	return nil
 }
 

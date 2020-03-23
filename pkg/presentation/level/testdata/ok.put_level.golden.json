@@ -1,1 +1,1 @@
-{"id":1000,"name":"Some name","description":"Some description"}
+{"id":1000,"name":"Some name","description":"Some description","definition":{"origin":{"position":{"x":0,"y":0},"orientation":""},"destination":{"position":{"x":0,"y":0},"active":false,"conditions":null},"minimal_dimension":{"rows":0,"columns":0},"collectibles":null,"gates":null,"pads":null}}

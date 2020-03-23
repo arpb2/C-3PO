@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/arpb2/C-3PO/third_party/ent/schema"
+
 	level2 "github.com/arpb2/C-3PO/pkg/data/repository/level"
 	"github.com/arpb2/C-3PO/pkg/domain/model/level"
 
@@ -63,18 +65,21 @@ func (l *levelRepository) StoreLevel(lvl level.Level) (result level.Level, err e
 		return lvl, err
 	}
 
+	levelDefinition := schema.LevelDefinition(lvl.Definition)
 	if lev == nil {
 		_, err = l.dbClient.Level.
 			Create().
 			SetID(lvl.Id).
 			SetName(lvl.Name).
 			SetDescription(lvl.Description).
+			SetDefinition(&levelDefinition).
 			Save(ctx)
 	} else {
 		_, err = lev.
 			Update().
 			SetName(lvl.Name).
 			SetDescription(lvl.Description).
+			SetDefinition(&levelDefinition).
 			SetUpdatedAt(time.Now()).
 			Save(ctx)
 	}
