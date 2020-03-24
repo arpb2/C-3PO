@@ -63,7 +63,7 @@ func (ulq *UserLevelQuery) QueryDeveloper() *UserQuery {
 	step := sqlgraph.NewStep(
 		sqlgraph.From(userlevel.Table, userlevel.FieldID, ulq.sqlQuery()),
 		sqlgraph.To(user.Table, user.FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, userlevel.DeveloperTable, userlevel.DeveloperColumn),
+		sqlgraph.Edge(sqlgraph.M2O, false, userlevel.DeveloperTable, userlevel.DeveloperColumn),
 	)
 	query.sql = sqlgraph.SetNeighbors(ulq.driver.Dialect(), step)
 	return query
@@ -357,7 +357,7 @@ func (ulq *UserLevelQuery) sqlAll(ctx context.Context) ([]*UserLevel, error) {
 		ids := make([]uint, 0, len(nodes))
 		nodeids := make(map[uint][]*UserLevel)
 		for i := range nodes {
-			if fk := nodes[i].user_levels; fk != nil {
+			if fk := nodes[i].user_level_developer; fk != nil {
 				ids = append(ids, *fk)
 				nodeids[*fk] = append(nodeids[*fk], nodes[i])
 			}
@@ -370,7 +370,7 @@ func (ulq *UserLevelQuery) sqlAll(ctx context.Context) ([]*UserLevel, error) {
 		for _, n := range neighbors {
 			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "user_levels" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "user_level_developer" returned %v`, n.ID)
 			}
 			for i := range nodes {
 				nodes[i].Edges.Developer = n

@@ -197,7 +197,7 @@ func (ulc *UserLevelCreate) sqlSave(ctx context.Context) (*UserLevel, error) {
 	if nodes := ulc.mutation.DeveloperIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   userlevel.DeveloperTable,
 			Columns: []string{userlevel.DeveloperColumn},
 			Bidi:    false,

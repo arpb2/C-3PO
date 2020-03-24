@@ -501,7 +501,7 @@ func HasDeveloper() predicate.UserLevel {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(DeveloperTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, DeveloperTable, DeveloperColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, DeveloperTable, DeveloperColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -513,7 +513,7 @@ func HasDeveloperWith(preds ...predicate.User) predicate.UserLevel {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(DeveloperInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, DeveloperTable, DeveloperColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, DeveloperTable, DeveloperColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

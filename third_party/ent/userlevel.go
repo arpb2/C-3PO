@@ -28,9 +28,9 @@ type UserLevel struct {
 	Workspace string `json:"workspace,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserLevelQuery when eager-loading is set.
-	Edges            UserLevelEdges `json:"edges"`
-	user_levels      *uint
-	user_level_level *uint
+	Edges                UserLevelEdges `json:"edges"`
+	user_level_developer *uint
+	user_level_level     *uint
 }
 
 // UserLevelEdges holds the relations/edges for other nodes in the graph.
@@ -86,7 +86,7 @@ func (*UserLevel) scanValues() []interface{} {
 // fkValues returns the types for scanning foreign-keys values from sql.Rows.
 func (*UserLevel) fkValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{}, // user_levels
+		&sql.NullInt64{}, // user_level_developer
 		&sql.NullInt64{}, // user_level_level
 	}
 }
@@ -126,10 +126,10 @@ func (ul *UserLevel) assignValues(values ...interface{}) error {
 	values = values[4:]
 	if len(values) == len(userlevel.ForeignKeys) {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field user_levels", value)
+			return fmt.Errorf("unexpected type %T for edge-field user_level_developer", value)
 		} else if value.Valid {
-			ul.user_levels = new(uint)
-			*ul.user_levels = uint(value.Int64)
+			ul.user_level_developer = new(uint)
+			*ul.user_level_developer = uint(value.Int64)
 		}
 		if value, ok := values[1].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field user_level_level", value)

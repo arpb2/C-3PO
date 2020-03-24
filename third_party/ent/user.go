@@ -31,33 +31,23 @@ type User struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
-	Edges UserEdges `json:"edges"`
+	Edges              UserEdges `json:"edges"`
+	classroom_students *uint
 }
 
 // UserEdges holds the relations/edges for other nodes in the graph.
 type UserEdges struct {
-	// Levels holds the value of the levels edge.
-	Levels []*UserLevel
 	// Credentials holds the value of the credentials edge.
 	Credentials *Credential
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
-}
-
-// LevelsOrErr returns the Levels value or an error if the edge
-// was not loaded in eager-loading.
-func (e UserEdges) LevelsOrErr() ([]*UserLevel, error) {
-	if e.loadedTypes[0] {
-		return e.Levels, nil
-	}
-	return nil, &NotLoadedError{edge: "levels"}
+	loadedTypes [1]bool
 }
 
 // CredentialsOrErr returns the Credentials value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e UserEdges) CredentialsOrErr() (*Credential, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[0] {
 		if e.Credentials == nil {
 			// The edge credentials was loaded in eager-loading,
 			// but was not found.
@@ -78,6 +68,13 @@ func (*User) scanValues() []interface{} {
 		&sql.NullString{}, // surname
 		&sql.NullTime{},   // created_at
 		&sql.NullTime{},   // updated_at
+	}
+}
+
+// fkValues returns the types for scanning foreign-keys values from sql.Rows.
+func (*User) fkValues() []interface{} {
+	return []interface{}{
+		&sql.NullInt64{}, // classroom_students
 	}
 }
 
@@ -123,12 +120,16 @@ func (u *User) assignValues(values ...interface{}) error {
 	} else if value.Valid {
 		u.UpdatedAt = value.Time
 	}
+	values = values[6:]
+	if len(values) == len(user.ForeignKeys) {
+		if value, ok := values[0].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for edge-field classroom_students", value)
+		} else if value.Valid {
+			u.classroom_students = new(uint)
+			*u.classroom_students = uint(value.Int64)
+		}
+	}
 	return nil
-}
-
-// QueryLevels queries the levels edge of the User.
-func (u *User) QueryLevels() *UserLevelQuery {
-	return (&UserClient{config: u.config}).QueryLevels(u)
 }
 
 // QueryCredentials queries the credentials edge of the User.

@@ -6,6 +6,9 @@ import (
 	"github.com/facebookincubator/ent/dialect/sql"
 )
 
+// Classroom is the predicate function for classroom builders.
+type Classroom func(*sql.Selector)
+
 // Credential is the predicate function for credential builders.
 type Credential func(*sql.Selector)
 

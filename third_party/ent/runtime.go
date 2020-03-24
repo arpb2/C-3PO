@@ -5,6 +5,7 @@ package ent
 import (
 	"time"
 
+	"github.com/arpb2/C-3PO/third_party/ent/classroom"
 	"github.com/arpb2/C-3PO/third_party/ent/level"
 	"github.com/arpb2/C-3PO/third_party/ent/schema"
 	"github.com/arpb2/C-3PO/third_party/ent/user"
@@ -15,6 +16,18 @@ import (
 // code (default values, validators or hooks) and stitches it
 // to their package variables.
 func init() {
+	classroomFields := schema.Classroom{}.Fields()
+	_ = classroomFields
+	// classroomDescCreatedAt is the schema descriptor for created_at field.
+	classroomDescCreatedAt := classroomFields[1].Descriptor()
+	// classroom.DefaultCreatedAt holds the default value on creation for the created_at field.
+	classroom.DefaultCreatedAt = classroomDescCreatedAt.Default.(func() time.Time)
+	// classroomDescUpdatedAt is the schema descriptor for updated_at field.
+	classroomDescUpdatedAt := classroomFields[2].Descriptor()
+	// classroom.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	classroom.DefaultUpdatedAt = classroomDescUpdatedAt.Default.(func() time.Time)
+	// classroom.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	classroom.UpdateDefaultUpdatedAt = classroomDescUpdatedAt.UpdateDefault.(func() time.Time)
 	levelFields := schema.Level{}.Fields()
 	_ = levelFields
 	// levelDescCreatedAt is the schema descriptor for created_at field.
