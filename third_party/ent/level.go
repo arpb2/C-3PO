@@ -3,11 +3,13 @@
 package ent
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
 
 	"github.com/arpb2/C-3PO/third_party/ent/level"
+	"github.com/arpb2/C-3PO/third_party/ent/schema"
 	"github.com/facebookincubator/ent/dialect/sql"
 )
 
@@ -24,6 +26,8 @@ type Level struct {
 	Name string `json:"name,omitempty"`
 	// Description holds the value of the "description" field.
 	Description string `json:"description,omitempty"`
+	// Definition holds the value of the "definition" field.
+	Definition *schema.LevelDefinition `json:"definition,omitempty"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -34,6 +38,7 @@ func (*Level) scanValues() []interface{} {
 		&sql.NullTime{},   // updated_at
 		&sql.NullString{}, // name
 		&sql.NullString{}, // description
+		&[]byte{},         // definition
 	}
 }
 
@@ -69,6 +74,14 @@ func (l *Level) assignValues(values ...interface{}) error {
 	} else if value.Valid {
 		l.Description = value.String
 	}
+
+	if value, ok := values[4].(*[]byte); !ok {
+		return fmt.Errorf("unexpected type %T for field definition", values[4])
+	} else if value != nil && len(*value) > 0 {
+		if err := json.Unmarshal(*value, &l.Definition); err != nil {
+			return fmt.Errorf("unmarshal field definition: %v", err)
+		}
+	}
 	return nil
 }
 
@@ -103,6 +116,8 @@ func (l *Level) String() string {
 	builder.WriteString(l.Name)
 	builder.WriteString(", description=")
 	builder.WriteString(l.Description)
+	builder.WriteString(", definition=")
+	builder.WriteString(fmt.Sprintf("%v", l.Definition))
 	builder.WriteByte(')')
 	return builder.String()
 }

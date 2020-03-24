@@ -8,6 +8,7 @@ import (
 
 	"github.com/arpb2/C-3PO/third_party/ent/credential"
 	"github.com/arpb2/C-3PO/third_party/ent/level"
+	"github.com/arpb2/C-3PO/third_party/ent/schema"
 	"github.com/arpb2/C-3PO/third_party/ent/user"
 	"github.com/arpb2/C-3PO/third_party/ent/userlevel"
 
@@ -367,6 +368,7 @@ type LevelMutation struct {
 	updated_at    *time.Time
 	name          *string
 	description   *string
+	definition    **schema.LevelDefinition
 	clearedFields map[string]struct{}
 }
 
@@ -492,6 +494,25 @@ func (m *LevelMutation) ResetDescription() {
 	m.description = nil
 }
 
+// SetDefinition sets the definition field.
+func (m *LevelMutation) SetDefinition(sd *schema.LevelDefinition) {
+	m.definition = &sd
+}
+
+// Definition returns the definition value in the mutation.
+func (m *LevelMutation) Definition() (r *schema.LevelDefinition, exists bool) {
+	v := m.definition
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetDefinition reset all changes of the definition field.
+func (m *LevelMutation) ResetDefinition() {
+	m.definition = nil
+}
+
 // Op returns the operation name.
 func (m *LevelMutation) Op() Op {
 	return m.op
@@ -506,7 +527,7 @@ func (m *LevelMutation) Type() string {
 // this mutation. Note that, in order to get all numeric
 // fields that were in/decremented, call AddedFields().
 func (m *LevelMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 5)
 	if m.created_at != nil {
 		fields = append(fields, level.FieldCreatedAt)
 	}
@@ -518,6 +539,9 @@ func (m *LevelMutation) Fields() []string {
 	}
 	if m.description != nil {
 		fields = append(fields, level.FieldDescription)
+	}
+	if m.definition != nil {
+		fields = append(fields, level.FieldDefinition)
 	}
 	return fields
 }
@@ -535,6 +559,8 @@ func (m *LevelMutation) Field(name string) (ent.Value, bool) {
 		return m.Name()
 	case level.FieldDescription:
 		return m.Description()
+	case level.FieldDefinition:
+		return m.Definition()
 	}
 	return nil, false
 }
@@ -571,6 +597,13 @@ func (m *LevelMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDescription(v)
+		return nil
+	case level.FieldDefinition:
+		v, ok := value.(*schema.LevelDefinition)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDefinition(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Level field %s", name)
@@ -633,6 +666,9 @@ func (m *LevelMutation) ResetField(name string) error {
 		return nil
 	case level.FieldDescription:
 		m.ResetDescription()
+		return nil
+	case level.FieldDefinition:
+		m.ResetDefinition()
 		return nil
 	}
 	return fmt.Errorf("unknown Level field %s", name)
