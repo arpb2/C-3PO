@@ -8,7 +8,7 @@ import (
 	"github.com/facebookincubator/ent/schema/field"
 )
 
-// Classroom holds the schema definition for the Level entity.
+// Classroom holds the schema definition for the Classroom entity.
 type Classroom struct {
 	ent.Schema
 }
