@@ -26,7 +26,7 @@ func (UserLevel) Fields() []ent.Field {
 
 func (UserLevel) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("developer", User.Type).Ref("levels").Unique().Required(),
+		edge.To("developer", User.Type).Unique().Required(),
 		edge.To("level", Level.Type).Unique().Required(),
 	}
 }

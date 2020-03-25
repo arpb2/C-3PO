@@ -10,7 +10,6 @@ import (
 	"github.com/arpb2/C-3PO/third_party/ent/credential"
 	"github.com/arpb2/C-3PO/third_party/ent/predicate"
 	"github.com/arpb2/C-3PO/third_party/ent/user"
-	"github.com/arpb2/C-3PO/third_party/ent/userlevel"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/schema/field"
@@ -54,21 +53,6 @@ func (uu *UserUpdate) SetUpdatedAt(t time.Time) *UserUpdate {
 	return uu
 }
 
-// AddLevelIDs adds the levels edge to UserLevel by ids.
-func (uu *UserUpdate) AddLevelIDs(ids ...int) *UserUpdate {
-	uu.mutation.AddLevelIDs(ids...)
-	return uu
-}
-
-// AddLevels adds the levels edges to UserLevel.
-func (uu *UserUpdate) AddLevels(u ...*UserLevel) *UserUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
-	}
-	return uu.AddLevelIDs(ids...)
-}
-
 // SetCredentialsID sets the credentials edge to Credential by id.
 func (uu *UserUpdate) SetCredentialsID(id int) *UserUpdate {
 	uu.mutation.SetCredentialsID(id)
@@ -86,21 +70,6 @@ func (uu *UserUpdate) SetNillableCredentialsID(id *int) *UserUpdate {
 // SetCredentials sets the credentials edge to Credential.
 func (uu *UserUpdate) SetCredentials(c *Credential) *UserUpdate {
 	return uu.SetCredentialsID(c.ID)
-}
-
-// RemoveLevelIDs removes the levels edge to UserLevel by ids.
-func (uu *UserUpdate) RemoveLevelIDs(ids ...int) *UserUpdate {
-	uu.mutation.RemoveLevelIDs(ids...)
-	return uu
-}
-
-// RemoveLevels removes levels edges to UserLevel.
-func (uu *UserUpdate) RemoveLevels(u ...*UserLevel) *UserUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
-	}
-	return uu.RemoveLevelIDs(ids...)
 }
 
 // ClearCredentials clears the credentials edge to Credential.
@@ -225,44 +194,6 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: user.FieldUpdatedAt,
 		})
 	}
-	if nodes := uu.mutation.RemovedLevelsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.LevelsTable,
-			Columns: []string{user.LevelsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: userlevel.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uu.mutation.LevelsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.LevelsTable,
-			Columns: []string{user.LevelsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: userlevel.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
 	if uu.mutation.CredentialsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
@@ -340,21 +271,6 @@ func (uuo *UserUpdateOne) SetUpdatedAt(t time.Time) *UserUpdateOne {
 	return uuo
 }
 
-// AddLevelIDs adds the levels edge to UserLevel by ids.
-func (uuo *UserUpdateOne) AddLevelIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.AddLevelIDs(ids...)
-	return uuo
-}
-
-// AddLevels adds the levels edges to UserLevel.
-func (uuo *UserUpdateOne) AddLevels(u ...*UserLevel) *UserUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
-	}
-	return uuo.AddLevelIDs(ids...)
-}
-
 // SetCredentialsID sets the credentials edge to Credential by id.
 func (uuo *UserUpdateOne) SetCredentialsID(id int) *UserUpdateOne {
 	uuo.mutation.SetCredentialsID(id)
@@ -372,21 +288,6 @@ func (uuo *UserUpdateOne) SetNillableCredentialsID(id *int) *UserUpdateOne {
 // SetCredentials sets the credentials edge to Credential.
 func (uuo *UserUpdateOne) SetCredentials(c *Credential) *UserUpdateOne {
 	return uuo.SetCredentialsID(c.ID)
-}
-
-// RemoveLevelIDs removes the levels edge to UserLevel by ids.
-func (uuo *UserUpdateOne) RemoveLevelIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.RemoveLevelIDs(ids...)
-	return uuo
-}
-
-// RemoveLevels removes levels edges to UserLevel.
-func (uuo *UserUpdateOne) RemoveLevels(u ...*UserLevel) *UserUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
-	}
-	return uuo.RemoveLevelIDs(ids...)
 }
 
 // ClearCredentials clears the credentials edge to Credential.
@@ -508,44 +409,6 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			Value:  value,
 			Column: user.FieldUpdatedAt,
 		})
-	}
-	if nodes := uuo.mutation.RemovedLevelsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.LevelsTable,
-			Columns: []string{user.LevelsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: userlevel.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uuo.mutation.LevelsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.LevelsTable,
-			Columns: []string{user.LevelsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: userlevel.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if uuo.mutation.CredentialsCleared() {
 		edge := &sqlgraph.EdgeSpec{

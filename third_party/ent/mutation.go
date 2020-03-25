@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/arpb2/C-3PO/third_party/ent/classroom"
 	"github.com/arpb2/C-3PO/third_party/ent/credential"
 	"github.com/arpb2/C-3PO/third_party/ent/level"
 	"github.com/arpb2/C-3PO/third_party/ent/schema"
@@ -24,11 +25,469 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
+	TypeClassroom  = "Classroom"
 	TypeCredential = "Credential"
 	TypeLevel      = "Level"
 	TypeUser       = "User"
 	TypeUserLevel  = "UserLevel"
 )
+
+// ClassroomMutation represents an operation that mutate the Classrooms
+// nodes in the graph.
+type ClassroomMutation struct {
+	config
+	op              Op
+	typ             string
+	id              *uint
+	created_at      *time.Time
+	updated_at      *time.Time
+	clearedFields   map[string]struct{}
+	teacher         *uint
+	clearedteacher  bool
+	students        map[uint]struct{}
+	removedstudents map[uint]struct{}
+	level           *uint
+	clearedlevel    bool
+}
+
+var _ ent.Mutation = (*ClassroomMutation)(nil)
+
+// newClassroomMutation creates new mutation for $n.Name.
+func newClassroomMutation(c config, op Op) *ClassroomMutation {
+	return &ClassroomMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeClassroom,
+		clearedFields: make(map[string]struct{}),
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m ClassroomMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m ClassroomMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that, this
+// operation is accepted only on Classroom creation.
+func (m *ClassroomMutation) SetID(id uint) {
+	m.id = &id
+}
+
+// ID returns the id value in the mutation. Note that, the id
+// is available only if it was provided to the builder.
+func (m *ClassroomMutation) ID() (id uint, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// SetCreatedAt sets the created_at field.
+func (m *ClassroomMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the created_at value in the mutation.
+func (m *ClassroomMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetCreatedAt reset all changes of the created_at field.
+func (m *ClassroomMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the updated_at field.
+func (m *ClassroomMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the updated_at value in the mutation.
+func (m *ClassroomMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetUpdatedAt reset all changes of the updated_at field.
+func (m *ClassroomMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetTeacherID sets the teacher edge to User by id.
+func (m *ClassroomMutation) SetTeacherID(id uint) {
+	m.teacher = &id
+}
+
+// ClearTeacher clears the teacher edge to User.
+func (m *ClassroomMutation) ClearTeacher() {
+	m.clearedteacher = true
+}
+
+// TeacherCleared returns if the edge teacher was cleared.
+func (m *ClassroomMutation) TeacherCleared() bool {
+	return m.clearedteacher
+}
+
+// TeacherID returns the teacher id in the mutation.
+func (m *ClassroomMutation) TeacherID() (id uint, exists bool) {
+	if m.teacher != nil {
+		return *m.teacher, true
+	}
+	return
+}
+
+// TeacherIDs returns the teacher ids in the mutation.
+// Note that ids always returns len(ids) <= 1 for unique edges, and you should use
+// TeacherID instead. It exists only for internal usage by the builders.
+func (m *ClassroomMutation) TeacherIDs() (ids []uint) {
+	if id := m.teacher; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetTeacher reset all changes of the teacher edge.
+func (m *ClassroomMutation) ResetTeacher() {
+	m.teacher = nil
+	m.clearedteacher = false
+}
+
+// AddStudentIDs adds the students edge to User by ids.
+func (m *ClassroomMutation) AddStudentIDs(ids ...uint) {
+	if m.students == nil {
+		m.students = make(map[uint]struct{})
+	}
+	for i := range ids {
+		m.students[ids[i]] = struct{}{}
+	}
+}
+
+// RemoveStudentIDs removes the students edge to User by ids.
+func (m *ClassroomMutation) RemoveStudentIDs(ids ...uint) {
+	if m.removedstudents == nil {
+		m.removedstudents = make(map[uint]struct{})
+	}
+	for i := range ids {
+		m.removedstudents[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedStudents returns the removed ids of students.
+func (m *ClassroomMutation) RemovedStudentsIDs() (ids []uint) {
+	for id := range m.removedstudents {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// StudentsIDs returns the students ids in the mutation.
+func (m *ClassroomMutation) StudentsIDs() (ids []uint) {
+	for id := range m.students {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetStudents reset all changes of the students edge.
+func (m *ClassroomMutation) ResetStudents() {
+	m.students = nil
+	m.removedstudents = nil
+}
+
+// SetLevelID sets the level edge to Level by id.
+func (m *ClassroomMutation) SetLevelID(id uint) {
+	m.level = &id
+}
+
+// ClearLevel clears the level edge to Level.
+func (m *ClassroomMutation) ClearLevel() {
+	m.clearedlevel = true
+}
+
+// LevelCleared returns if the edge level was cleared.
+func (m *ClassroomMutation) LevelCleared() bool {
+	return m.clearedlevel
+}
+
+// LevelID returns the level id in the mutation.
+func (m *ClassroomMutation) LevelID() (id uint, exists bool) {
+	if m.level != nil {
+		return *m.level, true
+	}
+	return
+}
+
+// LevelIDs returns the level ids in the mutation.
+// Note that ids always returns len(ids) <= 1 for unique edges, and you should use
+// LevelID instead. It exists only for internal usage by the builders.
+func (m *ClassroomMutation) LevelIDs() (ids []uint) {
+	if id := m.level; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetLevel reset all changes of the level edge.
+func (m *ClassroomMutation) ResetLevel() {
+	m.level = nil
+	m.clearedlevel = false
+}
+
+// Op returns the operation name.
+func (m *ClassroomMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (Classroom).
+func (m *ClassroomMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during
+// this mutation. Note that, in order to get all numeric
+// fields that were in/decremented, call AddedFields().
+func (m *ClassroomMutation) Fields() []string {
+	fields := make([]string, 0, 2)
+	if m.created_at != nil {
+		fields = append(fields, classroom.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, classroom.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name.
+// The second boolean value indicates that this field was
+// not set, or was not define in the schema.
+func (m *ClassroomMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case classroom.FieldCreatedAt:
+		return m.CreatedAt()
+	case classroom.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// SetField sets the value for the given name. It returns an
+// error if the field is not defined in the schema, or if the
+// type mismatch the field type.
+func (m *ClassroomMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case classroom.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case classroom.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Classroom field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented
+// or decremented during this mutation.
+func (m *ClassroomMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was in/decremented
+// from a field with the given name. The second value indicates
+// that this field was not set, or was not define in the schema.
+func (m *ClassroomMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value for the given name. It returns an
+// error if the field is not defined in the schema, or if the
+// type mismatch the field type.
+func (m *ClassroomMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Classroom numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared
+// during this mutation.
+func (m *ClassroomMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicates if this field was
+// cleared in this mutation.
+func (m *ClassroomMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value for the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *ClassroomMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Classroom nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation regarding the
+// given field name. It returns an error if the field is not
+// defined in the schema.
+func (m *ClassroomMutation) ResetField(name string) error {
+	switch name {
+	case classroom.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case classroom.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown Classroom field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this
+// mutation.
+func (m *ClassroomMutation) AddedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.teacher != nil {
+		edges = append(edges, classroom.EdgeTeacher)
+	}
+	if m.students != nil {
+		edges = append(edges, classroom.EdgeStudents)
+	}
+	if m.level != nil {
+		edges = append(edges, classroom.EdgeLevel)
+	}
+	return edges
+}
+
+// AddedIDs returns all ids (to other nodes) that were added for
+// the given edge name.
+func (m *ClassroomMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case classroom.EdgeTeacher:
+		if id := m.teacher; id != nil {
+			return []ent.Value{*id}
+		}
+	case classroom.EdgeStudents:
+		ids := make([]ent.Value, 0, len(m.students))
+		for id := range m.students {
+			ids = append(ids, id)
+		}
+		return ids
+	case classroom.EdgeLevel:
+		if id := m.level; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this
+// mutation.
+func (m *ClassroomMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.removedstudents != nil {
+		edges = append(edges, classroom.EdgeStudents)
+	}
+	return edges
+}
+
+// RemovedIDs returns all ids (to other nodes) that were removed for
+// the given edge name.
+func (m *ClassroomMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case classroom.EdgeStudents:
+		ids := make([]ent.Value, 0, len(m.removedstudents))
+		for id := range m.removedstudents {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this
+// mutation.
+func (m *ClassroomMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.clearedteacher {
+		edges = append(edges, classroom.EdgeTeacher)
+	}
+	if m.clearedlevel {
+		edges = append(edges, classroom.EdgeLevel)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean indicates if this edge was
+// cleared in this mutation.
+func (m *ClassroomMutation) EdgeCleared(name string) bool {
+	switch name {
+	case classroom.EdgeTeacher:
+		return m.clearedteacher
+	case classroom.EdgeLevel:
+		return m.clearedlevel
+	}
+	return false
+}
+
+// ClearEdge clears the value for the given name. It returns an
+// error if the edge name is not defined in the schema.
+func (m *ClassroomMutation) ClearEdge(name string) error {
+	switch name {
+	case classroom.EdgeTeacher:
+		m.ClearTeacher()
+		return nil
+	case classroom.EdgeLevel:
+		m.ClearLevel()
+		return nil
+	}
+	return fmt.Errorf("unknown Classroom unique edge %s", name)
+}
+
+// ResetEdge resets all changes in the mutation regarding the
+// given edge name. It returns an error if the edge is not
+// defined in the schema.
+func (m *ClassroomMutation) ResetEdge(name string) error {
+	switch name {
+	case classroom.EdgeTeacher:
+		m.ResetTeacher()
+		return nil
+	case classroom.EdgeStudents:
+		m.ResetStudents()
+		return nil
+	case classroom.EdgeLevel:
+		m.ResetLevel()
+		return nil
+	}
+	return fmt.Errorf("unknown Classroom edge %s", name)
+}
 
 // CredentialMutation represents an operation that mutate the Credentials
 // nodes in the graph.
@@ -748,8 +1207,6 @@ type UserMutation struct {
 	created_at         *time.Time
 	updated_at         *time.Time
 	clearedFields      map[string]struct{}
-	levels             map[int]struct{}
-	removedlevels      map[int]struct{}
 	credentials        *int
 	clearedcredentials bool
 }
@@ -912,48 +1369,6 @@ func (m *UserMutation) UpdatedAt() (r time.Time, exists bool) {
 // ResetUpdatedAt reset all changes of the updated_at field.
 func (m *UserMutation) ResetUpdatedAt() {
 	m.updated_at = nil
-}
-
-// AddLevelIDs adds the levels edge to UserLevel by ids.
-func (m *UserMutation) AddLevelIDs(ids ...int) {
-	if m.levels == nil {
-		m.levels = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.levels[ids[i]] = struct{}{}
-	}
-}
-
-// RemoveLevelIDs removes the levels edge to UserLevel by ids.
-func (m *UserMutation) RemoveLevelIDs(ids ...int) {
-	if m.removedlevels == nil {
-		m.removedlevels = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.removedlevels[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedLevels returns the removed ids of levels.
-func (m *UserMutation) RemovedLevelsIDs() (ids []int) {
-	for id := range m.removedlevels {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// LevelsIDs returns the levels ids in the mutation.
-func (m *UserMutation) LevelsIDs() (ids []int) {
-	for id := range m.levels {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetLevels reset all changes of the levels edge.
-func (m *UserMutation) ResetLevels() {
-	m.levels = nil
-	m.removedlevels = nil
 }
 
 // SetCredentialsID sets the credentials edge to Credential by id.
@@ -1174,10 +1589,7 @@ func (m *UserMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this
 // mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.levels != nil {
-		edges = append(edges, user.EdgeLevels)
-	}
+	edges := make([]string, 0, 1)
 	if m.credentials != nil {
 		edges = append(edges, user.EdgeCredentials)
 	}
@@ -1188,12 +1600,6 @@ func (m *UserMutation) AddedEdges() []string {
 // the given edge name.
 func (m *UserMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case user.EdgeLevels:
-		ids := make([]ent.Value, 0, len(m.levels))
-		for id := range m.levels {
-			ids = append(ids, id)
-		}
-		return ids
 	case user.EdgeCredentials:
 		if id := m.credentials; id != nil {
 			return []ent.Value{*id}
@@ -1205,10 +1611,7 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this
 // mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.removedlevels != nil {
-		edges = append(edges, user.EdgeLevels)
-	}
+	edges := make([]string, 0, 1)
 	return edges
 }
 
@@ -1216,12 +1619,6 @@ func (m *UserMutation) RemovedEdges() []string {
 // the given edge name.
 func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case user.EdgeLevels:
-		ids := make([]ent.Value, 0, len(m.removedlevels))
-		for id := range m.removedlevels {
-			ids = append(ids, id)
-		}
-		return ids
 	}
 	return nil
 }
@@ -1229,7 +1626,7 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 // ClearedEdges returns all edge names that were cleared in this
 // mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 1)
 	if m.clearedcredentials {
 		edges = append(edges, user.EdgeCredentials)
 	}
@@ -1262,9 +1659,6 @@ func (m *UserMutation) ClearEdge(name string) error {
 // defined in the schema.
 func (m *UserMutation) ResetEdge(name string) error {
 	switch name {
-	case user.EdgeLevels:
-		m.ResetLevels()
-		return nil
 	case user.EdgeCredentials:
 		m.ResetCredentials()
 		return nil

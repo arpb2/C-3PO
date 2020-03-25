@@ -29,7 +29,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	DeveloperInverseTable = "users"
 	// DeveloperColumn is the table column denoting the developer relation/edge.
-	DeveloperColumn = "user_levels"
+	DeveloperColumn = "user_level_developer"
 	// LevelTable is the table the holds the level relation/edge.
 	LevelTable = "user_levels"
 	// LevelInverseTable is the table name for the Level entity.
@@ -50,7 +50,7 @@ var Columns = []string{
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the UserLevel type.
 var ForeignKeys = []string{
-	"user_levels",
+	"user_level_developer",
 	"user_level_level",
 }
 

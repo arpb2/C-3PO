@@ -144,6 +144,30 @@ type fixedDecisionRule struct{ err error }
 func (f fixedDecisionRule) EvalQuery(context.Context, ent.Query) error       { return f.err }
 func (f fixedDecisionRule) EvalMutation(context.Context, ent.Mutation) error { return f.err }
 
+// The ClassroomQueryRuleFunc type is an adapter to allow the use of ordinary
+// functions as a query rule.
+type ClassroomQueryRuleFunc func(context.Context, *ent.ClassroomQuery) error
+
+// EvalQuery return f(ctx, q).
+func (f ClassroomQueryRuleFunc) EvalQuery(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.ClassroomQuery); ok {
+		return f(ctx, q)
+	}
+	return Denyf("ent/privacy: unexpected query type %T, expect *ent.ClassroomQuery", q)
+}
+
+// The ClassroomMutationRuleFunc type is an adapter to allow the use of ordinary
+// functions as a mutation rule.
+type ClassroomMutationRuleFunc func(context.Context, *ent.ClassroomMutation) error
+
+// EvalMutation calls f(ctx, m).
+func (f ClassroomMutationRuleFunc) EvalMutation(ctx context.Context, m ent.Mutation) error {
+	if m, ok := m.(*ent.ClassroomMutation); ok {
+		return f(ctx, m)
+	}
+	return Denyf("ent/privacy: unexpected mutation type %T, expect *ent.ClassroomMutation", m)
+}
+
 // The CredentialQueryRuleFunc type is an adapter to allow the use of ordinary
 // functions as a query rule.
 type CredentialQueryRuleFunc func(context.Context, *ent.CredentialQuery) error

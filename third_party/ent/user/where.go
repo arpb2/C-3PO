@@ -661,34 +661,6 @@ func UpdatedAtLTE(v time.Time) predicate.User {
 	})
 }
 
-// HasLevels applies the HasEdge predicate on the "levels" edge.
-func HasLevels() predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(LevelsTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, LevelsTable, LevelsColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasLevelsWith applies the HasEdge predicate on the "levels" edge with a given conditions (other predicates).
-func HasLevelsWith(preds ...predicate.UserLevel) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(LevelsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, LevelsTable, LevelsColumn),
-		)
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
 // HasCredentials applies the HasEdge predicate on the "credentials" edge.
 func HasCredentials() predicate.User {
 	return predicate.User(func(s *sql.Selector) {

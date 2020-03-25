@@ -9,6 +9,19 @@ import (
 	"github.com/arpb2/C-3PO/third_party/ent"
 )
 
+// The ClassroomFunc type is an adapter to allow the use of ordinary
+// function as Classroom mutator.
+type ClassroomFunc func(context.Context, *ent.ClassroomMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ClassroomFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.ClassroomMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ClassroomMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The CredentialFunc type is an adapter to allow the use of ordinary
 // function as Credential mutator.
 type CredentialFunc func(context.Context, *ent.CredentialMutation) (ent.Value, error)

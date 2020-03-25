@@ -9,6 +9,7 @@ import (
 
 	"github.com/arpb2/C-3PO/third_party/ent/migrate"
 
+	"github.com/arpb2/C-3PO/third_party/ent/classroom"
 	"github.com/arpb2/C-3PO/third_party/ent/credential"
 	"github.com/arpb2/C-3PO/third_party/ent/level"
 	"github.com/arpb2/C-3PO/third_party/ent/user"
@@ -24,6 +25,8 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// Classroom is the client for interacting with the Classroom builders.
+	Classroom *ClassroomClient
 	// Credential is the client for interacting with the Credential builders.
 	Credential *CredentialClient
 	// Level is the client for interacting with the Level builders.
@@ -45,6 +48,7 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.Classroom = NewClassroomClient(c.config)
 	c.Credential = NewCredentialClient(c.config)
 	c.Level = NewLevelClient(c.config)
 	c.User = NewUserClient(c.config)
@@ -79,6 +83,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := config{driver: tx, log: c.log, debug: c.debug, hooks: c.hooks}
 	return &Tx{
 		config:     cfg,
+		Classroom:  NewClassroomClient(cfg),
 		Credential: NewCredentialClient(cfg),
 		Level:      NewLevelClient(cfg),
 		User:       NewUserClient(cfg),
@@ -89,7 +94,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		Credential.
+//		Classroom.
 //		Query().
 //		Count(ctx)
 //
@@ -111,10 +116,136 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
+	c.Classroom.Use(hooks...)
 	c.Credential.Use(hooks...)
 	c.Level.Use(hooks...)
 	c.User.Use(hooks...)
 	c.UserLevel.Use(hooks...)
+}
+
+// ClassroomClient is a client for the Classroom schema.
+type ClassroomClient struct {
+	config
+}
+
+// NewClassroomClient returns a client for the Classroom from the given config.
+func NewClassroomClient(c config) *ClassroomClient {
+	return &ClassroomClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `classroom.Hooks(f(g(h())))`.
+func (c *ClassroomClient) Use(hooks ...Hook) {
+	c.hooks.Classroom = append(c.hooks.Classroom, hooks...)
+}
+
+// Create returns a create builder for Classroom.
+func (c *ClassroomClient) Create() *ClassroomCreate {
+	mutation := newClassroomMutation(c.config, OpCreate)
+	return &ClassroomCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Update returns an update builder for Classroom.
+func (c *ClassroomClient) Update() *ClassroomUpdate {
+	mutation := newClassroomMutation(c.config, OpUpdate)
+	return &ClassroomUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ClassroomClient) UpdateOne(cl *Classroom) *ClassroomUpdateOne {
+	return c.UpdateOneID(cl.ID)
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ClassroomClient) UpdateOneID(id uint) *ClassroomUpdateOne {
+	mutation := newClassroomMutation(c.config, OpUpdateOne)
+	mutation.id = &id
+	return &ClassroomUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Classroom.
+func (c *ClassroomClient) Delete() *ClassroomDelete {
+	mutation := newClassroomMutation(c.config, OpDelete)
+	return &ClassroomDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *ClassroomClient) DeleteOne(cl *Classroom) *ClassroomDeleteOne {
+	return c.DeleteOneID(cl.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *ClassroomClient) DeleteOneID(id uint) *ClassroomDeleteOne {
+	builder := c.Delete().Where(classroom.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ClassroomDeleteOne{builder}
+}
+
+// Create returns a query builder for Classroom.
+func (c *ClassroomClient) Query() *ClassroomQuery {
+	return &ClassroomQuery{config: c.config}
+}
+
+// Get returns a Classroom entity by its id.
+func (c *ClassroomClient) Get(ctx context.Context, id uint) (*Classroom, error) {
+	return c.Query().Where(classroom.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ClassroomClient) GetX(ctx context.Context, id uint) *Classroom {
+	cl, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return cl
+}
+
+// QueryTeacher queries the teacher edge of a Classroom.
+func (c *ClassroomClient) QueryTeacher(cl *Classroom) *UserQuery {
+	query := &UserQuery{config: c.config}
+	id := cl.ID
+	step := sqlgraph.NewStep(
+		sqlgraph.From(classroom.Table, classroom.FieldID, id),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, classroom.TeacherTable, classroom.TeacherColumn),
+	)
+	query.sql = sqlgraph.Neighbors(cl.driver.Dialect(), step)
+
+	return query
+}
+
+// QueryStudents queries the students edge of a Classroom.
+func (c *ClassroomClient) QueryStudents(cl *Classroom) *UserQuery {
+	query := &UserQuery{config: c.config}
+	id := cl.ID
+	step := sqlgraph.NewStep(
+		sqlgraph.From(classroom.Table, classroom.FieldID, id),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, classroom.StudentsTable, classroom.StudentsColumn),
+	)
+	query.sql = sqlgraph.Neighbors(cl.driver.Dialect(), step)
+
+	return query
+}
+
+// QueryLevel queries the level edge of a Classroom.
+func (c *ClassroomClient) QueryLevel(cl *Classroom) *LevelQuery {
+	query := &LevelQuery{config: c.config}
+	id := cl.ID
+	step := sqlgraph.NewStep(
+		sqlgraph.From(classroom.Table, classroom.FieldID, id),
+		sqlgraph.To(level.Table, level.FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, classroom.LevelTable, classroom.LevelColumn),
+	)
+	query.sql = sqlgraph.Neighbors(cl.driver.Dialect(), step)
+
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ClassroomClient) Hooks() []Hook {
+	return c.hooks.Classroom
 }
 
 // CredentialClient is a client for the Credential schema.
@@ -375,20 +506,6 @@ func (c *UserClient) GetX(ctx context.Context, id uint) *User {
 	return u
 }
 
-// QueryLevels queries the levels edge of a User.
-func (c *UserClient) QueryLevels(u *User) *UserLevelQuery {
-	query := &UserLevelQuery{config: c.config}
-	id := u.ID
-	step := sqlgraph.NewStep(
-		sqlgraph.From(user.Table, user.FieldID, id),
-		sqlgraph.To(userlevel.Table, userlevel.FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, user.LevelsTable, user.LevelsColumn),
-	)
-	query.sql = sqlgraph.Neighbors(u.driver.Dialect(), step)
-
-	return query
-}
-
 // QueryCredentials queries the credentials edge of a User.
 func (c *UserClient) QueryCredentials(u *User) *CredentialQuery {
 	query := &CredentialQuery{config: c.config}
@@ -493,7 +610,7 @@ func (c *UserLevelClient) QueryDeveloper(ul *UserLevel) *UserQuery {
 	step := sqlgraph.NewStep(
 		sqlgraph.From(userlevel.Table, userlevel.FieldID, id),
 		sqlgraph.To(user.Table, user.FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, userlevel.DeveloperTable, userlevel.DeveloperColumn),
+		sqlgraph.Edge(sqlgraph.M2O, false, userlevel.DeveloperTable, userlevel.DeveloperColumn),
 	)
 	query.sql = sqlgraph.Neighbors(ul.driver.Dialect(), step)
 

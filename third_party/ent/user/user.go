@@ -19,20 +19,11 @@ const (
 	FieldCreatedAt = "created_at" // FieldUpdatedAt holds the string denoting the updated_at vertex property in the database.
 	FieldUpdatedAt = "updated_at"
 
-	// EdgeLevels holds the string denoting the levels edge name in mutations.
-	EdgeLevels = "levels"
 	// EdgeCredentials holds the string denoting the credentials edge name in mutations.
 	EdgeCredentials = "credentials"
 
 	// Table holds the table name of the user in the database.
 	Table = "users"
-	// LevelsTable is the table the holds the levels relation/edge.
-	LevelsTable = "user_levels"
-	// LevelsInverseTable is the table name for the UserLevel entity.
-	// It exists in this package in order to avoid circular dependency with the "userlevel" package.
-	LevelsInverseTable = "user_levels"
-	// LevelsColumn is the table column denoting the levels relation/edge.
-	LevelsColumn = "user_levels"
 	// CredentialsTable is the table the holds the credentials relation/edge.
 	CredentialsTable = "credentials"
 	// CredentialsInverseTable is the table name for the Credential entity.
@@ -51,6 +42,11 @@ var Columns = []string{
 	FieldSurname,
 	FieldCreatedAt,
 	FieldUpdatedAt,
+}
+
+// ForeignKeys holds the SQL foreign-keys that are owned by the User type.
+var ForeignKeys = []string{
+	"classroom_students",
 }
 
 var (

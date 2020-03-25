@@ -197,7 +197,7 @@ func (ulu *UserLevelUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if ulu.mutation.DeveloperCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   userlevel.DeveloperTable,
 			Columns: []string{userlevel.DeveloperColumn},
 			Bidi:    false,
@@ -213,7 +213,7 @@ func (ulu *UserLevelUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if nodes := ulu.mutation.DeveloperIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   userlevel.DeveloperTable,
 			Columns: []string{userlevel.DeveloperColumn},
 			Bidi:    false,
@@ -446,7 +446,7 @@ func (uluo *UserLevelUpdateOne) sqlSave(ctx context.Context) (ul *UserLevel, err
 	if uluo.mutation.DeveloperCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   userlevel.DeveloperTable,
 			Columns: []string{userlevel.DeveloperColumn},
 			Bidi:    false,
@@ -462,7 +462,7 @@ func (uluo *UserLevelUpdateOne) sqlSave(ctx context.Context) (ul *UserLevel, err
 	if nodes := uluo.mutation.DeveloperIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   userlevel.DeveloperTable,
 			Columns: []string{userlevel.DeveloperColumn},
 			Bidi:    false,

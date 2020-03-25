@@ -12,7 +12,6 @@ import (
 	"github.com/arpb2/C-3PO/third_party/ent/credential"
 	"github.com/arpb2/C-3PO/third_party/ent/predicate"
 	"github.com/arpb2/C-3PO/third_party/ent/user"
-	"github.com/arpb2/C-3PO/third_party/ent/userlevel"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/schema/field"
@@ -27,8 +26,8 @@ type UserQuery struct {
 	unique     []string
 	predicates []predicate.User
 	// eager-loading edges.
-	withLevels      *UserLevelQuery
 	withCredentials *CredentialQuery
+	withFKs         bool
 	// intermediate query.
 	sql *sql.Selector
 }
@@ -55,18 +54,6 @@ func (uq *UserQuery) Offset(offset int) *UserQuery {
 func (uq *UserQuery) Order(o ...Order) *UserQuery {
 	uq.order = append(uq.order, o...)
 	return uq
-}
-
-// QueryLevels chains the current query on the levels edge.
-func (uq *UserQuery) QueryLevels() *UserLevelQuery {
-	query := &UserLevelQuery{config: uq.config}
-	step := sqlgraph.NewStep(
-		sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
-		sqlgraph.To(userlevel.Table, userlevel.FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, user.LevelsTable, user.LevelsColumn),
-	)
-	query.sql = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
-	return query
 }
 
 // QueryCredentials chains the current query on the credentials edge.
@@ -250,17 +237,6 @@ func (uq *UserQuery) Clone() *UserQuery {
 	}
 }
 
-//  WithLevels tells the query-builder to eager-loads the nodes that are connected to
-// the "levels" edge. The optional arguments used to configure the query builder of the edge.
-func (uq *UserQuery) WithLevels(opts ...func(*UserLevelQuery)) *UserQuery {
-	query := &UserLevelQuery{config: uq.config}
-	for _, opt := range opts {
-		opt(query)
-	}
-	uq.withLevels = query
-	return uq
-}
-
 //  WithCredentials tells the query-builder to eager-loads the nodes that are connected to
 // the "credentials" edge. The optional arguments used to configure the query builder of the edge.
 func (uq *UserQuery) WithCredentials(opts ...func(*CredentialQuery)) *UserQuery {
@@ -316,16 +292,22 @@ func (uq *UserQuery) Select(field string, fields ...string) *UserSelect {
 func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	var (
 		nodes       = []*User{}
+		withFKs     = uq.withFKs
 		_spec       = uq.querySpec()
-		loadedTypes = [2]bool{
-			uq.withLevels != nil,
+		loadedTypes = [1]bool{
 			uq.withCredentials != nil,
 		}
 	)
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, user.ForeignKeys...)
+	}
 	_spec.ScanValues = func() []interface{} {
 		node := &User{config: uq.config}
 		nodes = append(nodes, node)
 		values := node.scanValues()
+		if withFKs {
+			values = append(values, node.fkValues()...)
+		}
 		return values
 	}
 	_spec.Assign = func(values ...interface{}) error {
@@ -341,34 +323,6 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	}
 	if len(nodes) == 0 {
 		return nodes, nil
-	}
-
-	if query := uq.withLevels; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[uint]*User)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-		}
-		query.withFKs = true
-		query.Where(predicate.UserLevel(func(s *sql.Selector) {
-			s.Where(sql.InValues(user.LevelsColumn, fks...))
-		}))
-		neighbors, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, n := range neighbors {
-			fk := n.user_levels
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "user_levels" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "user_levels" returned %v for node %v`, *fk, n.ID)
-			}
-			node.Edges.Levels = append(node.Edges.Levels, n)
-		}
 	}
 
 	if query := uq.withCredentials; query != nil {

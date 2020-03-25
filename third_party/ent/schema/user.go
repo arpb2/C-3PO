@@ -32,7 +32,6 @@ func (User) Fields() []ent.Field {
 
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("levels", UserLevel.Type),
 		edge.To("credentials", Credential.Type).Unique(),
 	}
 }

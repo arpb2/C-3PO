@@ -10,7 +10,6 @@ import (
 
 	"github.com/arpb2/C-3PO/third_party/ent/credential"
 	"github.com/arpb2/C-3PO/third_party/ent/user"
-	"github.com/arpb2/C-3PO/third_party/ent/userlevel"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/schema/field"
 )
@@ -78,21 +77,6 @@ func (uc *UserCreate) SetNillableUpdatedAt(t *time.Time) *UserCreate {
 func (uc *UserCreate) SetID(u uint) *UserCreate {
 	uc.mutation.SetID(u)
 	return uc
-}
-
-// AddLevelIDs adds the levels edge to UserLevel by ids.
-func (uc *UserCreate) AddLevelIDs(ids ...int) *UserCreate {
-	uc.mutation.AddLevelIDs(ids...)
-	return uc
-}
-
-// AddLevels adds the levels edges to UserLevel.
-func (uc *UserCreate) AddLevels(u ...*UserLevel) *UserCreate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
-	}
-	return uc.AddLevelIDs(ids...)
 }
 
 // SetCredentialsID sets the credentials edge to Credential by id.
@@ -253,25 +237,6 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			Column: user.FieldUpdatedAt,
 		})
 		u.UpdatedAt = value
-	}
-	if nodes := uc.mutation.LevelsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.LevelsTable,
-			Columns: []string{user.LevelsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: userlevel.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := uc.mutation.CredentialsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
