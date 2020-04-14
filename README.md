@@ -6,7 +6,6 @@
 Backend for the ARPB2 project
 
 ## Running
-
 Simply run the `docker-compose.yml` inside `build/docker/`
 
 ```bash
