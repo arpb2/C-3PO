@@ -70,6 +70,24 @@ func createCredential(tx *ent.Tx, ctx context.Context, holder *ent.User, user us
 	return nil
 }
 
+func createClassroom(tx *ent.Tx, ctx context.Context, holder *ent.User, user user.AuthenticatedUser) error {
+	cr, err := tx.Classroom.Create().
+		SetTeacher(holder).
+		Save(ctx)
+
+	if err != nil {
+		if ent.IsConstraintError(err) {
+			return http.CreateBadRequestError("constraint error")
+		}
+		return mysql.Rollback(tx, err)
+	}
+
+	if cr == nil {
+		return mysql.Rollback(tx, err)
+	}
+	return nil
+}
+
 func create(dbClient *ent.Client, authUser user.AuthenticatedUser) (user.User, error) {
 	var userModel user.User
 	ctx := context.Background()
@@ -85,6 +103,11 @@ func create(dbClient *ent.Client, authUser user.AuthenticatedUser) (user.User, e
 	}
 
 	err = createCredential(tx, ctx, result, authUser)
+	if err != nil {
+		return userModel, err
+	}
+
+	err = createClassroom(tx, ctx, result, authUser)
 	if err != nil {
 		return userModel, err
 	}

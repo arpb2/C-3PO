@@ -20,7 +20,6 @@ import (
 	"github.com/arpb2/C-3PO/pkg/infrastructure/hystrix/decorator"
 	credentialrepository "github.com/arpb2/C-3PO/pkg/infrastructure/mysql/credential"
 	levelrepository "github.com/arpb2/C-3PO/pkg/infrastructure/mysql/level"
-	teacherrepository "github.com/arpb2/C-3PO/pkg/infrastructure/mysql/teacher"
 	userrepository "github.com/arpb2/C-3PO/pkg/infrastructure/mysql/user"
 )
 
@@ -62,7 +61,6 @@ func main() {
 	tokenHandler := jwt.CreateTokenRepository([]byte(assertEnv(envSecretJWT)))
 
 	userRepository := userrepository.CreateUserRepository(dbClient)
-	teacherRepository := teacherrepository.CreateRepository(userRepository, dbClient)
 	levelRepository := levelrepository.CreateRepository(dbClient)
 	userLevelRepository := userrepository.CreateLevelRepository(dbClient)
 	credentialRepository := credentialrepository.CreateRepository(dbClient)
@@ -70,7 +68,6 @@ func main() {
 	debugAuthMiddleware := session.CreateAuthenticateDebugMiddleware()
 	adminAuthMiddleware := session.CreateAuthenticateAdminMiddleware([]byte(assertEnv(envSecretAdminToken)))
 	singleAuthMiddleware := session.CreateAuthenticateUserMiddleware(ParamUserId, tokenHandler)
-	teacherAuthMiddleware := session.CreateAuthenticateTeacherMiddleware(ParamUserId, tokenHandler, teacherRepository)
 
 	emptyUserValidation := validation.EmptyUser
 	emptyEmailValidation := validation.EmptyEmail
@@ -139,11 +136,11 @@ func main() {
 	/****** User level routes ******/
 	engine.GET(
 		fmt.Sprintf("/users/:%s/levels/:%s", ParamUserId, ParamLevelId),
-		teacherAuthMiddleware, userLevelGetHandler,
+		singleAuthMiddleware, userLevelGetHandler,
 	)
 	engine.PUT(
 		fmt.Sprintf("/users/:%s/levels/:%s", ParamUserId, ParamLevelId),
-		teacherAuthMiddleware, userLevelPutHandler,
+		singleAuthMiddleware, userLevelPutHandler,
 	)
 
 	/****** Level routes ******/

@@ -25,6 +25,6 @@ func (Classroom) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("teacher", User.Type).Required().Unique(),
 		edge.To("students", User.Type),
-		edge.To("level", Level.Type).Required().Unique(),
+		edge.To("level", Level.Type).Unique(),
 	}
 }

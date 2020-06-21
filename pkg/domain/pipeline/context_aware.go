@@ -2,6 +2,7 @@ package pipeline
 
 import (
 	"github.com/arpb2/C-3PO/pkg/domain/http"
+	"github.com/arpb2/C-3PO/pkg/domain/model/classroom"
 	"github.com/arpb2/C-3PO/pkg/domain/model/level"
 	"github.com/arpb2/C-3PO/pkg/domain/model/session"
 	"github.com/arpb2/C-3PO/pkg/domain/model/user"
@@ -72,6 +73,20 @@ func (c *ContextAware) GetAuthenticatedUser(key pipeline.Tag) (user.Authenticate
 		return u, nil
 	}
 	return u, http.CreateInternalError()
+}
+
+func (c *ContextAware) GetClassroom(key pipeline.Tag) (classroom.Classroom, error) {
+	var cr classroom.Classroom
+	val, exists := c.Get(key)
+
+	if !exists {
+		return cr, http.CreateInternalError()
+	}
+
+	if cr, ok := val.(classroom.Classroom); ok {
+		return cr, nil
+	}
+	return cr, http.CreateInternalError()
 }
 
 func (c *ContextAware) GetUser(key pipeline.Tag) (user.User, error) {
