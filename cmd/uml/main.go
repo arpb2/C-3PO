@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/arpb2/C-3PO/pkg/presentation/classroom"
 	"os"
 
 	pipeline2 "github.com/arpb2/C-3PO/pkg/infrastructure/pipeline"
@@ -18,6 +19,7 @@ import (
 const (
 	ParamLevelId = "level_id"
 	ParamUserId  = "user_id"
+	ParamClassroomId = "classroom_id"
 )
 
 func createDrawablePipeline(fileName string) pipeline.HttpPipeline {
@@ -49,6 +51,9 @@ func getPipelinedBodies() []http.Handler {
 		user.CreatePostUserHandler(createDrawablePipeline("user_post_controller"), nil, nil),
 		user.CreatePutUserHandler(ParamUserId, createDrawablePipeline("user_put_controller"), nil, nil),
 		user.CreateDeleteUserHandler(ParamUserId, createDrawablePipeline("user_delete_controller"), nil),
+
+		classroom.CreateGetHandler(ParamClassroomId, createDrawablePipeline("classroom_get_controller"), nil),
+		classroom.CreatePutHandler(ParamClassroomId, createDrawablePipeline("classroom_put_controller"), nil),
 	}
 }
 

@@ -94,7 +94,23 @@ func (c classroomRepository) UpdateClassroom(classroom classroom2.Classroom) (re
 			return classroom2.Classroom{}, err
 		}
 
-		update.AddStudents(students...)
+		var ids []uint
+		for _, st := range students {
+			if st.Type == user.TypeTeacher {
+				return classroom2.Classroom{}, http.CreateBadRequestError("a student is of type teacher")
+			}
+			ids = append(ids, st.ID)
+		}
+		r, err := c.dbClient.Classroom.Query().Where(classroom3.HasStudentsWith(user.IDIn(ids...))).All(ctx)
+
+		if err != nil {
+			return classroom2.Classroom{}, err
+		}
+		if len(r) > 0 {
+			return classroom2.Classroom{}, http.CreateBadRequestError("some students already have a classroom associated")
+		}
+
+		update.AddStudentIDs(ids...)
 	}
 
 	cr, err := update.Save(ctx)

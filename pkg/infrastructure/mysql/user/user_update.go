@@ -128,7 +128,9 @@ func update(dbClient *ent.Client, authUser user2.AuthenticatedUser) (user2.User,
 		return userModel, err
 	}
 
-	mapToDTO(result.ID, result, &userModel)
+	if err = mapToDTO(dbClient, result.ID, result, &userModel); err != nil {
+		return userModel, err
+	}
 
 	return userModel, nil
 }

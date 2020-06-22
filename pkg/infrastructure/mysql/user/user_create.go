@@ -118,7 +118,9 @@ func create(dbClient *ent.Client, authUser user.AuthenticatedUser) (user.User, e
 		return userModel, err
 	}
 
-	mapToDTO(result.ID, result, &userModel)
+	if err = mapToDTO(dbClient, result.ID, result, &userModel); err != nil {
+		return userModel, err
+	}
 
 	return userModel, nil
 }

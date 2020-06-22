@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	classroomrepository "github.com/arpb2/C-3PO/pkg/infrastructure/mysql/classroom"
+	"github.com/arpb2/C-3PO/pkg/presentation/classroom"
 	"log"
 	"os"
 
@@ -31,6 +33,7 @@ const (
 
 	ParamLevelId = "level_id"
 	ParamUserId  = "user_id"
+	ParamClassroomId = "classroom_id"
 
 	defaultPort = "8080"
 )
@@ -64,6 +67,7 @@ func main() {
 	levelRepository := levelrepository.CreateRepository(dbClient)
 	userLevelRepository := userrepository.CreateLevelRepository(dbClient)
 	credentialRepository := credentialrepository.CreateRepository(dbClient)
+	classroomRepository := classroomrepository.CreateRepository(dbClient)
 
 	debugAuthMiddleware := session.CreateAuthenticateDebugMiddleware()
 	adminAuthMiddleware := session.CreateAuthenticateAdminMiddleware([]byte(assertEnv(envSecretAdminToken)))
@@ -109,6 +113,8 @@ func main() {
 	)
 	levelGetHandler := level.CreateGetHandler(ParamLevelId, httpPipeline, levelRepository)
 	levelPutHandler := level.CreatePutHandler(ParamLevelId, httpPipeline, levelRepository)
+	classroomGetHandler := classroom.CreateGetHandler(ParamClassroomId, httpPipeline, classroomRepository)
+	classroomPutHandler := classroom.CreatePutHandler(ParamClassroomId, httpPipeline, classroomRepository)
 
 	/****** Global middle-wares ******/
 	engine.Use(debugAuthMiddleware)
@@ -151,6 +157,16 @@ func main() {
 	engine.PUT(
 		fmt.Sprintf("/levels/:%s", ParamLevelId),
 		adminAuthMiddleware, levelPutHandler,
+	)
+
+	/****** Classroom routes ******/
+	engine.GET(
+		fmt.Sprintf("/classrooms/:%s", ParamClassroomId),
+		classroomGetHandler,
+	)
+	engine.PUT(
+		fmt.Sprintf("/classrooms/:%s", ParamClassroomId),
+		classroomPutHandler,
 	)
 
 	if err := engine.Run(port); err != nil {

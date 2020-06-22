@@ -1,1 +1,1 @@
-{"id":1000,"type":"student","classroom_id":0,"email":"test@email.com","name":"TestName","surname":"TestSurname"}
+{"id":1000,"type":"student","email":"test@email.com","name":"TestName","surname":"TestSurname"}
