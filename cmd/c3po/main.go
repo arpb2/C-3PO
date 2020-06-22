@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	classroomrepository "github.com/arpb2/C-3PO/pkg/infrastructure/mysql/classroom"
-	"github.com/arpb2/C-3PO/pkg/presentation/classroom"
 	"log"
 	"os"
+
+	classroomrepository "github.com/arpb2/C-3PO/pkg/infrastructure/mysql/classroom"
+	"github.com/arpb2/C-3PO/pkg/presentation/classroom"
 
 	"github.com/arpb2/C-3PO/pkg/data/usecase/user/validation"
 	"github.com/arpb2/C-3PO/pkg/infrastructure/gin"
@@ -31,8 +32,8 @@ const (
 	envSecretJWT        = "SECRET_JWT"
 	envSecretAdminToken = "SECRET_TOKEN_ADMIN"
 
-	ParamLevelId = "level_id"
-	ParamUserId  = "user_id"
+	ParamLevelId     = "level_id"
+	ParamUserId      = "user_id"
 	ParamClassroomId = "classroom_id"
 
 	defaultPort = "8080"

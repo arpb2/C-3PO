@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/arpb2/C-3PO/pkg/presentation/classroom"
 	"os"
+
+	"github.com/arpb2/C-3PO/pkg/presentation/classroom"
 
 	pipeline2 "github.com/arpb2/C-3PO/pkg/infrastructure/pipeline"
 	"github.com/arpb2/C-3PO/pkg/presentation/level"
@@ -17,8 +18,8 @@ import (
 )
 
 const (
-	ParamLevelId = "level_id"
-	ParamUserId  = "user_id"
+	ParamLevelId     = "level_id"
+	ParamUserId      = "user_id"
 	ParamClassroomId = "classroom_id"
 )
 

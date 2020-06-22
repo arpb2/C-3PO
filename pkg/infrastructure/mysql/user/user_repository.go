@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+
 	user3 "github.com/arpb2/C-3PO/pkg/data/repository/user"
 	"github.com/arpb2/C-3PO/pkg/domain/model/user"
 	"github.com/arpb2/C-3PO/third_party/ent"

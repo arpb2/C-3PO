@@ -28,12 +28,12 @@ func TestUser_ToJson(t *testing.T) {
 
 func TestUser_FromJson(t *testing.T) {
 	expectedUser := &user2.User{
-		Id:      0,
+		Id:          0,
 		ClassroomID: 0,
-		Type:    user2.TypeStudent,
-		Name:    "test name",
-		Surname: "test surname",
-		Email:   "test@email.com",
+		Type:        user2.TypeStudent,
+		Name:        "test name",
+		Surname:     "test surname",
+		Email:       "test@email.com",
 	}
 
 	data := `{"id":0,"type":"student","classroom_id":0,"email":"test@email.com","name":"test name","surname":"test surname"}`

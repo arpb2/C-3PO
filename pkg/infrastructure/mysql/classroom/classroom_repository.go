@@ -2,6 +2,7 @@ package classroom
 
 import (
 	"context"
+
 	"github.com/arpb2/C-3PO/pkg/data/repository/classroom"
 	classroom2 "github.com/arpb2/C-3PO/pkg/domain/model/classroom"
 	user2 "github.com/arpb2/C-3PO/pkg/domain/model/user"
@@ -38,7 +39,7 @@ func mapToClassroom(cr *ent.Classroom) classroom2.Classroom {
 		Id:       cr.ID,
 		Level:    cr.Edges.Level.ID,
 		Students: students,
-		Teacher:  user2.User{
+		Teacher: user2.User{
 			Id:          cr.Edges.Teacher.ID,
 			Type:        user2.Type(cr.Edges.Teacher.Type),
 			ClassroomID: cr.ID,
