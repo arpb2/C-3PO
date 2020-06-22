@@ -25,7 +25,9 @@ func get(dbClient *ent.Client, userId uint) (user.User, error) {
 		return userModel, http.CreateNotFoundError()
 	}
 
-	mapToDTO(userId, result, &userModel)
+	if err = mapToDTO(dbClient, userId, result, &userModel); err != nil {
+		return userModel, err
+	}
 
 	return userModel, nil
 }

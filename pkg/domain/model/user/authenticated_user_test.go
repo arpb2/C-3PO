@@ -41,7 +41,7 @@ func TestAuthenticatedUser_FromJson(t *testing.T) {
 		Password: "test password",
 	}
 
-	data := `{"id":0,"type":"student","email":"test@email.com","name":"test name","surname":"test surname","password":"test password"}`
+	data := `{"id":0,"type":"student","classroom_id":0,"email":"test@email.com","name":"test name","surname":"test surname","password":"test password"}`
 	var user user2.AuthenticatedUser
 
 	err := json.Unmarshal([]byte(data), &user)

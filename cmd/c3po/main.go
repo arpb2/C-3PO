@@ -5,6 +5,9 @@ import (
 	"log"
 	"os"
 
+	classroomrepository "github.com/arpb2/C-3PO/pkg/infrastructure/mysql/classroom"
+	"github.com/arpb2/C-3PO/pkg/presentation/classroom"
+
 	"github.com/arpb2/C-3PO/pkg/data/usecase/user/validation"
 	"github.com/arpb2/C-3PO/pkg/infrastructure/gin"
 	"github.com/arpb2/C-3PO/pkg/infrastructure/hystrix"
@@ -20,7 +23,6 @@ import (
 	"github.com/arpb2/C-3PO/pkg/infrastructure/hystrix/decorator"
 	credentialrepository "github.com/arpb2/C-3PO/pkg/infrastructure/mysql/credential"
 	levelrepository "github.com/arpb2/C-3PO/pkg/infrastructure/mysql/level"
-	teacherrepository "github.com/arpb2/C-3PO/pkg/infrastructure/mysql/teacher"
 	userrepository "github.com/arpb2/C-3PO/pkg/infrastructure/mysql/user"
 )
 
@@ -30,8 +32,9 @@ const (
 	envSecretJWT        = "SECRET_JWT"
 	envSecretAdminToken = "SECRET_TOKEN_ADMIN"
 
-	ParamLevelId = "level_id"
-	ParamUserId  = "user_id"
+	ParamLevelId     = "level_id"
+	ParamUserId      = "user_id"
+	ParamClassroomId = "classroom_id"
 
 	defaultPort = "8080"
 )
@@ -62,15 +65,14 @@ func main() {
 	tokenHandler := jwt.CreateTokenRepository([]byte(assertEnv(envSecretJWT)))
 
 	userRepository := userrepository.CreateUserRepository(dbClient)
-	teacherRepository := teacherrepository.CreateRepository(userRepository, dbClient)
 	levelRepository := levelrepository.CreateRepository(dbClient)
 	userLevelRepository := userrepository.CreateLevelRepository(dbClient)
 	credentialRepository := credentialrepository.CreateRepository(dbClient)
+	classroomRepository := classroomrepository.CreateRepository(dbClient)
 
 	debugAuthMiddleware := session.CreateAuthenticateDebugMiddleware()
 	adminAuthMiddleware := session.CreateAuthenticateAdminMiddleware([]byte(assertEnv(envSecretAdminToken)))
 	singleAuthMiddleware := session.CreateAuthenticateUserMiddleware(ParamUserId, tokenHandler)
-	teacherAuthMiddleware := session.CreateAuthenticateTeacherMiddleware(ParamUserId, tokenHandler, teacherRepository)
 
 	emptyUserValidation := validation.EmptyUser
 	emptyEmailValidation := validation.EmptyEmail
@@ -112,6 +114,8 @@ func main() {
 	)
 	levelGetHandler := level.CreateGetHandler(ParamLevelId, httpPipeline, levelRepository)
 	levelPutHandler := level.CreatePutHandler(ParamLevelId, httpPipeline, levelRepository)
+	classroomGetHandler := classroom.CreateGetHandler(ParamClassroomId, httpPipeline, classroomRepository)
+	classroomPutHandler := classroom.CreatePutHandler(ParamClassroomId, httpPipeline, classroomRepository)
 
 	/****** Global middle-wares ******/
 	engine.Use(debugAuthMiddleware)
@@ -139,11 +143,11 @@ func main() {
 	/****** User level routes ******/
 	engine.GET(
 		fmt.Sprintf("/users/:%s/levels/:%s", ParamUserId, ParamLevelId),
-		teacherAuthMiddleware, userLevelGetHandler,
+		singleAuthMiddleware, userLevelGetHandler,
 	)
 	engine.PUT(
 		fmt.Sprintf("/users/:%s/levels/:%s", ParamUserId, ParamLevelId),
-		teacherAuthMiddleware, userLevelPutHandler,
+		singleAuthMiddleware, userLevelPutHandler,
 	)
 
 	/****** Level routes ******/
@@ -154,6 +158,16 @@ func main() {
 	engine.PUT(
 		fmt.Sprintf("/levels/:%s", ParamLevelId),
 		adminAuthMiddleware, levelPutHandler,
+	)
+
+	/****** Classroom routes ******/
+	engine.GET(
+		fmt.Sprintf("/classrooms/:%s", ParamClassroomId),
+		classroomGetHandler,
+	)
+	engine.PUT(
+		fmt.Sprintf("/classrooms/:%s", ParamClassroomId),
+		classroomPutHandler,
 	)
 
 	if err := engine.Run(port); err != nil {

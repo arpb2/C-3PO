@@ -69,6 +69,14 @@ func (cu *ClassroomUpdate) SetLevelID(id uint) *ClassroomUpdate {
 	return cu
 }
 
+// SetNillableLevelID sets the level edge to Level by id if the given value is not nil.
+func (cu *ClassroomUpdate) SetNillableLevelID(id *uint) *ClassroomUpdate {
+	if id != nil {
+		cu = cu.SetLevelID(*id)
+	}
+	return cu
+}
+
 // SetLevel sets the level edge to Level.
 func (cu *ClassroomUpdate) SetLevel(l *Level) *ClassroomUpdate {
 	return cu.SetLevelID(l.ID)
@@ -112,9 +120,6 @@ func (cu *ClassroomUpdate) Save(ctx context.Context) (int, error) {
 		return 0, errors.New("ent: clearing a unique edge \"teacher\"")
 	}
 
-	if _, ok := cu.mutation.LevelID(); cu.mutation.LevelCleared() && !ok {
-		return 0, errors.New("ent: clearing a unique edge \"level\"")
-	}
 	var (
 		err      error
 		affected int
@@ -352,6 +357,14 @@ func (cuo *ClassroomUpdateOne) SetLevelID(id uint) *ClassroomUpdateOne {
 	return cuo
 }
 
+// SetNillableLevelID sets the level edge to Level by id if the given value is not nil.
+func (cuo *ClassroomUpdateOne) SetNillableLevelID(id *uint) *ClassroomUpdateOne {
+	if id != nil {
+		cuo = cuo.SetLevelID(*id)
+	}
+	return cuo
+}
+
 // SetLevel sets the level edge to Level.
 func (cuo *ClassroomUpdateOne) SetLevel(l *Level) *ClassroomUpdateOne {
 	return cuo.SetLevelID(l.ID)
@@ -395,9 +408,6 @@ func (cuo *ClassroomUpdateOne) Save(ctx context.Context) (*Classroom, error) {
 		return nil, errors.New("ent: clearing a unique edge \"teacher\"")
 	}
 
-	if _, ok := cuo.mutation.LevelID(); cuo.mutation.LevelCleared() && !ok {
-		return nil, errors.New("ent: clearing a unique edge \"level\"")
-	}
 	var (
 		err  error
 		node *Classroom

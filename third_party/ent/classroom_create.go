@@ -88,6 +88,14 @@ func (cc *ClassroomCreate) SetLevelID(id uint) *ClassroomCreate {
 	return cc
 }
 
+// SetNillableLevelID sets the level edge to Level by id if the given value is not nil.
+func (cc *ClassroomCreate) SetNillableLevelID(id *uint) *ClassroomCreate {
+	if id != nil {
+		cc = cc.SetLevelID(*id)
+	}
+	return cc
+}
+
 // SetLevel sets the level edge to Level.
 func (cc *ClassroomCreate) SetLevel(l *Level) *ClassroomCreate {
 	return cc.SetLevelID(l.ID)
@@ -105,9 +113,6 @@ func (cc *ClassroomCreate) Save(ctx context.Context) (*Classroom, error) {
 	}
 	if _, ok := cc.mutation.TeacherID(); !ok {
 		return nil, errors.New("ent: missing required edge \"teacher\"")
-	}
-	if _, ok := cc.mutation.LevelID(); !ok {
-		return nil, errors.New("ent: missing required edge \"level\"")
 	}
 	var (
 		err  error
