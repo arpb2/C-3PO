@@ -31,6 +31,7 @@ func (l *levelRepository) mapToDTO(input *ent.Level, output *level.Level) {
 	output.Id = input.ID
 	output.Name = input.Name
 	output.Description = input.Description
+	output.Definition = level.Definition(*input.Definition)
 }
 
 func (l *levelRepository) GetLevel(levelId uint) (level.Level, error) {
