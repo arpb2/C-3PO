@@ -127,5 +127,5 @@ func (c classroomRepository) UpdateClassroom(classroom classroom2.Classroom) (re
 		return classroom2.Classroom{}, http.CreateInternalError()
 	}
 
-	return mapToClassroom(cr), nil
+	return c.GetClassroom(cr.ID)
 }
