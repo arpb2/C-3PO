@@ -13,7 +13,7 @@ const (
 type Definition struct {
 	Origin           Origin      `json:"origin"`
 	Destination      Destination `json:"destination"`
-	MinimalDimension Dimension   `json:"minimal_dimension"`
+	MinimalDimension Dimension   `json:"minimal_dimensions"`
 	Collectibles     []Element   `json:"collectibles"`
 	Gates            []Gate      `json:"gates"`
 	Pads             []Element   `json:"pads"`
