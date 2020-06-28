@@ -37,11 +37,11 @@ func updateUser(tx *ent.Tx, ctx context.Context, user user2.User) (*ent.User, er
 		if ent.IsConstraintError(err) {
 			return nil, http.CreateBadRequestError("constraint error")
 		}
-		return nil, mysql.Rollback(tx, err)
+		return nil, err
 	}
 
 	if result == nil {
-		return nil, mysql.Rollback(tx, err)
+		return nil, http.CreateInternalError()
 	}
 
 	return result, nil
@@ -90,11 +90,11 @@ func updateCredential(tx *ent.Tx, ctx context.Context, userId uint, hash []byte)
 		if ent.IsConstraintError(err) {
 			return http.CreateBadRequestError("constraint error")
 		}
-		return mysql.Rollback(tx, err)
+		return err
 	}
 
 	if matches != 1 {
-		return mysql.Rollback(tx, err)
+		return http.CreateInternalError()
 	}
 
 	return nil
@@ -106,23 +106,26 @@ func update(dbClient *ent.Client, authUser user2.AuthenticatedUser) (user2.User,
 	tx, err := dbClient.Tx(ctx)
 
 	if err != nil {
-		return userModel, err
+		return userModel, mysql.Rollback(tx, err)
 	}
 
 	hashPw, err := hasToUpdateCredential(dbClient, ctx, authUser)
 	if err != nil {
-		return userModel, err
+		return userModel, mysql.Rollback(tx, err)
 	}
 
 	if hashPw != nil {
 		err = updateCredential(tx, ctx, authUser.Id, *hashPw)
 
 		if err != nil {
-			return userModel, err
+			return userModel, mysql.Rollback(tx, err)
 		}
 	}
 
 	result, err := updateUser(tx, ctx, authUser.User)
+	if err != nil {
+		return userModel, mysql.Rollback(tx, err)
+	}
 
 	if err = tx.Commit(); err != nil {
 		return userModel, err

@@ -31,11 +31,11 @@ func createUser(tx *ent.Tx, ctx context.Context, user user.User) (*ent.User, err
 		if ent.IsConstraintError(err) {
 			return nil, http.CreateBadRequestError("constraint error")
 		}
-		return nil, mysql.Rollback(tx, err)
+		return nil, err
 	}
 
 	if result == nil {
-		return nil, mysql.Rollback(tx, err)
+		return nil, http.CreateInternalError()
 	}
 
 	return result, nil
@@ -45,12 +45,12 @@ func createCredential(tx *ent.Tx, ctx context.Context, holder *ent.User, user us
 	salt := make([]byte, saltBytes)
 	_, err := io.ReadFull(rand.Reader, salt)
 	if err != nil {
-		return mysql.Rollback(tx, err)
+		return err
 	}
 
 	hash, err := mysql.SaltHash([]byte(user.Password), salt)
 	if err != nil {
-		return mysql.Rollback(tx, err)
+		return err
 	}
 
 	credential, err := tx.Credential.Create().
@@ -63,11 +63,11 @@ func createCredential(tx *ent.Tx, ctx context.Context, holder *ent.User, user us
 		if ent.IsConstraintError(err) {
 			return http.CreateBadRequestError("constraint error")
 		}
-		return mysql.Rollback(tx, err)
+		return err
 	}
 
 	if credential == nil {
-		return mysql.Rollback(tx, err)
+		return http.CreateInternalError()
 	}
 	return nil
 }
@@ -81,11 +81,11 @@ func createClassroom(tx *ent.Tx, ctx context.Context, holder *ent.User, user use
 		if ent.IsConstraintError(err) {
 			return http.CreateBadRequestError("constraint error")
 		}
-		return mysql.Rollback(tx, err)
+		return err
 	}
 
 	if cr == nil {
-		return mysql.Rollback(tx, err)
+		return http.CreateInternalError()
 	}
 	return nil
 }
@@ -96,22 +96,24 @@ func create(dbClient *ent.Client, authUser user.AuthenticatedUser) (user.User, e
 	tx, err := dbClient.Tx(ctx)
 
 	if err != nil {
-		return userModel, err
+		return userModel, mysql.Rollback(tx, err)
 	}
 
 	result, err := createUser(tx, ctx, authUser.User)
 	if err != nil {
-		return userModel, err
+		return userModel, mysql.Rollback(tx, err)
 	}
 
 	err = createCredential(tx, ctx, result, authUser)
 	if err != nil {
-		return userModel, err
+		return userModel, mysql.Rollback(tx, err)
 	}
 
-	err = createClassroom(tx, ctx, result, authUser)
-	if err != nil {
-		return userModel, err
+	if authUser.Type == user.TypeTeacher {
+		err = createClassroom(tx, ctx, result, authUser)
+		if err != nil {
+			return userModel, mysql.Rollback(tx, err)
+		}
 	}
 
 	err = tx.Commit()
