@@ -18,9 +18,8 @@ func (UserLevel) Fields() []ent.Field {
 	return []ent.Field{
 		field.Time("created_at").Default(time.Now).Immutable(),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
-		// TODO: Make them a reference to an external storage
-		field.String("code").NotEmpty(),
-		field.String("workspace").NotEmpty(),
+		field.Text("code").NotEmpty(),
+		field.Text("workspace").NotEmpty(),
 	}
 }
 

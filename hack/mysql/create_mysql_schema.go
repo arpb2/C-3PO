@@ -11,7 +11,7 @@ import (
 
 func main() {
 	ctx := context.Background()
-	drv, err := sql.Open("mysql", "mockuser:mockpassword@tcp(52.14.108.243:3380)/testdb")
+	drv, err := sql.Open("mysql", "mockuser:mockpassword@tcp(3.16.213.100:3380)/testdb")
 
 	if err != nil {
 		panic(err)

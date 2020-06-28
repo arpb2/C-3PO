@@ -22,7 +22,7 @@ func (Level) Fields() []ent.Field {
 		field.Time("created_at").Default(time.Now).Immutable(),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 		field.String("name").NotEmpty(),
-		field.String("description").NotEmpty(),
+		field.Text("description").NotEmpty(),
 		field.JSON("definition", &LevelDefinition{}),
 	}
 }

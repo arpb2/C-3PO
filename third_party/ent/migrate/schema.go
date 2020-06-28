@@ -73,7 +73,7 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "name", Type: field.TypeString},
-		{Name: "description", Type: field.TypeString},
+		{Name: "description", Type: field.TypeString, Size: 2147483647},
 		{Name: "definition", Type: field.TypeJSON},
 	}
 	// LevelsTable holds the schema information for the "levels" table.
@@ -114,8 +114,8 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "code", Type: field.TypeString},
-		{Name: "workspace", Type: field.TypeString},
+		{Name: "code", Type: field.TypeString, Size: 2147483647},
+		{Name: "workspace", Type: field.TypeString, Size: 2147483647},
 		{Name: "user_level_developer", Type: field.TypeInt, Nullable: true},
 		{Name: "user_level_level", Type: field.TypeInt, Nullable: true},
 	}
