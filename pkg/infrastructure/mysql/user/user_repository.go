@@ -36,6 +36,7 @@ func mapToDTO(dbClient *ent.Client, userId uint, input *ent.User, output *user.U
 	ctx := context.Background()
 	ul, err := dbClient.UserLevel.
 		Query().
+		WithLevel().
 		Where(
 			userlevel.HasDeveloperWith(user2.ID(userId)),
 		).
