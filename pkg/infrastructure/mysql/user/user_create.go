@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"crypto/rand"
+	user2 "github.com/arpb2/C-3PO/third_party/ent/user"
 	"io"
 
 	"github.com/arpb2/C-3PO/pkg/domain/http"
@@ -23,6 +24,7 @@ func createUser(tx *ent.Tx, ctx context.Context, user user.User) (*ent.User, err
 		SetName(user.Name).
 		SetSurname(user.Surname).
 		SetEmail(user.Email).
+		SetType(user2.Type(user.Type)).
 		Save(ctx)
 
 	if err != nil {
