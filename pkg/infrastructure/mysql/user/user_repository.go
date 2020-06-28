@@ -31,6 +31,7 @@ func mapToDTO(dbClient *ent.Client, userId uint, input *ent.User, output *user.U
 	output.Email = input.Email
 	output.Name = input.Name
 	output.Surname = input.Surname
+	output.Type = input.Type
 
 	ctx := context.Background()
 	ul, err := dbClient.UserLevel.
