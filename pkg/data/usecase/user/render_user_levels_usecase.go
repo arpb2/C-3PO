@@ -26,7 +26,11 @@ func (c *renderUserLevelsUseCase) Run(ctx pipeline.Context) error {
 		return httpwrapper.CreateInternalError()
 	}
 
-	httpWriter.WriteJson(http.StatusOK, userLevels)
+	if userLevels == nil || len(userLevels) == 0 {
+		httpWriter.WriteStatus(http.StatusNoContent)
+	} else {
+		httpWriter.WriteJson(http.StatusOK, userLevels)
+	}
 	return nil
 }
 
