@@ -7,5 +7,7 @@ import (
 type LevelRepository interface {
 	GetUserLevel(userId uint, levelId uint) (userLevel user.Level, err error)
 
+	GetUserLevels(userId uint) (userLevels []user.Level, err error)
+
 	StoreUserLevel(userLevel user.Level) (model user.Level, err error)
 }

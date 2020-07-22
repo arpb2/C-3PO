@@ -62,6 +62,35 @@ func (c *userLevelRepository) GetUserLevel(userId uint, levelId uint) (userLevel
 	return ul, nil
 }
 
+func (c *userLevelRepository) GetUserLevels(userId uint) (userLevels []user2.Level, err error) {
+	var uls []user2.Level
+	ctx := context.Background()
+	result, err := c.dbClient.UserLevel.
+		Query().
+		WithLevel().
+		Where(userlevel.HasDeveloperWith(user.ID(userId))).
+		All(ctx)
+
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return uls, http.CreateNotFoundError()
+		}
+		return uls, err
+	}
+
+	if result == nil {
+		return uls, http.CreateNotFoundError()
+	}
+
+	for _, ul := range result {
+		var tmp user2.Level
+		mapLevelToDTO(userId, ul.Edges.Level.ID, ul, &tmp)
+		uls = append(uls, tmp)
+	}
+
+	return uls, nil
+}
+
 func (c *userLevelRepository) StoreUserLevel(data user2.Level) (userLevel user2.Level, err error) {
 	ctx := context.Background()
 

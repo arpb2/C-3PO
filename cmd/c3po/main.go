@@ -107,6 +107,7 @@ func main() {
 	})
 	userDeleteHandler := user.CreateDeleteUserHandler(ParamUserId, httpPipeline, userRepository)
 	userLevelGetHandler := user.CreateGetLevelHandler(ParamUserId, ParamLevelId, httpPipeline, userLevelRepository)
+	userLevelsGetHandler := user.CreateGetLevelsHandler(ParamUserId, httpPipeline, userLevelRepository)
 	userLevelPutHandler := user.CreatePutLevelHandler(
 		ParamUserId, ParamLevelId,
 		httpPipeline,
@@ -144,6 +145,10 @@ func main() {
 	engine.GET(
 		fmt.Sprintf("/users/:%s/levels/:%s", ParamUserId, ParamLevelId),
 		singleAuthMiddleware, userLevelGetHandler,
+	)
+	engine.GET(
+		fmt.Sprintf("/users/:%s/levels", ParamUserId),
+		singleAuthMiddleware, userLevelsGetHandler,
 	)
 	engine.PUT(
 		fmt.Sprintf("/users/:%s/levels/:%s", ParamUserId, ParamLevelId),

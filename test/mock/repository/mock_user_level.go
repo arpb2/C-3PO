@@ -17,6 +17,14 @@ func (m *MockUserLevelRepository) GetUserLevel(userId uint, levelId uint) (resul
 	return
 }
 
+func (m *MockUserLevelRepository) GetUserLevels(userId uint) (userLevels []user.Level, err error) {
+	args := m.Called(userId)
+
+	userLevels = args.Get(0).([]user.Level)
+	err = args.Error(1)
+	return
+}
+
 func (m *MockUserLevelRepository) StoreUserLevel(userLevel user.Level) (result user.Level, err error) {
 	args := m.Called(userLevel)
 

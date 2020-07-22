@@ -44,6 +44,7 @@ func getPipelinedBodies() []http.Handler {
 		level.CreatePutHandler(ParamLevelId, createDrawablePipeline("level_put_controller"), nil),
 
 		user.CreateGetLevelHandler(ParamUserId, ParamLevelId, createDrawablePipeline("user_level_get_controller"), nil),
+		user.CreateGetLevelsHandler(ParamUserId, createDrawablePipeline("user_levels_get_controller"), nil),
 		user.CreatePutLevelHandler(ParamUserId, ParamLevelId, createDrawablePipeline("user_level_put_controller"), nil),
 
 		session.CreatePostHandler(createDrawablePipeline("session_post_controller"), nil, nil, nil),

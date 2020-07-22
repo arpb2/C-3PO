@@ -117,6 +117,20 @@ func (c *ContextAware) GetUserLevel(key pipeline.Tag) (user.Level, error) {
 	return userLevel, http.CreateInternalError()
 }
 
+func (c *ContextAware) GetUserLevels(key pipeline.Tag) ([]user.Level, error) {
+	var userLevel []user.Level
+	val, exists := c.Get(key)
+
+	if !exists {
+		return userLevel, http.CreateInternalError()
+	}
+
+	if userLevel, ok := val.([]user.Level); ok {
+		return userLevel, nil
+	}
+	return userLevel, http.CreateInternalError()
+}
+
 func (c *ContextAware) GetUserLevelData(key pipeline.Tag) (user.LevelData, error) {
 	var userLevelData user.LevelData
 	val, exists := c.Get(key)

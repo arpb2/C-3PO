@@ -9,4 +9,5 @@ const (
 
 	TagUserLevelData pipeline.Tag = "tag_user_level_data"
 	TagUserLevel     pipeline.Tag = "tag_user_level"
+	TagUserLevels    pipeline.Tag = "tag_user_levels"
 )
