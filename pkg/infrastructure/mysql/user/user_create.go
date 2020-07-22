@@ -76,6 +76,7 @@ func createCredential(tx *ent.Tx, ctx context.Context, holder *ent.User, user us
 func createClassroom(tx *ent.Tx, ctx context.Context, holder *ent.User, user user.AuthenticatedUser) error {
 	cr, err := tx.Classroom.Create().
 		SetTeacher(holder).
+		SetLevelID(1).
 		Save(ctx)
 
 	if err != nil {
