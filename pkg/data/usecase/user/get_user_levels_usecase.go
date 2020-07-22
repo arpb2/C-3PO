@@ -2,7 +2,6 @@ package user
 
 import (
 	user2 "github.com/arpb2/C-3PO/pkg/data/repository/user"
-	level2 "github.com/arpb2/C-3PO/pkg/data/usecase/level"
 	"github.com/arpb2/C-3PO/pkg/domain/http"
 	"github.com/saantiaguilera/go-pipeline"
 )

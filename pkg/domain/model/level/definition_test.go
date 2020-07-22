@@ -10,7 +10,7 @@ import (
 )
 
 func TestLevelDefinition_ToJson(t *testing.T) {
-	expectedJson := `{"origin":{"position":{"x":1,"y":2},"orientation":"E"},"destination":{"position":{"x":2,"y":3},"active":true,"conditions":[{"type":"coin","value":3},{"type":"colour","value":"blue"},{"type":"key","value":true}]},"minimal_dimension":{"rows":1,"columns":2},"collectibles":[{"position":{"x":1,"y":2},"type":"coin"},{"position":{"x":4,"y":3},"type":"key"}],"gates":[{"position":{"x":1,"y":2,"axis":"x"},"type":"key"},{"position":{"x":1,"y":8,"axis":"y"},"type":"verbal","opening_value":"holis"}],"pads":[{"position":{"x":1,"y":2},"type":"colour"}]}`
+	expectedJson := `{"origin":{"position":{"x":1,"y":2},"orientation":"E"},"destination":{"position":{"x":2,"y":3},"active":true,"conditions":[{"type":"coin","value":3},{"type":"colour","value":"blue"},{"type":"key","value":true}]},"minimal_dimensions":{"rows":1,"columns":2},"collectibles":[{"position":{"x":1,"y":2},"type":"coin"},{"position":{"x":4,"y":3},"type":"key"}],"gates":[{"position":{"x":1,"y":2,"axis":"x"},"type":"key"},{"position":{"x":1,"y":8,"axis":"y"},"type":"verbal","opening_value":"holis"}],"pads":[{"position":{"x":1,"y":2},"type":"colour"}]}`
 
 	definition := &level2.Definition{
 		Origin: level2.Origin{
@@ -102,7 +102,7 @@ func TestLevelDefinition_ToJson(t *testing.T) {
 }
 
 func TestLevelDefinition_FromJson(t *testing.T) {
-	data := `{"origin":{"position":{"x":1,"y":2},"orientation":"E"},"destination":{"position":{"x":2,"y":3},"active":true,"conditions":[{"type":"coin","value":3},{"type":"colour","value":"blue"},{"type":"key","value":true}]},"minimal_dimension":{"rows":1,"columns":2},"collectibles":[{"position":{"x":1,"y":2},"type":"coin"},{"position":{"x":4,"y":3},"type":"key"}],"gates":[{"position":{"x":1,"y":2,"axis":"x"},"type":"key"},{"position":{"x":1,"y":8,"axis":"y"},"type":"verbal","opening_value":"holis"}],"pads":[{"position":{"x":1,"y":2},"type":"colour"}]}`
+	data := `{"origin":{"position":{"x":1,"y":2},"orientation":"E"},"destination":{"position":{"x":2,"y":3},"active":true,"conditions":[{"type":"coin","value":3},{"type":"colour","value":"blue"},{"type":"key","value":true}]},"minimal_dimensions":{"rows":1,"columns":2},"collectibles":[{"position":{"x":1,"y":2},"type":"coin"},{"position":{"x":4,"y":3},"type":"key"}],"gates":[{"position":{"x":1,"y":2,"axis":"x"},"type":"key"},{"position":{"x":1,"y":8,"axis":"y"},"type":"verbal","opening_value":"holis"}],"pads":[{"position":{"x":1,"y":2},"type":"colour"}]}`
 	expectedDefinition := level2.Definition{
 		Origin: level2.Origin{
 			Position: level2.Position{

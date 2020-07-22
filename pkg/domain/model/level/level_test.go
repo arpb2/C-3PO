@@ -10,7 +10,7 @@ import (
 )
 
 func TestLevel_ToJson(t *testing.T) {
-	expectedJson := `{"id":0,"name":"test name","description":"test description","definition":{"origin":{"position":{"x":0,"y":0},"orientation":""},"destination":{"position":{"x":0,"y":0},"active":false,"conditions":null},"minimal_dimension":{"rows":0,"columns":0},"collectibles":null,"gates":null,"pads":null}}`
+	expectedJson := `{"id":0,"name":"test name","description":"test description","definition":{"origin":{"position":{"x":0,"y":0},"orientation":""},"destination":{"position":{"x":0,"y":0},"active":false,"conditions":null},"minimal_dimensions":{"rows":0,"columns":0},"collectibles":null,"gates":null,"pads":null}}`
 
 	level := &level2.Level{
 		Id:          0,
@@ -31,7 +31,7 @@ func TestLevel_FromJson(t *testing.T) {
 		Description: "test description",
 	}
 
-	data := `{"id":0,"name":"test name","description":"test description","definition":{"origin":{"position":{"x":0,"y":0},"orientation":""},"destination":{"position":{"x":0,"y":0},"active":false,"conditions":null},"minimal_dimension":{"rows":0,"columns":0},"collectibles":null,"gates":null,"pads":null}}`
+	data := `{"id":0,"name":"test name","description":"test description","definition":{"origin":{"position":{"x":0,"y":0},"orientation":""},"destination":{"position":{"x":0,"y":0},"active":false,"conditions":null},"minimal_dimensions":{"rows":0,"columns":0},"collectibles":null,"gates":null,"pads":null}}`
 	var level level2.Level
 
 	err := json.Unmarshal([]byte(data), &level)

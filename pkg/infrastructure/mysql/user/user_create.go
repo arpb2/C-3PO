@@ -3,8 +3,9 @@ package user
 import (
 	"context"
 	"crypto/rand"
-	user2 "github.com/arpb2/C-3PO/third_party/ent/user"
 	"io"
+
+	user2 "github.com/arpb2/C-3PO/third_party/ent/user"
 
 	"github.com/arpb2/C-3PO/pkg/domain/http"
 
